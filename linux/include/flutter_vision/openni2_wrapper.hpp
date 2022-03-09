@@ -380,8 +380,6 @@ private:
     if (!(videoStart))
       return;
 
-    // printf("VideoStart:%d, %d, %d\n", enableRgb, enableDepth, enableIr);
-
     while (videoStart)
     {
       rgbNewFrame = false;
@@ -422,14 +420,6 @@ private:
       if ((rgbNewFrame || depthNewFrame || irNewFrame) && models->size())
       {
         tfPipeline->run(rgbCls->cvImage, depthCls->cvImage, irCls->cvImage, *models->at(0));
-
-        // TfLiteTensor *outputBoxes = models->at(0)->interpreter->tensor(models->at(0)->interpreter->outputs()[0]);
-        // TfLiteTensor *outputClasses = models->at(0)->interpreter->tensor(models->at(0)->interpreter->outputs()[1]);
-        // TfLiteTensor *outputScores = models->at(0)->interpreter->tensor(models->at(0)->interpreter->outputs()[2]);
-        // for (int i = 0; i < 3; i++)
-        // {
-        //   printf("%d: [%i, %.2f] (%.2f,%.2f,%.2f,%.2f)\n", i, ((int)outputClasses->data.f[i]) - 1, outputScores->data.f[i], outputBoxes->data.f[i * 4], outputBoxes->data.f[i * 4 + 1], outputBoxes->data.f[i * 4 + 2], outputBoxes->data.f[i * 4 + 3]);
-        // }
       }
 
       if (enableRgb && depthNewFrame && rgbNewFrame)
@@ -438,8 +428,6 @@ private:
       }
 
       fl_method_channel_invoke_method(flChannel, "onFrame", nullptr, nullptr, nullptr, NULL);
-
-      // printf("Debug:%d, %d, %d ,%d ,%d ,%d\n", enableRgb, rgbNewFrame, enableDepth, depthNewFrame, enableIr, irNewFrame);
     }
   }
 };
