@@ -5,6 +5,8 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
+#include "pipeline/pipeline.h"
 struct _RgbTextureClass
 {
     FlPixelBufferTextureClass parent_class;
@@ -14,6 +16,7 @@ struct _RgbTextureClass
     int32_t video_height = 0;
     bool video_start = false;
     cv::Mat cvImage;
+    Pipeline *pipeline;
 };
 
 G_DECLARE_DERIVABLE_TYPE(RgbTexture,
@@ -48,21 +51,4 @@ static void rgb_texture_class_init(
 
 static void rgb_texture_init(RgbTexture *self)
 {
-}
-
-static void updateRgbFrame(RgbTextureClass *p, FlTextureRegistrar *registrar, RgbTexture *texture)
-{
-    auto &buffer = p->buffer;
-    if (buffer.size() <= 0)
-    {
-        return;
-    }
-
-    cv::Mat img;
-    cv::cvtColor(p->cvImage, img, cv::COLOR_RGB2RGBA);
-    for (int i = 0; i < p->video_width * p->video_height * 4; i++)
-    {
-        buffer[i] = *(img.data + i);
-    }
-    fl_texture_registrar_mark_texture_frame_available(registrar, FL_TEXTURE(texture));
 }

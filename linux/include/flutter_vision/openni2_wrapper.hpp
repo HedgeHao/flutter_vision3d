@@ -10,6 +10,7 @@
 #include "ir_texture.hpp"
 #include <thread>
 #include "opengl.h"
+#include "tflite.h"
 
 using namespace openni;
 
@@ -64,7 +65,7 @@ public:
   VideoStream vsIR;
   bool videoStart;
 
-  void registerFlContext(FlTextureRegistrar *r, RgbTexture *rgb, DepthTexture *depth, IrTexture *ir, FlMethodChannel *channel, OpenGLFL *g)
+  void registerFlContext(FlTextureRegistrar *r, RgbTexture *rgb, DepthTexture *depth, IrTexture *ir, FlMethodChannel *channel, OpenGLFL *g, std::vector<TFLiteModel *> *m, TfPipeline *tp)
   {
     registrar = r;
     rgbTexture = rgb;
@@ -72,6 +73,8 @@ public:
     irTexture = ir;
     flChannel = channel;
     glfl = g;
+    models = m;
+    tfPipeline = tp;
   };
 
   ~OpenNi2Wrapper() {}
@@ -278,6 +281,8 @@ private:
   IrTexture *irTexture;
   DepthTexture *depthTexture;
   FlMethodChannel *flChannel;
+  std::vector<TFLiteModel *> *models;
+  TfPipeline *tfPipeline;
 
   bool enableRgb = false;
   bool enableDepth = false;
@@ -385,6 +390,7 @@ private:
         if (vsColor.readFrame(&rgbFrame) == STATUS_OK)
         {
           rgbCls->cvImage = cv::Mat(rgbFrame.getHeight(), rgbFrame.getWidth(), CV_8UC3, (void *)rgbFrame.getData());
+          rgbCls->pipeline->run(rgbCls->cvImage, *registrar, *FL_TEXTURE(rgbTexture), rgbCls->video_width, rgbCls->video_height, rgbCls->buffer);
           rgbNewFrame = true;
         }
       }
@@ -394,6 +400,7 @@ private:
         if (vsDepth.readFrame(&depthFrame) == STATUS_OK)
         {
           depthCls->cvImage = cv::Mat(depthFrame.getHeight(), depthFrame.getWidth(), CV_16UC1, (void *)depthFrame.getData());
+          depthCls->pipeline->run(depthCls->cvImage, *registrar, *FL_TEXTURE(depthTexture), depthCls->video_width, depthCls->video_height, depthCls->buffer);
           depthNewFrame = true;
         }
       }
@@ -403,23 +410,33 @@ private:
         if (vsIR.readFrame(&irFrame) == STATUS_OK)
         {
           irCls->cvImage = cv::Mat(irFrame.getHeight(), irFrame.getWidth(), CV_16UC1, (void *)irFrame.getData());
+          irCls->pipeline->run(irCls->cvImage, *registrar, *FL_TEXTURE(irTexture), irCls->video_width, irCls->video_height, irCls->buffer);
           irNewFrame = true;
         }
       }
 
-      if (enableRgb && depthNewFrame && rgbNewFrame)
+      // TODO: chose model
+      if (rgbNewFrame && models->size())
       {
-        niComputeCloud(vsDepth, (const openni::DepthPixel *)depthFrame.getData(), (const openni::RGB888Pixel *)rgbFrame.getData(), glfl->modelPointCloud->vertices, glfl->modelPointCloud->colors, glfl->modelPointCloud->colorsMap, &glfl->modelPointCloud->vertexPoints);
+        tfPipeline->run(rgbCls->cvImage, depthCls->cvImage, irCls->cvImage, *models->at(0));
+
+        // TfLiteTensor *outputBoxes = models->at(0)->interpreter->tensor(models->at(0)->interpreter->outputs()[0]);
+        // TfLiteTensor *outputClasses = models->at(0)->interpreter->tensor(models->at(0)->interpreter->outputs()[1]);
+        // TfLiteTensor *outputScores = models->at(0)->interpreter->tensor(models->at(0)->interpreter->outputs()[2]);
+        // for (int i = 0; i < 3; i++)
+        // {
+        //   printf("%d: [%i, %.2f] (%.2f,%.2f,%.2f,%.2f)\n", i, ((int)outputClasses->data.f[i]) - 1, outputScores->data.f[i], outputBoxes->data.f[i * 4], outputBoxes->data.f[i * 4 + 1], outputBoxes->data.f[i * 4 + 2], outputBoxes->data.f[i * 4 + 3]);
+        // }
       }
 
-      // printf("Debug:%d, %d, %d ,%d ,%d ,%d\n", enableRgb, rgbNewFrame, enableDepth, depthNewFrame, enableIr, irNewFrame);
+      // if (enableRgb && depthNewFrame && rgbNewFrame)
+      // {
+      //   niComputeCloud(vsDepth, (const openni::DepthPixel *)depthFrame.getData(), (const openni::RGB888Pixel *)rgbFrame.getData(), glfl->modelPointCloud->vertices, glfl->modelPointCloud->colors, glfl->modelPointCloud->colorsMap, &glfl->modelPointCloud->vertexPoints);
+      // }
 
-      if (enableRgb && rgbNewFrame)
-        updateRgbFrame(rgbCls, registrar, rgbTexture);
-      if (enableDepth && depthNewFrame)
-        updateDepthFrame(depthCls, registrar, depthTexture);
-      if (enableIr && irNewFrame)
-        updateIrFrame(irCls, registrar, irTexture);
+      fl_method_channel_invoke_method(flChannel, "onFrame", nullptr, nullptr, nullptr, NULL);
+
+      // printf("Debug:%d, %d, %d ,%d ,%d ,%d\n", enableRgb, rgbNewFrame, enableDepth, depthNewFrame, enableIr, irNewFrame);
     }
   }
 };

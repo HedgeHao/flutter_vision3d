@@ -7,7 +7,7 @@ project(${PROJECT_NAME} LANGUAGES CXX)
 set(PLUGIN_NAME "flutter_vision_plugin")
 
 include_directories(
-  
+  "${PROJECT_SOURCE_DIR}/include/tensorflow"
 )
 link_directories(
   "${PROJECT_SOURCE_DIR}/lib"
@@ -36,6 +36,8 @@ target_link_libraries( ${PLUGIN_NAME} PRIVATE ${OPENGL_LIBRARIES})
 
 find_package( GLEW REQUIRED )
 target_link_libraries( ${PLUGIN_NAME} PRIVATE GLEW::GLEW)
+
+target_link_libraries( ${PLUGIN_NAME} PRIVATE tensorflowlite)
 
 
 # List of absolute paths to libraries that should be bundled with the plugin

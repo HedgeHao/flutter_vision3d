@@ -6,6 +6,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include "pipeline/pipeline.h"
+
 struct _IrTextureClass
 {
     FlPixelBufferTextureClass parent_class;
@@ -15,6 +17,7 @@ struct _IrTextureClass
     int32_t video_height = 0;
     bool video_start = false;
     cv::Mat cvImage;
+    Pipeline *pipeline;
 };
 
 G_DECLARE_DERIVABLE_TYPE(IrTexture,
@@ -49,24 +52,4 @@ static void ir_texture_class_init(
 
 static void ir_texture_init(IrTexture *self)
 {
-}
-
-static void updateIrFrame(IrTextureClass *p, FlTextureRegistrar *registrar, IrTexture *texture)
-{
-    auto &buffer = p->buffer;
-    if (buffer.size() <= 0)
-    {
-        return;
-    }
-
-    cv::Mat irDepth;
-    p->cvImage.convertTo(irDepth, CV_8U, 255.0 / 1024);
-    for (int i = 0; i < p->video_width * p->video_height; i++)
-    {
-        buffer[4 * i] = *(irDepth.data + i);
-        buffer[(4 * i) + 1] = *(irDepth.data + i);
-        buffer[(4 * i) + 2] = *(irDepth.data + i);
-        buffer[(4 * i) + 3] = 255;
-    }
-    fl_texture_registrar_mark_texture_frame_available(registrar, FL_TEXTURE(texture));
 }
