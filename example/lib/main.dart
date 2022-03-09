@@ -169,7 +169,17 @@ class _MyAppState extends State<MyApp> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  rgbTextureId == 0 ? const SizedBox() : Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 240, height: 180, child: Texture(textureId: rgbTextureId)),
+                  rgbTextureId == 0
+                      ? const SizedBox()
+                      : Container(
+                          decoration: BoxDecoration(border: Border.all(width: 1)),
+                          width: texture_width,
+                          height: texture_height,
+                          child: Stack(children: [
+                            Texture(textureId: rgbTextureId),
+                            ...rects,
+                          ]),
+                        ),
                   const SizedBox(width: 10),
                   depthTextureId == 0 ? const SizedBox() : Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 240, height: 180, child: Texture(textureId: depthTextureId)),
                   const SizedBox(width: 10),
@@ -221,9 +231,9 @@ class _MyAppState extends State<MyApp> {
                       await irPipeline.cvtColor(9); // COLOR_GRAY2BGRA
                       await irPipeline.show();
 
-                      // LipsPipeline tfPipeline = LipsPipeline(8);
-                      // await tfPipeline.clear();
-                      // await tfPipeline.setInputTensorData(LipsPipeline.IR_FRAME, 0, LipsPipeline.DATATYPE_FLOAT);
+                      LipsPipeline tfPipeline = LipsPipeline(8);
+                      await tfPipeline.clear();
+                      await tfPipeline.setInputTensorData(LipsPipeline.IR_FRAME, 0, LipsPipeline.DATATYPE_FLOAT);
 
                       await FlutterVision.test();
 
@@ -236,42 +246,6 @@ class _MyAppState extends State<MyApp> {
                       await depthPipeline.applyColorMap(Random().nextInt(10), at: 1);
                     },
                     child: const Text('Replace pipeline')),
-                TextButton(
-                    onPressed: () async {
-                      LipsPipeline rgbPipeline = LipsPipeline(1);
-                      await rgbPipeline.clear();
-                      // await rgbPipeline.resize(640, 480);
-                      // await rgbPipeline.cvtColor(2);
-                      await rgbPipeline.crop(80, 560, 0, 480);
-                      // await rgbPipeline.imread("/home/hedgehao/Desktop/test.jpg");
-                      await rgbPipeline.cvtColor(0);
-                      await rgbPipeline.show();
-                      await rgbPipeline.resize(28, 28);
-                      await rgbPipeline.cvtColor(7);
-                      await rgbPipeline.convertTo(3, 255.0 / 1024.0);
-                      await rgbPipeline.imwrite("/home/hedgehao/Desktop/test.jpg");
-
-                      TFLiteModel model = await TFLiteModel.create('/home/hedgehao/test/cpp/tflite/models/mnist.tflite');
-                      models.add(model);
-
-                      print(model.index);
-                      print('valid: ${await model.valid}');
-                      print('error: ${await model.error}');
-
-                      LipsPipeline tfPipeline = LipsPipeline(8);
-                      await tfPipeline.clear();
-                      await tfPipeline.setInputTensorData(LipsPipeline.RGB_FRAME, 0, LipsPipeline.DATATYPE_FLOAT);
-                      await tfPipeline.inference();
-
-                      await FlutterVision.test();
-
-                      Float32List output = await model.getTensorOutput(0, [10]) as Float32List;
-                      // print(output);
-                      List<double> result = softmax(output);
-                      double score = result.reduce((a, b) => a > b ? a : b);
-                      print('result: ${result.indexOf(score)}, score: $score');
-                    },
-                    child: const Text('TF Test')),
                 TextButton(
                   onPressed: () async {
                     LipsPipeline rgbPipeline = LipsPipeline(1);

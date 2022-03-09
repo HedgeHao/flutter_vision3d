@@ -191,14 +191,17 @@ public:
 
     if ((videoMode & VideoIndex::RGB) > 0 && vsColor.create(*device, SENSOR_COLOR) == STATUS_OK)
     {
+      vsColor.setMirroringEnabled(false);
       enableRgb = true;
     }
     if ((videoMode & VideoIndex::Depth) > 0 && vsDepth.create(*device, SENSOR_DEPTH) == STATUS_OK)
     {
+      vsDepth.setMirroringEnabled(false);
       enableDepth = true;
     }
     if ((videoMode & VideoIndex::IR) > 0 && vsIR.create(*device, SENSOR_IR) == STATUS_OK)
     {
+      vsIR.setMirroringEnabled(false);
       enableIr = true;
     }
   }
@@ -416,7 +419,7 @@ private:
       }
 
       // TODO: chose model
-      if (rgbNewFrame && models->size())
+      if ((rgbNewFrame || depthNewFrame || irNewFrame) && models->size())
       {
         tfPipeline->run(rgbCls->cvImage, depthCls->cvImage, irCls->cvImage, *models->at(0));
 
@@ -429,10 +432,10 @@ private:
         // }
       }
 
-      // if (enableRgb && depthNewFrame && rgbNewFrame)
-      // {
-      //   niComputeCloud(vsDepth, (const openni::DepthPixel *)depthFrame.getData(), (const openni::RGB888Pixel *)rgbFrame.getData(), glfl->modelPointCloud->vertices, glfl->modelPointCloud->colors, glfl->modelPointCloud->colorsMap, &glfl->modelPointCloud->vertexPoints);
-      // }
+      if (enableRgb && depthNewFrame && rgbNewFrame)
+      {
+        niComputeCloud(vsDepth, (const openni::DepthPixel *)depthFrame.getData(), (const openni::RGB888Pixel *)rgbFrame.getData(), glfl->modelPointCloud->vertices, glfl->modelPointCloud->colors, glfl->modelPointCloud->colorsMap, &glfl->modelPointCloud->vertexPoints);
+      }
 
       fl_method_channel_invoke_method(flChannel, "onFrame", nullptr, nullptr, nullptr, NULL);
 
