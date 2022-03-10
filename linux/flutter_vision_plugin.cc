@@ -4,10 +4,16 @@
 #include <gtk/gtk.h>
 #include <sys/utsname.h>
 
+#include "include/flutter_vision/pipeline/pipeline.h"
+#include "include/flutter_vision/pipeline/tf_pipeline.h"
+#include "include/flutter_vision/tflite.h"
+
 #include "include/flutter_vision/openni2_wrapper.hpp"
 
 #include <cstring>
 #include <memory>
+
+#define PIPELINE_INDEX_TFLITE 8
 
 #define FLUTTER_VISION_PLUGIN(obj)                                     \
   (G_TYPE_CHECK_INSTANCE_CAST((obj), flutter_vision_plugin_get_type(), \
@@ -25,6 +31,9 @@ struct _FlutterVisionPlugin
 
   FlView *flView;
   OpenGLFL *glfl;
+
+  TfPipeline *tfPipeline;
+  std::vector<TFLiteModel *> models{};
 };
 
 G_DEFINE_TYPE(FlutterVisionPlugin, flutter_vision_plugin, g_object_get_type())
@@ -203,9 +212,147 @@ static void flutter_vision_plugin_handle_method_call(
     self->glfl->render();
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
+  else if (strcmp(method, "pipelineAdd") == 0)
+  {
+    FlValue *valueIndex = fl_value_lookup_string(args, "index");
+    const int index = fl_value_get_int(valueIndex);
+    FlValue *valueFuncIndex = fl_value_lookup_string(args, "funcIndex");
+    const int funcIndex = fl_value_get_int(valueFuncIndex);
+    FlValue *valueLen = fl_value_lookup_string(args, "len");
+    const int len = fl_value_get_int(valueLen);
+    FlValue *valueParams = fl_value_lookup_string(args, "params");
+    const uint8_t *params;
+    if (valueParams != nullptr && fl_value_get_type(valueParams) == FL_VALUE_TYPE_NULL)
+    {
+      params = NULL;
+    }
+    else
+    {
+      params = fl_value_get_uint8_list(valueParams);
+    }
+
+    int insertAt = -1;
+    FlValue *valueAt = fl_value_lookup_string(args, "at");
+    if (valueAt != nullptr && fl_value_get_type(valueAt) != FL_VALUE_TYPE_NULL)
+      insertAt = fl_value_get_int(valueAt);
+
+    Pipeline *pipeline;
+    if (index == VideoIndex::RGB)
+    {
+      RGB_TEXTURE_GET_CLASS(self->rgbTexture)->pipeline->add(funcIndex, params, len, insertAt);
+    }
+    else if (index == VideoIndex::Depth)
+    {
+      DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->pipeline->add(funcIndex, params, len, insertAt);
+    }
+    else if (index == VideoIndex::IR)
+    {
+      IR_TEXTURE_GET_CLASS(self->irTexture)->pipeline->add(funcIndex, params, len, insertAt);
+    }
+    else if (index == PIPELINE_INDEX_TFLITE)
+    {
+      self->tfPipeline->add(funcIndex, params, len, insertAt);
+    }
+    else
+    {
+      return;
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+  }
+  else if (strcmp(method, "pipelineClear") == 0)
+  {
+    FlValue *valueIndex = fl_value_lookup_string(args, "index");
+    const int index = fl_value_get_int(valueIndex);
+    if (index == VideoIndex::RGB)
+    {
+      RGB_TEXTURE_GET_CLASS(self->rgbTexture)->pipeline->clear();
+    }
+    else if (index == VideoIndex::Depth)
+    {
+      DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->pipeline->clear();
+    }
+    else if (index == VideoIndex::IR)
+    {
+      IR_TEXTURE_GET_CLASS(self->irTexture)->pipeline->clear();
+    }
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+  }
+  else if (strcmp(method, "tfliteCreateModel") == 0)
+  {
+    FlValue *valuePath = fl_value_lookup_string(args, "modelPath");
+    const char *path = fl_value_get_string(valuePath);
+
+    TFLiteModel *m = new TFLiteModel(path);
+    self->models.push_back(m);
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+  }
+  else if (strcmp(method, "tfliteGetModelInfo") == 0)
+  {
+    FlValue *valueIndex = fl_value_lookup_string(args, "index");
+    const int index = fl_value_get_int(valueIndex);
+
+    TFLiteModel *m = self->models[index];
+
+    FlValue *modelMap = fl_value_new_map();
+
+    if (index < self->models.size())
+    {
+      fl_value_set(modelMap, fl_value_new_string("valid"), fl_value_new_bool(m->valid));
+      fl_value_set(modelMap, fl_value_new_string("error"), fl_value_new_string(m->error.c_str()));
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(modelMap));
+  }
+  else if (strcmp(method, "tfliteGetTensorOutput") == 0)
+  {
+    FlValue *valueIndex = fl_value_lookup_string(args, "tensorIndex");
+    const int index = fl_value_get_int(valueIndex);
+    FlValue *valueSize = fl_value_lookup_string(args, "size");
+    const int32_t *size = fl_value_get_int32_list(valueSize);
+    const int len = fl_value_get_length(valueSize);
+
+    int outputSize = 1;
+    for (int i = 0; i < len; i++)
+      outputSize *= *(size + i);
+    float *data = new float[outputSize];
+
+    self->models[0]->retrieveOutput<float>(index, outputSize, data);
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_float32_list(data, outputSize)));
+  }
+  else if (strcmp(method, "_float2uint8") == 0)
+  {
+    FlValue *value = fl_value_lookup_string(args, "value");
+    float f = fl_value_get_float(value);
+    uint8_t *bytes = reinterpret_cast<uint8_t *>(&f);
+
+    FlValue *result = fl_value_new_uint8_list(bytes, 4);
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+  }
   else if (strcmp(method, "test") == 0)
   {
-    // self->glfl->render();
+    // cv::Mat b(1280, 720, CV_8UC4, cv::Scalar(255, 0, 0, 255));
+    cv::Mat b = cv::imread("/home/hedgehao/test/cpp/tflite/images/dog.jpg", cv::IMREAD_COLOR);
+    cv::cvtColor(b, b, cv::COLOR_BGR2RGB);
+    cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
+    cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
+
+    RGB_TEXTURE_GET_CLASS(self->rgbTexture)->pipeline->run(b, *self->texture_registrar, *FL_TEXTURE(self->rgbTexture), RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_width, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_height, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->buffer);
+    DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->pipeline->run(g, *self->texture_registrar, *FL_TEXTURE(self->depthTexture), DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->video_width, DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->video_height, DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->buffer);
+    IR_TEXTURE_GET_CLASS(self->irTexture)->pipeline->run(r, *self->texture_registrar, *FL_TEXTURE(self->irTexture), IR_TEXTURE_GET_CLASS(self->irTexture)->video_width, IR_TEXTURE_GET_CLASS(self->irTexture)->video_height, IR_TEXTURE_GET_CLASS(self->irTexture)->buffer);
+
+    if (self->models.size())
+    {
+      cv::Mat img = cv::imread("/home/hedgehao/test/cpp/tflite/images/dog.jpg");
+      img.convertTo(img, CV_8UC3);
+      cv::resize(img, img, cv::Size(320, 320), cv::INTER_CUBIC);
+      self->tfPipeline->run(img, g, b, *self->models[0]);
+    }
+
+    fl_texture_registrar_mark_texture_frame_available(self->texture_registrar, FL_TEXTURE(self->rgbTexture));
+
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
   else
@@ -259,18 +406,21 @@ void flutter_vision_plugin_register_with_registrar(FlPluginRegistrar *registrar)
   fl_texture_registrar_register_texture(plugin->texture_registrar, FL_TEXTURE(plugin->rgbTexture));
   RGB_TEXTURE_GET_CLASS(plugin->rgbTexture)->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(plugin->rgbTexture));
   fl_texture_registrar_mark_texture_frame_available(plugin->texture_registrar, FL_TEXTURE(plugin->rgbTexture));
+  RGB_TEXTURE_GET_CLASS(plugin->rgbTexture)->pipeline = new Pipeline();
 
   plugin->depthTexture = DEPTH_TEXTURE(g_object_new(depth_texture_get_type(), nullptr));
   FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(plugin->depthTexture)->copy_pixels = depth_texture_copy_pixels;
   fl_texture_registrar_register_texture(plugin->texture_registrar, FL_TEXTURE(plugin->depthTexture));
   DEPTH_TEXTURE_GET_CLASS(plugin->depthTexture)->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(plugin->depthTexture));
   fl_texture_registrar_mark_texture_frame_available(plugin->texture_registrar, FL_TEXTURE(plugin->depthTexture));
+  DEPTH_TEXTURE_GET_CLASS(plugin->depthTexture)->pipeline = new Pipeline();
 
   plugin->irTexture = IR_TEXTURE(g_object_new(ir_texture_get_type(), nullptr));
   FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(plugin->irTexture)->copy_pixels = ir_texture_copy_pixels;
   fl_texture_registrar_register_texture(plugin->texture_registrar, FL_TEXTURE(plugin->irTexture));
   IR_TEXTURE_GET_CLASS(plugin->irTexture)->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(plugin->irTexture));
   fl_texture_registrar_mark_texture_frame_available(plugin->texture_registrar, FL_TEXTURE(plugin->irTexture));
+  IR_TEXTURE_GET_CLASS(plugin->irTexture)->pipeline = new Pipeline();
 
   plugin->openglTexture = OPENGL_TEXTURE(g_object_new(opengl_texture_get_type(), nullptr));
   OPENGL_TEXTURE_GET_CLASS(plugin->openglTexture)->video_width = 1280;
@@ -283,7 +433,8 @@ void flutter_vision_plugin_register_with_registrar(FlPluginRegistrar *registrar)
   plugin->glfl = new OpenGLFL(gtk_widget_get_parent_window(GTK_WIDGET(plugin->flView)), plugin->texture_registrar, plugin->openglTexture);
   OPENGL_TEXTURE_GET_CLASS(plugin->openglTexture)->buffer = plugin->glfl->pixelBuffer;
 
-  plugin->ni2->registerFlContext(plugin->texture_registrar, plugin->rgbTexture, plugin->depthTexture, plugin->irTexture, channel, plugin->glfl);
+  plugin->tfPipeline = new TfPipeline();
+  plugin->ni2->registerFlContext(plugin->texture_registrar, plugin->rgbTexture, plugin->depthTexture, plugin->irTexture, channel, plugin->glfl, &plugin->models, plugin->tfPipeline);
 
   g_object_unref(plugin);
 }

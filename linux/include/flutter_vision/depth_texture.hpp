@@ -6,6 +6,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include "pipeline/pipeline.h"
+
 struct _DepthTextureClass
 {
     FlPixelBufferTextureClass parent_class;
@@ -15,6 +17,7 @@ struct _DepthTextureClass
     int32_t video_height = 0;
     bool video_start = false;
     cv::Mat cvImage;
+    Pipeline *pipeline;
 };
 
 G_DECLARE_DERIVABLE_TYPE(DepthTexture,
@@ -49,24 +52,4 @@ static void depth_texture_class_init(
 
 static void depth_texture_init(DepthTexture *self)
 {
-}
-
-static void updateDepthFrame(DepthTextureClass *p, FlTextureRegistrar *registrar, DepthTexture *texture)
-{
-    auto &buffer = p->buffer;
-    if (buffer.size() <= 0)
-    {
-        return;
-    }
-
-    cv::Mat imgDepth;
-    p->cvImage.convertTo(imgDepth, CV_8U, 255.0 / 1024);
-    for (int i = 0; i < p->video_width * p->video_height; i++)
-    {
-        buffer[4 * i] = *(imgDepth.data + i);
-        buffer[(4 * i) + 1] = *(imgDepth.data + i);
-        buffer[(4 * i) + 2] = *(imgDepth.data + i);
-        buffer[(4 * i) + 3] = 255;
-    }
-    fl_texture_registrar_mark_texture_frame_available(registrar, FL_TEXTURE(texture));
 }

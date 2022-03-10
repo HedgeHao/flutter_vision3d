@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision_example/configurePanel.dart';
 import 'package:desktop_window/desktop_window.dart';
+import 'package:flutter_vision/constants.dart';
+import 'package:flutter_vision/algorithm.dart';
+
+const texture_width = 240.0;
+const texture_height = 180.0;
 
 enum MOUSEBUTTON {
   release,
@@ -47,6 +53,10 @@ class _MyAppState extends State<MyApp> {
   String debugText = '';
 
   bool mouseDown = false;
+
+  List<TFLiteModel> models = [];
+
+  List<PositionedRect> rects = [];
 
   void updateMouseClick(PointerEvent details) {
     setState(() {
@@ -118,7 +128,29 @@ class _MyAppState extends State<MyApp> {
     setState(() {});
   }
 
-  Future<dynamic> update(MethodCall call) async {}
+  Future<dynamic> update(MethodCall call) async {
+    if (call.method == 'onFrame') {
+      Float32List outputBoxes = await models[0].getTensorOutput(0, [25, 4]) as Float32List;
+      Float32List outputClass = await models[0].getTensorOutput(1, [25]) as Float32List;
+      Float32List outputScore = await models[0].getTensorOutput(2, [25]) as Float32List;
+
+      print('Class:${COCO_CLASSES[outputClass[0].toInt()]}, Score: ${outputScore[0]}');
+
+      List<PositionedRect> r = [];
+      for (int i = 0; i < 3; i++) {
+        double x = texture_width * outputBoxes[i * 4 + 1];
+        double y = texture_height * outputBoxes[i * 4];
+        double width = texture_width * outputBoxes[i * 4 + 3] - x;
+        double height = texture_height * outputBoxes[i * 4 + 2] - y;
+        r.add(PositionedRect(x, y, width, height, Colors.red));
+      }
+
+      setState(() {
+        rects = r;
+        debugText = '${COCO_CLASSES[outputClass[0].toInt() - 1]} ${outputScore[0]}';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +169,17 @@ class _MyAppState extends State<MyApp> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  rgbTextureId == 0 ? const SizedBox() : Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 240, height: 180, child: Texture(textureId: rgbTextureId)),
+                  rgbTextureId == 0
+                      ? const SizedBox()
+                      : Container(
+                          decoration: BoxDecoration(border: Border.all(width: 1)),
+                          width: texture_width,
+                          height: texture_height,
+                          child: Stack(children: [
+                            Texture(textureId: rgbTextureId),
+                            ...rects,
+                          ]),
+                        ),
                   const SizedBox(width: 10),
                   depthTextureId == 0 ? const SizedBox() : Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 240, height: 180, child: Texture(textureId: depthTextureId)),
                   const SizedBox(width: 10),
@@ -166,11 +208,90 @@ class _MyAppState extends State<MyApp> {
 
                       // registerTexture();
 
+                      LipsPipeline rgbPipeline = LipsPipeline(1);
+                      await rgbPipeline.clear();
+                      await rgbPipeline.crop(80, 560, 0, 480);
+                      await rgbPipeline.cvtColor(0);
+                      await rgbPipeline.show();
+                      await rgbPipeline.resize(28, 28);
+                      await rgbPipeline.cvtColor(7);
+                      await rgbPipeline.convertTo(3, 255.0 / 1024.0);
+
+                      LipsPipeline depthPipeline = LipsPipeline(2);
+                      await depthPipeline.clear();
+                      await depthPipeline.convertTo(0, 255.0 / 1024.0);
+                      // await depthPipeline.cvtColor(9); // COLOR_GRAY2BGRA
+                      await depthPipeline.applyColorMap(OpenCV.COLORMAP_JET);
+                      await depthPipeline.cvtColor(0); //COLOR_RGB2RGBA
+                      await depthPipeline.show();
+
+                      LipsPipeline irPipeline = LipsPipeline(4);
+                      await irPipeline.clear();
+                      await irPipeline.convertTo(0, 255.0 / 1024.0);
+                      await irPipeline.cvtColor(9); // COLOR_GRAY2BGRA
+                      await irPipeline.show();
+
+                      LipsPipeline tfPipeline = LipsPipeline(8);
+                      await tfPipeline.clear();
+                      await tfPipeline.setInputTensorData(LipsPipeline.IR_FRAME, 0, LipsPipeline.DATATYPE_FLOAT);
+
                       await FlutterVision.test();
 
                       print('');
                     },
                     child: const Text('Test')),
+                TextButton(
+                    onPressed: () async {
+                      LipsPipeline depthPipeline = LipsPipeline(2);
+                      await depthPipeline.applyColorMap(Random().nextInt(10), at: 1);
+                    },
+                    child: const Text('Replace pipeline')),
+                TextButton(
+                  onPressed: () async {
+                    LipsPipeline rgbPipeline = LipsPipeline(1);
+                    await rgbPipeline.clear();
+                    await rgbPipeline.resize(320, 320, mode: OpenCV.INTER_CUBIC);
+                    await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
+                    // await rgbPipeline.crop(160, 480, 80, 400);
+                    await rgbPipeline.show();
+                    await rgbPipeline.cvtColor(OpenCV.CV_8UC1);
+                    await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2BGR);
+
+                    TFLiteModel model = await TFLiteModel.create('/home/hedgehao/test/cpp/tflite/models/efficientdet.tflite');
+                    models.add(model);
+
+                    LipsPipeline tfPipeline = LipsPipeline(8);
+                    await tfPipeline.clear();
+                    await tfPipeline.setInputTensorData(LipsPipeline.RGB_FRAME, 0, LipsPipeline.DATATYPE_UINT8);
+                    await tfPipeline.inference();
+
+                    await FlutterVision.test();
+
+                    Float32List outputBoxes = await model.getTensorOutput(0, [25, 4]) as Float32List;
+                    Float32List outputClass = await model.getTensorOutput(1, [25]) as Float32List;
+                    Float32List outputScore = await model.getTensorOutput(2, [25]) as Float32List;
+
+                    List<String> classes = outputClass.map((e) => COCO_CLASSES[e.toInt()]).toList();
+
+                    print('Class:$classes');
+                    print('Score:${outputScore.map((e) => e.toStringAsFixed(2)).toList()}');
+                    print('Boxes:${outputBoxes.map((e) => e.toStringAsFixed(2)).toList()}');
+
+                    List<PositionedRect> r = [];
+                    for (int i = 0; i < 5; i++) {
+                      double x = texture_width * outputBoxes[i * 4 + 1];
+                      double y = texture_height * outputBoxes[i * 4];
+                      double width = texture_width * outputBoxes[i * 4 + 3] - x;
+                      double height = texture_height * outputBoxes[i * 4 + 2] - y;
+                      r.add(PositionedRect(x, y, width, height, Colors.red));
+                    }
+
+                    setState(() {
+                      rects = r;
+                    });
+                  },
+                  child: const Text('EfficientNet'),
+                ),
                 TextButton(
                     onPressed: () {
                       FlutterVision.openglSetCamAngle(90, 0);
@@ -194,5 +315,24 @@ class _MyAppState extends State<MyApp> {
         )),
       ),
     );
+  }
+}
+
+class PositionedRect extends StatelessWidget {
+  final double top, left, width, height;
+  final Color color;
+
+  const PositionedRect(this.left, this.top, this.width, this.height, this.color, {Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+        top: top,
+        left: left,
+        child: Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(border: Border.all(color: color)),
+        ));
   }
 }

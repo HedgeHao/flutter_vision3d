@@ -10,6 +10,7 @@
 #include "ir_texture.hpp"
 #include <thread>
 #include "opengl.h"
+#include "tflite.h"
 
 using namespace openni;
 
@@ -64,7 +65,7 @@ public:
   VideoStream vsIR;
   bool videoStart;
 
-  void registerFlContext(FlTextureRegistrar *r, RgbTexture *rgb, DepthTexture *depth, IrTexture *ir, FlMethodChannel *channel, OpenGLFL *g)
+  void registerFlContext(FlTextureRegistrar *r, RgbTexture *rgb, DepthTexture *depth, IrTexture *ir, FlMethodChannel *channel, OpenGLFL *g, std::vector<TFLiteModel *> *m, TfPipeline *tp)
   {
     registrar = r;
     rgbTexture = rgb;
@@ -72,6 +73,8 @@ public:
     irTexture = ir;
     flChannel = channel;
     glfl = g;
+    models = m;
+    tfPipeline = tp;
   };
 
   ~OpenNi2Wrapper() {}
@@ -188,14 +191,17 @@ public:
 
     if ((videoMode & VideoIndex::RGB) > 0 && vsColor.create(*device, SENSOR_COLOR) == STATUS_OK)
     {
+      vsColor.setMirroringEnabled(false);
       enableRgb = true;
     }
     if ((videoMode & VideoIndex::Depth) > 0 && vsDepth.create(*device, SENSOR_DEPTH) == STATUS_OK)
     {
+      vsDepth.setMirroringEnabled(false);
       enableDepth = true;
     }
     if ((videoMode & VideoIndex::IR) > 0 && vsIR.create(*device, SENSOR_IR) == STATUS_OK)
     {
+      vsIR.setMirroringEnabled(false);
       enableIr = true;
     }
   }
@@ -278,6 +284,8 @@ private:
   IrTexture *irTexture;
   DepthTexture *depthTexture;
   FlMethodChannel *flChannel;
+  std::vector<TFLiteModel *> *models;
+  TfPipeline *tfPipeline;
 
   bool enableRgb = false;
   bool enableDepth = false;
@@ -372,8 +380,6 @@ private:
     if (!(videoStart))
       return;
 
-    // printf("VideoStart:%d, %d, %d\n", enableRgb, enableDepth, enableIr);
-
     while (videoStart)
     {
       rgbNewFrame = false;
@@ -385,6 +391,7 @@ private:
         if (vsColor.readFrame(&rgbFrame) == STATUS_OK)
         {
           rgbCls->cvImage = cv::Mat(rgbFrame.getHeight(), rgbFrame.getWidth(), CV_8UC3, (void *)rgbFrame.getData());
+          rgbCls->pipeline->run(rgbCls->cvImage, *registrar, *FL_TEXTURE(rgbTexture), rgbCls->video_width, rgbCls->video_height, rgbCls->buffer);
           rgbNewFrame = true;
         }
       }
@@ -394,6 +401,7 @@ private:
         if (vsDepth.readFrame(&depthFrame) == STATUS_OK)
         {
           depthCls->cvImage = cv::Mat(depthFrame.getHeight(), depthFrame.getWidth(), CV_16UC1, (void *)depthFrame.getData());
+          depthCls->pipeline->run(depthCls->cvImage, *registrar, *FL_TEXTURE(depthTexture), depthCls->video_width, depthCls->video_height, depthCls->buffer);
           depthNewFrame = true;
         }
       }
@@ -403,8 +411,15 @@ private:
         if (vsIR.readFrame(&irFrame) == STATUS_OK)
         {
           irCls->cvImage = cv::Mat(irFrame.getHeight(), irFrame.getWidth(), CV_16UC1, (void *)irFrame.getData());
+          irCls->pipeline->run(irCls->cvImage, *registrar, *FL_TEXTURE(irTexture), irCls->video_width, irCls->video_height, irCls->buffer);
           irNewFrame = true;
         }
+      }
+
+      // TODO: chose model
+      if ((rgbNewFrame || depthNewFrame || irNewFrame) && models->size())
+      {
+        tfPipeline->run(rgbCls->cvImage, depthCls->cvImage, irCls->cvImage, *models->at(0));
       }
 
       if (enableRgb && depthNewFrame && rgbNewFrame)
@@ -412,14 +427,7 @@ private:
         niComputeCloud(vsDepth, (const openni::DepthPixel *)depthFrame.getData(), (const openni::RGB888Pixel *)rgbFrame.getData(), glfl->modelPointCloud->vertices, glfl->modelPointCloud->colors, glfl->modelPointCloud->colorsMap, &glfl->modelPointCloud->vertexPoints);
       }
 
-      // printf("Debug:%d, %d, %d ,%d ,%d ,%d\n", enableRgb, rgbNewFrame, enableDepth, depthNewFrame, enableIr, irNewFrame);
-
-      if (enableRgb && rgbNewFrame)
-        updateRgbFrame(rgbCls, registrar, rgbTexture);
-      if (enableDepth && depthNewFrame)
-        updateDepthFrame(depthCls, registrar, depthTexture);
-      if (enableIr && irNewFrame)
-        updateIrFrame(irCls, registrar, irTexture);
+      fl_method_channel_invoke_method(flChannel, "onFrame", nullptr, nullptr, nullptr, NULL);
     }
   }
 };
