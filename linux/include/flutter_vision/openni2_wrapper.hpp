@@ -20,6 +20,7 @@ enum VideoIndex
   Depth = 0b10,
   IR = 0b100,
   POINTCLOUD = 0b1000,
+  Camera2D = 0b10000,
 };
 
 class FlValueWrapper

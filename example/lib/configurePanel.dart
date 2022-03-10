@@ -155,6 +155,36 @@ class DeviceDropdownState extends State<DeviceDropdown> {
   }
 }
 
+class Camera2dConfigure extends StatelessWidget {
+  final TextEditingController ctl = TextEditingController()..text = '0';
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Spacer(),
+        SizedBox(width: 50, child: TextField(controller: ctl, textAlign: TextAlign.center)),
+        TextButton(
+            onPressed: () async {
+              await FlutterVision.cameraOpen(int.parse(ctl.text));
+            },
+            child: const Text('Open')),
+        TextButton(
+            onPressed: () async {
+              await FlutterVision.cameraConfig(int.parse(ctl.text), true);
+            },
+            child: const Text('Start')),
+        TextButton(
+            onPressed: () async {
+              await FlutterVision.cameraConfig(int.parse(ctl.text), false);
+            },
+            child: const Text('Stop')),
+        const Spacer(),
+      ],
+    );
+  }
+}
+
 class ConfigurePannel extends StatelessWidget {
   const ConfigurePannel({Key? key}) : super(key: key);
   final subTitleStyle = const TextStyle(fontSize: 18, fontWeight: FontWeight.w500);
@@ -181,6 +211,8 @@ class ConfigurePannel extends StatelessWidget {
             Text('Streaming', style: subTitleStyle),
             const VideoStreamingConfig(),
             StaticUI.divider,
+            Text('2D Camera', style: subTitleStyle),
+            Camera2dConfigure(),
           ],
         ));
   }

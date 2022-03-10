@@ -128,6 +128,14 @@ class FlutterVision {
     return await _channel.invokeMethod('tfliteCreateModel', {'modelPath': modelPath});
   }
 
+  static Future<void> cameraOpen(int index) async {
+    return await _channel.invokeMethod('cameraOpen', {'index': index});
+  }
+
+  static Future<void> cameraConfig(int index, bool start) async {
+    return await _channel.invokeMethod('cameraConfig', {'index': index, 'start': start});
+  }
+
   static Future<void> test() async {
     await _channel.invokeMethod('test');
     print('');

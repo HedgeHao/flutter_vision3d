@@ -49,6 +49,7 @@ class _MyAppState extends State<MyApp> {
   int depthTextureId = 0;
   int irTextureId = 0;
   int openglTextureId = 0;
+  int cameraTextureId = 0;
 
   String debugText = '';
 
@@ -124,6 +125,7 @@ class _MyAppState extends State<MyApp> {
     depthTextureId = await FlutterVision.getVideoTextureId(2);
     irTextureId = await FlutterVision.getVideoTextureId(4);
     openglTextureId = await FlutterVision.getVideoTextureId(8);
+    cameraTextureId = await FlutterVision.getVideoTextureId(16);
 
     setState(() {});
   }
@@ -185,6 +187,8 @@ class _MyAppState extends State<MyApp> {
                   const SizedBox(width: 10),
                   irTextureId == 0 ? const SizedBox() : Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 240, height: 180, child: Texture(textureId: irTextureId)),
                   const SizedBox(width: 10),
+                  cameraTextureId == 0 ? const SizedBox() : Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 240, height: 180, child: Texture(textureId: cameraTextureId)),
+                  const SizedBox(width: 10),
                 ],
               ),
               openglTextureId == 0
@@ -234,6 +238,11 @@ class _MyAppState extends State<MyApp> {
                       LipsPipeline tfPipeline = LipsPipeline(8);
                       await tfPipeline.clear();
                       await tfPipeline.setInputTensorData(LipsPipeline.IR_FRAME, 0, LipsPipeline.DATATYPE_FLOAT);
+
+                      LipsPipeline uvcPipeline = LipsPipeline(16);
+                      await uvcPipeline.clear();
+                      await uvcPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+                      await uvcPipeline.show();
 
                       await FlutterVision.test();
 

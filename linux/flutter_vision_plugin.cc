@@ -9,6 +9,7 @@
 #include "include/flutter_vision/tflite.h"
 
 #include "include/flutter_vision/openni2_wrapper.hpp"
+#include "include/flutter_vision/uvc_texture.hpp"
 
 #include <cstring>
 #include <memory>
@@ -27,6 +28,7 @@ struct _FlutterVisionPlugin
   RgbTexture *rgbTexture;
   DepthTexture *depthTexture;
   IrTexture *irTexture;
+  UvcTexture *uvcTexture;
   OpenGLTexture *openglTexture;
 
   FlView *flView;
@@ -34,6 +36,7 @@ struct _FlutterVisionPlugin
 
   TfPipeline *tfPipeline;
   std::vector<TFLiteModel *> models{};
+  std::vector<OpenCVCamera *> cameras{};
 };
 
 G_DEFINE_TYPE(FlutterVisionPlugin, flutter_vision_plugin, g_object_get_type())
@@ -69,6 +72,10 @@ static void flutter_vision_plugin_handle_method_call(
     else if (index == VideoIndex::POINTCLOUD)
     {
       result = OPENGL_TEXTURE_GET_CLASS(self->openglTexture)->texture_id;
+    }
+    else if (index == VideoIndex::Camera2D)
+    {
+      result = UVC_TEXTURE_GET_CLASS(self->uvcTexture)->texture_id;
     }
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(result)));
@@ -249,6 +256,10 @@ static void flutter_vision_plugin_handle_method_call(
     {
       IR_TEXTURE_GET_CLASS(self->irTexture)->pipeline->add(funcIndex, params, len, insertAt);
     }
+    else if (index == VideoIndex::Camera2D)
+    {
+      UVC_TEXTURE_GET_CLASS(self->uvcTexture)->pipeline->add(funcIndex, params, len, insertAt);
+    }
     else if (index == PIPELINE_INDEX_TFLITE)
     {
       self->tfPipeline->add(funcIndex, params, len, insertAt);
@@ -275,6 +286,10 @@ static void flutter_vision_plugin_handle_method_call(
     else if (index == VideoIndex::IR)
     {
       IR_TEXTURE_GET_CLASS(self->irTexture)->pipeline->clear();
+    }
+    else if (index == VideoIndex::Camera2D)
+    {
+      UVC_TEXTURE_GET_CLASS(self->uvcTexture)->pipeline->clear();
     }
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
@@ -330,6 +345,66 @@ static void flutter_vision_plugin_handle_method_call(
 
     FlValue *result = fl_value_new_uint8_list(bytes, 4);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+  }
+  else if (strcmp(method, "cameraOpen") == 0)
+  {
+    FlValue *flIndex = fl_value_lookup_string(args, "index");
+    int index = fl_value_get_int(flIndex);
+
+    bool newCam = true;
+    bool result = false;
+    for (int i = 0; i < self->cameras.size(); i++)
+    {
+      if (self->cameras[i]->capIndex == index)
+      {
+        newCam = false;
+        if (!self->cameras[i]->cap->isOpened())
+        {
+          self->cameras[i]->cap->open(index);
+        }
+
+        result = true;
+        break;
+      }
+    }
+
+    if (newCam)
+    {
+      OpenCVCamera *c = new OpenCVCamera(index, self->uvcTexture, self->texture_registrar);
+      c->open();
+      self->cameras.push_back(c);
+      result = c->cap->isOpened();
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(result)));
+  }
+  else if (strcmp(method, "cameraConfig") == 0)
+  {
+    FlValue *flIndex = fl_value_lookup_string(args, "index");
+    int index = fl_value_get_int(flIndex);
+    FlValue *flStart = fl_value_lookup_string(args, "start");
+    bool start = fl_value_get_bool(flStart);
+
+    bool result = false;
+    for (int i = 0; i < self->cameras.size(); i++)
+    {
+      if (self->cameras[i]->capIndex == index)
+      {
+        if (start)
+        {
+          self->cameras[i]->start();
+        }
+        else
+        {
+          self->cameras[i]->stop();
+        }
+
+        result = true;
+        break;
+      }
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(result)));
   }
   else if (strcmp(method, "test") == 0)
   {
@@ -400,6 +475,13 @@ void flutter_vision_plugin_register_with_registrar(FlPluginRegistrar *registrar)
 
   plugin->ni2 = new OpenNi2Wrapper();
   plugin->texture_registrar = fl_plugin_registrar_get_texture_registrar(registrar);
+
+  plugin->uvcTexture = UVC_TEXTURE(g_object_new(uvc_texture_get_type(), nullptr));
+  FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(plugin->uvcTexture)->copy_pixels = uvc_texture_copy_pixels;
+  fl_texture_registrar_register_texture(plugin->texture_registrar, FL_TEXTURE(plugin->uvcTexture));
+  UVC_TEXTURE_GET_CLASS(plugin->uvcTexture)->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(plugin->uvcTexture));
+  fl_texture_registrar_mark_texture_frame_available(plugin->texture_registrar, FL_TEXTURE(plugin->uvcTexture));
+  UVC_TEXTURE_GET_CLASS(plugin->uvcTexture)->pipeline = new Pipeline();
 
   plugin->rgbTexture = RGB_TEXTURE(g_object_new(rgb_texture_get_type(), nullptr));
   FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(plugin->rgbTexture)->copy_pixels = rgb_texture_copy_pixels;
