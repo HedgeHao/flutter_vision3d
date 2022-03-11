@@ -406,6 +406,7 @@ static void flutter_vision_plugin_handle_method_call(
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(result)));
   }
+
   else if (strcmp(method, "test") == 0)
   {
     // cv::Mat b(1280, 720, CV_8UC4, cv::Scalar(255, 0, 0, 255));
