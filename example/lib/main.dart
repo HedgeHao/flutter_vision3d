@@ -244,6 +244,11 @@ class _MyAppState extends State<MyApp> {
                       // await uvcPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
                       // await uvcPipeline.show();
 
+                      LipsPipeline uvcPipeline = LipsPipeline(16);
+                      await uvcPipeline.clear();
+                      await uvcPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+                      await uvcPipeline.show();
+
                       await FlutterVision.test();
 
                       print('');

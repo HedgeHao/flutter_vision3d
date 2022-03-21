@@ -37,6 +37,7 @@ namespace
 
     // TfPipeline *tfPipeline;
     // std::vector<TFLiteModel *> models{};
+    std::vector<OpenCVCamera *> cameras{};
 
     static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);
 
@@ -126,6 +127,10 @@ namespace
       else if (index == VideoIndex::IR)
       {
         ret = irTexture->textureId;
+      }
+      else if (index == VideoIndex::Camera2D)
+      {
+        ret = uvcTexture->textureId;
       }
       else if (index == VideoIndex::OPENGL)
       {
@@ -237,6 +242,7 @@ namespace
         height = std::get<int>(heightIt->second);
       }
 
+      // TODO: [Refactor] use Texture class
       if (videoIndex == VideoIndex::RGB)
       {
         rgbTexture->videoWidth = width;
@@ -254,6 +260,12 @@ namespace
         irTexture->videoWidth = width;
         irTexture->videoHeight = height;
         irTexture->buffer.resize(width * height * 4);
+      }
+      else if (videoIndex == VideoIndex::IR)
+      {
+        uvcTexture->videoWidth = width;
+        uvcTexture->videoHeight = height;
+        uvcTexture->buffer.resize(width * height * 4);
       }
 
       result->Success(flutter::EncodableValue(nullptr));
@@ -412,6 +424,78 @@ namespace
       }
 
       result->Success(flutter::EncodableValue(nullptr));
+    }
+    else if (method_call.method_name().compare("cameraOpen") == 0)
+    {
+      int index = 0;
+      auto flIndex = arguments->find(flutter::EncodableValue("index"));
+      if (flIndex != arguments->end())
+      {
+        index = std::get<int>(flIndex->second);
+      }
+
+      bool newCam = true;
+      bool ret = false;
+      for (int i = 0; i < cameras.size(); i++)
+      {
+        if (cameras[i]->capIndex == index)
+        {
+          newCam = false;
+          if (!cameras[i]->cap->isOpened())
+          {
+            cameras[i]->cap->open(index);
+          }
+
+          ret = true;
+          break;
+        }
+      }
+
+      if (newCam)
+      {
+        OpenCVCamera *c = new OpenCVCamera(index, uvcTexture.get(), textureRegistrar);
+        c->open();
+        cameras.push_back(c);
+        ret = c->cap->isOpened();
+      }
+
+      result->Success(flutter::EncodableValue(ret));
+    }
+    else if (method_call.method_name().compare("cameraConfig") == 0)
+    {
+      int index = 0;
+      auto flIndex = arguments->find(flutter::EncodableValue("index"));
+      if (flIndex != arguments->end())
+      {
+        index = std::get<int>(flIndex->second);
+      }
+
+      bool start = false;
+      auto flStart = arguments->find(flutter::EncodableValue("start"));
+      if (flStart != arguments->end())
+      {
+        start = std::get<bool>(flStart->second);
+      }
+
+      bool ret = false;
+      for (int i = 0; i < cameras.size(); i++)
+      {
+        if (cameras[i]->capIndex == index)
+        {
+          if (start)
+          {
+            cameras[i]->start();
+          }
+          else
+          {
+            cameras[i]->stop();
+          }
+
+          ret = true;
+          break;
+        }
+      }
+      result->Success(flutter::EncodableValue(ret));
     }
     else if (method_call.method_name().compare("_float2uint8") == 0)
     {
