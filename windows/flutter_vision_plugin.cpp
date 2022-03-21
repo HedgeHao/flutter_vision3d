@@ -12,12 +12,18 @@
 #include <sstream>
 #include <thread>
 
+#include "include/flutter_vision/pipeline/pipeline.h"
+// #include "include/flutter_vision/pipeline/tf_pipeline.h"
+#include "include/flutter_vision/texture.h"
 #include "include/flutter_vision/rgb_texture.hpp"
 #include "include/flutter_vision/depth_texture.hpp"
 #include "include/flutter_vision/ir_texture.hpp"
+#include "include/flutter_vision/uvc_texture.hpp"
 #include "include/flutter_vision/openni2_wrapper.hpp"
 
 #include "include/flutter_vision/opengl/opengl.h"
+
+#define PIPELINE_INDEX_TFLITE 8
 
 namespace
 {
@@ -28,6 +34,10 @@ namespace
     flutter::MethodChannel<flutter::EncodableValue> *flChannel;
     OpenNi2Wrapper *ni2 = new OpenNi2Wrapper();
     OpenGLFL *glfl;
+
+    // TfPipeline *tfPipeline;
+    // std::vector<TFLiteModel *> models{};
+    std::vector<OpenCVCamera *> cameras{};
 
     static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);
 
@@ -44,6 +54,7 @@ namespace
     std::unique_ptr<RgbTexture> rgbTexture;
     std::unique_ptr<DepthTexture> depthTexture;
     std::unique_ptr<IrTexture> irTexture;
+    std::unique_ptr<UvcTexture> uvcTexture;
   };
 
   // static
@@ -77,9 +88,10 @@ namespace
     rgbTexture = std::make_unique<RgbTexture>(textureRegistrar);
     depthTexture = std::make_unique<DepthTexture>(textureRegistrar);
     irTexture = std::make_unique<IrTexture>(textureRegistrar);
+    uvcTexture = std::make_unique<UvcTexture>(textureRegistrar);
     glfl = new OpenGLFL(textureRegistrar);
 
-    ni2->registerFlContext(rgbTexture.get(), depthTexture.get(), irTexture.get(), glfl);
+    ni2->registerFlContext(textureRegistrar, rgbTexture.get(), depthTexture.get(), irTexture.get(), glfl);
 
     rgbTexture->stream = &ni2->vsColor;
     depthTexture->stream = &ni2->vsDepth;
@@ -115,6 +127,10 @@ namespace
       else if (index == VideoIndex::IR)
       {
         ret = irTexture->textureId;
+      }
+      else if (index == VideoIndex::Camera2D)
+      {
+        ret = uvcTexture->textureId;
       }
       else if (index == VideoIndex::OPENGL)
       {
@@ -226,6 +242,7 @@ namespace
         height = std::get<int>(heightIt->second);
       }
 
+      // TODO: [Refactor] use Texture class
       if (videoIndex == VideoIndex::RGB)
       {
         rgbTexture->videoWidth = width;
@@ -243,6 +260,12 @@ namespace
         irTexture->videoWidth = width;
         irTexture->videoHeight = height;
         irTexture->buffer.resize(width * height * 4);
+      }
+      else if (videoIndex == VideoIndex::IR)
+      {
+        uvcTexture->videoWidth = width;
+        uvcTexture->videoHeight = height;
+        uvcTexture->buffer.resize(width * height * 4);
       }
 
       result->Success(flutter::EncodableValue(nullptr));
@@ -300,15 +323,219 @@ namespace
 
       result->Success(flutter::EncodableValue(nullptr));
     }
+    else if (method_call.method_name().compare("pipelineAdd") == 0)
+    {
+      int index = -1;
+      auto flIndex = arguments->find(flutter::EncodableValue("index"));
+      if (flIndex != arguments->end())
+      {
+        index = std::get<int>(flIndex->second);
+      }
+
+      int funcIndex = -1;
+      auto flFuncIndex = arguments->find(flutter::EncodableValue("funcIndex"));
+      if (flFuncIndex != arguments->end())
+      {
+        funcIndex = std::get<int>(flFuncIndex->second);
+      }
+
+      int len = 0;
+      auto flLen = arguments->find(flutter::EncodableValue("len"));
+      if (flLen != arguments->end())
+      {
+        len = std::get<int>(flLen->second);
+      }
+
+      std::vector<uint8_t> params{};
+      if (len > 0)
+      {
+        auto flParams = arguments->find(flutter::EncodableValue("params"));
+        if (flParams != arguments->end())
+        {
+          params = std::get<std::vector<uint8_t>>(flParams->second);
+        }
+      }
+
+      int insertAt = -1;
+      auto flAt = arguments->find(flutter::EncodableValue("at"));
+      if (flAt != arguments->end())
+      {
+        insertAt = std::get<int>(flAt->second);
+      }
+
+      if (index == VideoIndex::RGB)
+      {
+        rgbTexture->pipeline->add(funcIndex, params, len, insertAt);
+      }
+      else if (index == VideoIndex::Depth)
+      {
+        depthTexture->pipeline->add(funcIndex, params, len, insertAt);
+      }
+      else if (index == VideoIndex::IR)
+      {
+        irTexture->pipeline->add(funcIndex, params, len, insertAt);
+      }
+      else if (index == VideoIndex::Camera2D)
+      {
+        uvcTexture->pipeline->add(funcIndex, params, len, insertAt);
+      }
+      else if (index == PIPELINE_INDEX_TFLITE)
+      {
+        // self->tfPipeline->add(funcIndex, params, len, insertAt);
+      }
+      else
+      {
+        return;
+      }
+
+      result->Success(flutter::EncodableValue(nullptr));
+    }
+    else if (method_call.method_name().compare("pipelineClear") == 0)
+    {
+      int index = -1;
+      auto flIndex = arguments->find(flutter::EncodableValue("index"));
+      if (flIndex != arguments->end())
+      {
+        index = std::get<int>(flIndex->second);
+      }
+
+      if (index == VideoIndex::RGB)
+      {
+        rgbTexture->pipeline->clear();
+      }
+      else if (index == VideoIndex::Depth)
+      {
+        depthTexture->pipeline->clear();
+      }
+      else if (index == VideoIndex::IR)
+      {
+        irTexture->pipeline->clear();
+      }
+      else if (index == VideoIndex::Camera2D)
+      {
+        uvcTexture->pipeline->clear();
+      }
+      else if (index == PIPELINE_INDEX_TFLITE)
+      {
+      }
+      else
+      {
+        return;
+      }
+
+      result->Success(flutter::EncodableValue(nullptr));
+    }
+    else if (method_call.method_name().compare("cameraOpen") == 0)
+    {
+      int index = 0;
+      auto flIndex = arguments->find(flutter::EncodableValue("index"));
+      if (flIndex != arguments->end())
+      {
+        index = std::get<int>(flIndex->second);
+      }
+
+      bool newCam = true;
+      bool ret = false;
+      for (int i = 0; i < cameras.size(); i++)
+      {
+        if (cameras[i]->capIndex == index)
+        {
+          newCam = false;
+          if (!cameras[i]->cap->isOpened())
+          {
+            cameras[i]->cap->open(index);
+          }
+
+          ret = true;
+          break;
+        }
+      }
+
+      if (newCam)
+      {
+        OpenCVCamera *c = new OpenCVCamera(index, uvcTexture.get(), textureRegistrar);
+        c->open();
+        cameras.push_back(c);
+        ret = c->cap->isOpened();
+      }
+
+      result->Success(flutter::EncodableValue(ret));
+    }
+    else if (method_call.method_name().compare("cameraConfig") == 0)
+    {
+      int index = 0;
+      auto flIndex = arguments->find(flutter::EncodableValue("index"));
+      if (flIndex != arguments->end())
+      {
+        index = std::get<int>(flIndex->second);
+      }
+
+      bool start = false;
+      auto flStart = arguments->find(flutter::EncodableValue("start"));
+      if (flStart != arguments->end())
+      {
+        start = std::get<bool>(flStart->second);
+      }
+
+      bool ret = false;
+      for (int i = 0; i < cameras.size(); i++)
+      {
+        if (cameras[i]->capIndex == index)
+        {
+          if (start)
+          {
+            cameras[i]->start();
+          }
+          else
+          {
+            cameras[i]->stop();
+          }
+
+          ret = true;
+          break;
+        }
+      }
+      result->Success(flutter::EncodableValue(ret));
+    }
+    else if (method_call.method_name().compare("_float2uint8") == 0)
+    {
+      float v = 0.0f;
+      auto flV = arguments->find(flutter::EncodableValue("value"));
+      if (flV != arguments->end())
+      {
+        v = std::get<double>(flV->second);
+      }
+
+      flutter::EncodableList fl = flutter::EncodableList();
+      uint8_t *bytes = reinterpret_cast<uint8_t *>(&v);
+      for (int i = 0; i < 4; i++)
+      {
+        fl.push_back(flutter::EncodableValue(*(bytes + i)));
+      }
+      result->Success(fl);
+    }
     else if (method_call.method_name().compare("test") == 0)
     {
+      // cv::Mat b(1280, 720, CV_8UC4, cv::Scalar(255, 0, 0, 255));
+      cv::Mat b = cv::imread("C:/Users/000279/Desktop/dog.jpg", cv::IMREAD_COLOR);
+      cv::cvtColor(b, b, cv::COLOR_BGR2RGB);
+      cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
+      cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
+
+      rgbTexture->pipeline->run(b, textureRegistrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer);
+      rgbTexture->setPixelBuffer();
+      irTexture->pipeline->run(g, textureRegistrar, irTexture->textureId, irTexture->videoWidth, irTexture->videoHeight, irTexture->buffer);
+      irTexture->setPixelBuffer();
+      depthTexture->pipeline->run(r, textureRegistrar, depthTexture->textureId, depthTexture->videoWidth, depthTexture->videoHeight, depthTexture->buffer);
+      depthTexture->setPixelBuffer();
+
       // rgbTexture->genPixels();
       // depthTexture->genPixels();
       // irTexture->genPixels();
 
       // ni2->test();
 
-      glfl->render();
+      // glfl->render();
       // glfl->test();
 
       result->Success(flutter::EncodableValue(true));

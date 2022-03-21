@@ -199,7 +199,7 @@ class _MyAppState extends State<MyApp> {
                       onPointerUp: updateMouseClick,
                       onPointerMove: updateMousePosition,
                       onPointerSignal: updateMouseWheel,
-                      child: Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 720, height: 540, child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
+                      child: Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 540, height: 405, child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
               Text(debugText, style: const TextStyle(fontSize: 30)),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 TextButton(
@@ -214,7 +214,7 @@ class _MyAppState extends State<MyApp> {
 
                       LipsPipeline rgbPipeline = LipsPipeline(1);
                       await rgbPipeline.clear();
-                      await rgbPipeline.crop(80, 560, 0, 480);
+                      // await rgbPipeline.crop(80, 560, 0, 480);
                       await rgbPipeline.cvtColor(0);
                       await rgbPipeline.show();
                       await rgbPipeline.resize(28, 28);
@@ -235,9 +235,14 @@ class _MyAppState extends State<MyApp> {
                       await irPipeline.cvtColor(9); // COLOR_GRAY2BGRA
                       await irPipeline.show();
 
-                      LipsPipeline tfPipeline = LipsPipeline(8);
-                      await tfPipeline.clear();
-                      await tfPipeline.setInputTensorData(LipsPipeline.IR_FRAME, 0, LipsPipeline.DATATYPE_FLOAT);
+                      // LipsPipeline tfPipeline = LipsPipeline(8);
+                      // await tfPipeline.clear();
+                      // await tfPipeline.setInputTensorData(LipsPipeline.IR_FRAME, 0, LipsPipeline.DATATYPE_FLOAT);
+
+                      // LipsPipeline uvcPipeline = LipsPipeline(16);
+                      // await uvcPipeline.clear();
+                      // await uvcPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+                      // await uvcPipeline.show();
 
                       LipsPipeline uvcPipeline = LipsPipeline(16);
                       await uvcPipeline.clear();

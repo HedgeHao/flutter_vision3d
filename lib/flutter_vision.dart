@@ -223,7 +223,8 @@ class LipsPipeline {
   }
 
   Future<void> convertTo(int mode, double alpha) async {
-    Uint8List alphaBytes = await FlutterVision._channel.invokeMethod("_float2uint8", {'value': alpha});
+    List<Object?> list = await FlutterVision._channel.invokeMethod("_float2uint8", {'value': alpha});
+    Uint8List alphaBytes = Uint8List.fromList(list.map((e) => e as int).toList());
 
     await FlutterVision._channel.invokeMethod('pipelineAdd', {
       'index': index,
@@ -239,7 +240,7 @@ class LipsPipeline {
       'funcIndex': FUNC_APPLY_COLOR_MAP,
       'params': Uint8List.fromList([colorMap]),
       'len': 1,
-      'at': at
+      'at': at ?? -1
     });
   }
 
@@ -249,7 +250,7 @@ class LipsPipeline {
       'funcIndex': FUNC_RESIZE,
       'params': Uint8List.fromList([(width >> 8) & 0xff, width & 0xff, (height >> 8) & 0xff, height & 0xff, mode ?? OpenCV.INTER_NEAREST]),
       'len': 5,
-      'at': at
+      'at': at ?? -1
     });
   }
 
@@ -259,7 +260,7 @@ class LipsPipeline {
       'funcIndex': FUNC_CROP,
       'params': Uint8List.fromList([xStart >> 8, xStart & 0xff, xEnd >> 8, xEnd & 0xff, yStart >> 8, yStart & 0xff, yEnd >> 8, yEnd & 0xff]),
       'len': 8,
-      'at': at
+      'at': at ?? -1
     });
   }
 
@@ -274,7 +275,7 @@ class LipsPipeline {
       'funcIndex': FUNC_CV_RECTANGLE,
       'params': Uint8List.fromList([...x1f, ...y1f, ...x2f, ...y2f, r, g, b, alpha ?? 255, thickness ?? 1, lineType ?? OpenCV.LINE_TYPE_LINE_8, shift ?? 0]),
       'len': 23,
-      'at': at,
+      'at': at ?? -1
     });
   }
 
@@ -284,18 +285,12 @@ class LipsPipeline {
       'funcIndex': FUNC_SET_INPUT_TENSOR,
       'params': Uint8List.fromList([frame, tensorIndex, dataType]),
       'len': 3,
-      'at': at
+      'at': at ?? -1
     });
   }
 
   Future<void> inference({int? at}) async {
-    await FlutterVision._channel.invokeMethod('pipelineAdd', {
-      'index': index,
-      'funcIndex': FUNC_INFERENCE,
-      'params': null,
-      'len': 0,
-      'at': at,
-    });
+    await FlutterVision._channel.invokeMethod('pipelineAdd', {'index': index, 'funcIndex': FUNC_INFERENCE, 'params': null, 'len': 0, 'at': at ?? -1});
   }
 }
 

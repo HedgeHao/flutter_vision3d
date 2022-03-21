@@ -18,6 +18,7 @@ include_directories(
 	"${OpenCV_DIR}/include"
 	"${OPENNI_DIR}/Include"
   "${PROJECT_SOURCE_DIR}/include/"
+  "${PROJECT_SOURCE_DIR}/include/tensorflow"
 )
 
 add_library(${PLUGIN_NAME} SHARED
@@ -39,6 +40,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
   "${OPENNI_DIR}/Lib/OpenNI2.lib"
   ${OpenCV_LIBS}
   opengl32
+  "${PROJECT_SOURCE_DIR}/lib/tensorflowlite_c.lib"
 )
 
 # List of absolute paths to libraries that should be bundled with the plugin
