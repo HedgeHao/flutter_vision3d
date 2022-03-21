@@ -15,6 +15,7 @@ enum VideoIndex
   Depth = 0b10,
   IR = 0b100,
   OPENGL = 0b1000,
+  Camera2D = 0b10000,
 };
 
 class OpenNi2Wrapper : public OpenNI::DeviceConnectedListener,
@@ -61,12 +62,13 @@ public:
     flChannel = c;
   }
 
-  void registerFlContext(RgbTexture *r, DepthTexture *d, IrTexture *i, OpenGLFL *g)
+  void registerFlContext(flutter::TextureRegistrar *re, RgbTexture *r, DepthTexture *d, IrTexture *i, OpenGLFL *g)
   {
     rgbTexture = r;
     depthTexture = d;
     irTexture = i;
     glfl = g;
+    registrar = re;
   }
 
   int init()
@@ -266,6 +268,7 @@ private:
   RgbTexture *rgbTexture;
   DepthTexture *depthTexture;
   IrTexture *irTexture;
+  flutter::TextureRegistrar *registrar;
 
   void colorMap(float dis, float *outputR, float *outputG, float *outputB)
   {
@@ -367,6 +370,8 @@ private:
         if (vsColor.readFrame(&rgbFrame) == STATUS_OK)
         {
           rgbTexture->cvImage = cv::Mat(rgbFrame.getHeight(), rgbFrame.getWidth(), CV_8UC3, (void *)rgbFrame.getData());
+          rgbTexture->pipeline->run(rgbTexture->cvImage, registrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer);
+          rgbTexture->setPixelBuffer();
           rgbNewFrame = true;
         }
       }
@@ -376,6 +381,8 @@ private:
         if (vsDepth.readFrame(&depthFrame) == STATUS_OK)
         {
           depthTexture->cvImage = cv::Mat(depthFrame.getHeight(), depthFrame.getWidth(), CV_16UC1, (void *)depthFrame.getData());
+          depthTexture->pipeline->run(depthTexture->cvImage, registrar, depthTexture->textureId, depthTexture->videoWidth, depthTexture->videoHeight, depthTexture->buffer);
+          depthTexture->setPixelBuffer();
           depthNewFrame = true;
         }
       }
@@ -385,24 +392,18 @@ private:
         if (vsIR.readFrame(&irFrame) == STATUS_OK)
         {
           irTexture->cvImage = cv::Mat(irFrame.getHeight(), irFrame.getWidth(), CV_16UC1, (void *)irFrame.getData());
+          irTexture->pipeline->run(irTexture->cvImage, registrar, irTexture->textureId, irTexture->videoWidth, irTexture->videoHeight, irTexture->buffer);
+          irTexture->setPixelBuffer();
           irNewFrame = true;
         }
       }
 
       if (enableRgb && depthNewFrame && rgbNewFrame)
       {
-        niComputeCloud(vsDepth, (const openni::DepthPixel *)depthFrame.getData(), (const openni::RGB888Pixel *)rgbFrame.getData(), glfl->modelPointCloud->vertices, glfl->modelPointCloud->colors, glfl->modelPointCloud->colorsMap, &glfl->modelPointCloud->vertexPoints);
-        // glfl->render();
+        // niComputeCloud(vsDepth, (const openni::DepthPixel *)depthFrame.getData(), (const openni::RGB888Pixel *)rgbFrame.getData(), glfl->modelPointCloud->vertices, glfl->modelPointCloud->colors, glfl->modelPointCloud->colorsMap, &glfl->modelPointCloud->vertexPoints);
       }
 
-      // printf("Debug:%d, %d, %d ,%d ,%d ,%d\n", enableRgb, rgbNewFrame, enableDepth, depthNewFrame, enableIr, irNewFrame);
-
-      if (enableRgb && rgbNewFrame)
-        rgbTexture->updateFrame();
-      if (enableDepth && depthNewFrame)
-        depthTexture->updateFrame();
-      if (enableIr && irNewFrame)
-        irTexture->updateFrame();
+      // TODO: onFrame callback
     }
   }
 };
