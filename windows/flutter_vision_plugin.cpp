@@ -25,6 +25,8 @@
 
 #define PIPELINE_INDEX_TFLITE 8
 
+cv::Mat emptyMat = cv::Mat::zeros(3, 3, CV_64F);
+
 namespace
 {
 
@@ -513,6 +515,52 @@ namespace
         fl.push_back(flutter::EncodableValue(*(bytes + i)));
       }
       result->Success(fl);
+    }
+    else if (method_call.method_name().compare("screenshot") == 0)
+    {
+      int index = 0;
+      auto flIndex = arguments->find(flutter::EncodableValue("index"));
+      if (flIndex != arguments->end())
+      {
+        index = std::get<int>(flIndex->second);
+      }
+
+      std::string path;
+      auto flPath = arguments->find(flutter::EncodableValue("path"));
+      if (flPath != arguments->end())
+      {
+        path = std::get<std::string>(flPath->second);
+      }
+
+      bool ret = false;
+      cv::Mat frame;
+      if (index == VideoIndex::RGB)
+      {
+        rgbTexture->cvImage.copyTo(frame);
+      }
+      else if (index == VideoIndex::Depth)
+      {
+        depthTexture->cvImage.copyTo(frame);
+      }
+      else if (index == VideoIndex::IR)
+      {
+        irTexture->cvImage.copyTo(frame);
+      }
+      else if (index == VideoIndex::Camera2D)
+      {
+        uvcTexture->cvImage.copyTo(frame);
+      }
+      else
+      {
+        emptyMat.copyTo(frame);
+      }
+
+      if (!frame.empty())
+      {
+        ret = cv::imwrite(path, frame);
+      }
+
+      result->Success(flutter::EncodableValue(ret));
     }
     else if (method_call.method_name().compare("test") == 0)
     {
