@@ -42,6 +42,6 @@ target_link_libraries( ${PLUGIN_NAME} PRIVATE tensorflowlite)
 
 # List of absolute paths to libraries that should be bundled with the plugin
 set(flutter_vision_bundled_libraries
-  "${PROJECT_SOURCE_DIR}/lib/"
+  "${PROJECT_SOURCE_DIR}/lib/libtensorflowlite.so"
   PARENT_SCOPE
 )

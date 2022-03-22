@@ -136,6 +136,10 @@ class FlutterVision {
     return await _channel.invokeMethod('cameraConfig', {'index': index, 'start': start});
   }
 
+  static Future<bool> videoScreenshot(int index, String path) async {
+    return await _channel.invokeMethod('screenshot', {'index': index, 'path': path});
+  }
+
   static Future<void> test() async {
     await _channel.invokeMethod('test');
     print('');

@@ -239,11 +239,6 @@ class _MyAppState extends State<MyApp> {
                       // await tfPipeline.clear();
                       // await tfPipeline.setInputTensorData(LipsPipeline.IR_FRAME, 0, LipsPipeline.DATATYPE_FLOAT);
 
-                      // LipsPipeline uvcPipeline = LipsPipeline(16);
-                      // await uvcPipeline.clear();
-                      // await uvcPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
-                      // await uvcPipeline.show();
-
                       LipsPipeline uvcPipeline = LipsPipeline(16);
                       await uvcPipeline.clear();
                       await uvcPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
