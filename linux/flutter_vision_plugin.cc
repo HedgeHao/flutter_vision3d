@@ -19,6 +19,9 @@
 #define FLUTTER_VISION_PLUGIN(obj)                                     \
   (G_TYPE_CHECK_INSTANCE_CAST((obj), flutter_vision_plugin_get_type(), \
                               FlutterVisionPlugin))
+
+cv::Mat emptyMat = cv::Mat::zeros(3, 3, CV_64F);
+
 struct _FlutterVisionPlugin
 {
   GObject parent_instance;
@@ -183,6 +186,13 @@ static void flutter_vision_plugin_handle_method_call(
     else if (index == VideoIndex::IR)
     {
       IrTextureClass *c = IR_TEXTURE_GET_CLASS(self->irTexture);
+      c->video_width = width;
+      c->video_height = height;
+      c->buffer.resize(width * height * 4);
+    }
+    else if (index == VideoIndex::Camera2D)
+    {
+      UvcTextureClass *c = UVC_TEXTURE_GET_CLASS(self->uvcTexture);
       c->video_width = width;
       c->video_height = height;
       c->buffer.resize(width * height * 4);
@@ -406,7 +416,45 @@ static void flutter_vision_plugin_handle_method_call(
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(result)));
   }
+  else if (strcmp(method, "screenshot") == 0)
+  {
+    // TODO: frame might be alter by pipeline. Should use better mechanism to trigger this function
 
+    FlValue *flIndex = fl_value_lookup_string(args, "index");
+    int index = fl_value_get_int(flIndex);
+    FlValue *flPath = fl_value_lookup_string(args, "path");
+    const char *path = fl_value_get_string(flPath);
+
+    bool result = false;
+    cv::Mat frame;
+    if (index == VideoIndex::RGB)
+    {
+      RGB_TEXTURE_GET_CLASS(self->rgbTexture)->cvImage.copyTo(frame);
+    }
+    else if (index == VideoIndex::Depth)
+    {
+      DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->cvImage.copyTo(frame);
+    }
+    else if (index == VideoIndex::IR)
+    {
+      IR_TEXTURE_GET_CLASS(self->irTexture)->cvImage.copyTo(frame);
+    }
+    else if (index == VideoIndex::Camera2D)
+    {
+      UVC_TEXTURE_GET_CLASS(self->uvcTexture)->cvImage.copyTo(frame);
+    }
+    else
+    {
+      emptyMat.copyTo(frame);
+    }
+
+    if (!frame.empty())
+    {
+      result = cv::imwrite(path, frame);
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(result)));
+  }
   else if (strcmp(method, "test") == 0)
   {
     // cv::Mat b(1280, 720, CV_8UC4, cv::Scalar(255, 0, 0, 255));

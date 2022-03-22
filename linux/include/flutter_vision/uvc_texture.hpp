@@ -70,7 +70,6 @@ public:
     bool open()
     {
         cap = new cv::VideoCapture(capIndex);
-        printf("Debug:%d\n", cap->isOpened());
         return cap->isOpened();
     }
 

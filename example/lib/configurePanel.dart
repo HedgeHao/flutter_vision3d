@@ -179,6 +179,11 @@ class Camera2dConfigure extends StatelessWidget {
               await FlutterVision.cameraConfig(int.parse(ctl.text), false);
             },
             child: const Text('Stop')),
+        TextButton(
+            onPressed: () async {
+              await FlutterVision.videoScreenshot(16, 'test.png');
+            },
+            child: const Text('Shot')),
         const Spacer(),
       ],
     );
