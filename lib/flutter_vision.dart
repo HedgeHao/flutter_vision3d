@@ -156,6 +156,7 @@ const FUNC_RESIZE = 6;
 const FUNC_CROP = 7;
 const FUNC_IMREAD = 8;
 const FUNC_CV_RECTANGLE = 9;
+const FUNC_CV_ROTATE = 10;
 
 const FUNC_SET_INPUT_TENSOR = 0;
 const FUNC_INFERENCE = 1;
@@ -275,6 +276,16 @@ class LipsPipeline {
       'funcIndex': FUNC_CV_RECTANGLE,
       'params': Uint8List.fromList([...x1f, ...y1f, ...x2f, ...y2f, r, g, b, alpha ?? 255, thickness ?? 1, lineType ?? OpenCV.LINE_TYPE_LINE_8, shift ?? 0]),
       'len': 23,
+      'at': at ?? -1
+    });
+  }
+
+  Future<void> rotate(int rotateCode, {int? at}) async {
+    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+      'index': index,
+      'funcIndex': FUNC_CV_ROTATE,
+      'params': Uint8List.fromList([rotateCode]),
+      'len': 1,
       'at': at ?? -1
     });
   }

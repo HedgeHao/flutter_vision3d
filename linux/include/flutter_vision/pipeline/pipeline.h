@@ -128,6 +128,11 @@ void PipelineFuncOpencvRectangle(cv::Mat &img, std::vector<uint8_t> params, FlTe
     cv::rectangle(img, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(b, g, r, alpha), thickness, lineType, shift);
 }
 
+void PipelineFuncOpencvRotate(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf)
+{
+    cv::rotate(img, img, params[0]);
+}
+
 const FuncDef pipelineFuncs[] = {
     {0, "test", PipelineFuncTest},
     {1, "cvtColor", PipelineFuncOpencvCvtColor},
@@ -139,6 +144,7 @@ const FuncDef pipelineFuncs[] = {
     {7, "crop", PipelineFuncCrop},
     {8, "imread", PipelineFuncOpencvImread},
     {9, "cvRectangle", PipelineFuncOpencvRectangle},
+    {10, "rotate", PipelineFuncOpencvRotate},
 };
 
 class Pipeline
