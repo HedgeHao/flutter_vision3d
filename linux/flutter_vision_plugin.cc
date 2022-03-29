@@ -418,42 +418,38 @@ static void flutter_vision_plugin_handle_method_call(
   }
   else if (strcmp(method, "screenshot") == 0)
   {
-    // TODO: frame might be alter by pipeline. Should use better mechanism to trigger this function
+    // TODO: this function should be one of the pipeline function
 
     FlValue *flIndex = fl_value_lookup_string(args, "index");
     int index = fl_value_get_int(flIndex);
     FlValue *flPath = fl_value_lookup_string(args, "path");
     const char *path = fl_value_get_string(flPath);
+    FlValue *flCvtCode = fl_value_lookup_string(args, "cvtCode");
+    int cvtCode = fl_value_get_int(flCvtCode);
 
     bool result = false;
     cv::Mat frame;
     if (index == VideoIndex::RGB)
     {
-      RGB_TEXTURE_GET_CLASS(self->rgbTexture)->cvImage.copyTo(frame);
+      RGB_TEXTURE_GET_CLASS(self->rgbTexture)->pipeline->screenshot(path, cvtCode);
     }
     else if (index == VideoIndex::Depth)
     {
-      DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->cvImage.copyTo(frame);
+      DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->pipeline->screenshot(path, cvtCode);
     }
     else if (index == VideoIndex::IR)
     {
-      IR_TEXTURE_GET_CLASS(self->irTexture)->cvImage.copyTo(frame);
+      IR_TEXTURE_GET_CLASS(self->irTexture)->pipeline->screenshot(path, cvtCode);
     }
     else if (index == VideoIndex::Camera2D)
     {
-      UVC_TEXTURE_GET_CLASS(self->uvcTexture)->cvImage.copyTo(frame);
+      UVC_TEXTURE_GET_CLASS(self->uvcTexture)->pipeline->screenshot(path, cvtCode);
     }
     else
     {
-      emptyMat.copyTo(frame);
     }
 
-    if (!frame.empty())
-    {
-      result = cv::imwrite(path, frame);
-    }
-
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(result)));
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
   }
   else if (strcmp(method, "test") == 0)
   {
@@ -469,9 +465,9 @@ static void flutter_vision_plugin_handle_method_call(
 
     if (self->models.size())
     {
-      cv::Mat img = cv::imread("/home/hedgehao/test/cpp/tflite/images/dog.jpg");
-      img.convertTo(img, CV_8UC3);
-      cv::resize(img, img, cv::Size(320, 320), cv::INTER_CUBIC);
+      cv::Mat img = cv::imread("/home/hedgehao/test/BlazeFace-TFLite-Inference/img/image.jpg");
+      img.convertTo(img, CV_32FC2, 1.0f / 255.0f);
+      cv::resize(img, img, cv::Size(128, 128), cv::INTER_CUBIC);
       self->tfPipeline->run(img, g, b, *self->models[0]);
     }
 

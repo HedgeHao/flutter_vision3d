@@ -74,7 +74,7 @@ public:
     void setInput(unsigned int tensorIndex, cv::Mat &img, size_t size)
     {
         // TODO: check out which way is better
-        memcpy(interpreter->typed_input_tensor<T>(tensorIndex), img.data, size);
+        memcpy(interpreter->typed_input_tensor<T>(tensorIndex), img.data, size * sizeof(T));
 
         // auto tensor = interpreter->typed_input_tensor<T>(tensorIndex);
         // unsigned int index = 0;

@@ -149,6 +149,10 @@ const FuncDef pipelineFuncs[] = {
 
 class Pipeline
 {
+    bool doScreenshot = false;
+    std::string screenshotSavePath;
+    int screenshotCvtColor = -1;
+
 public:
     void add(unsigned int index, const uint8_t *params, unsigned int len, int insertAt = -1)
     {
@@ -169,6 +173,30 @@ public:
         {
             funcs[i].func(img, funcs[i].params, registrar, texture, texture_width, texture_height, pixelBuf);
         }
+        if (doScreenshot)
+        {
+            if (!img.empty())
+            {
+                if (screenshotCvtColor > 0)
+                {
+                    cv::Mat temp;
+                    cv::cvtColor(img, temp, screenshotCvtColor);
+                    cv::imwrite(screenshotSavePath.c_str(), temp);
+                }
+                else
+                {
+                    cv::imwrite(screenshotSavePath.c_str(), img);
+                }
+            }
+            doScreenshot = false;
+        }
+    }
+
+    void screenshot(const char *filePath, int convert = -1)
+    {
+        doScreenshot = true;
+        screenshotSavePath = std::string(filePath);
+        screenshotCvtColor = convert;
     }
 
     void clear()

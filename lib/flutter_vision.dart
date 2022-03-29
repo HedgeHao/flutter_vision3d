@@ -136,8 +136,8 @@ class FlutterVision {
     return await _channel.invokeMethod('cameraConfig', {'index': index, 'start': start});
   }
 
-  static Future<bool> videoScreenshot(int index, String path) async {
-    return await _channel.invokeMethod('screenshot', {'index': index, 'path': path});
+  static Future<bool> videoScreenshot(int index, String path, {int? cvtCode}) async {
+    return await _channel.invokeMethod('screenshot', {'index': index, 'path': path, 'cvtCode': cvtCode ?? -1});
   }
 
   static Future<void> test() async {
@@ -166,6 +166,7 @@ class LipsPipeline {
   static const RGB_FRAME = 0;
   static const DEPTH_FRAME = 1;
   static const IR_FRAME = 2;
+  static const UVC_FRAME = 3;
 
   static const DATATYPE_UINT8 = 0;
   static const DATATYPE_FLOAT = 1;

@@ -9,7 +9,6 @@ import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision_example/configurePanel.dart';
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter_vision/constants.dart';
-import 'package:flutter_vision/algorithm.dart';
 
 const texture_width = 240.0;
 const texture_height = 180.0;
@@ -21,6 +20,7 @@ enum MOUSEBUTTON {
   unknown,
   middle,
 }
+
 void main() {
   runApp(const MyApp());
   if (!Platform.isWindows) {
@@ -245,6 +245,8 @@ class _MyAppState extends State<MyApp> {
                       await uvcPipeline.show();
 
                       await FlutterVision.test();
+
+                      await FlutterVision.videoScreenshot(16, '/home/hedgehao/Desktop/test.jpg');
 
                       print('');
                     },
