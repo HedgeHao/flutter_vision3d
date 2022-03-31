@@ -454,7 +454,7 @@ static void flutter_vision_plugin_handle_method_call(
   else if (strcmp(method, "test") == 0)
   {
     // cv::Mat b(1280, 720, CV_8UC4, cv::Scalar(255, 0, 0, 255));
-    cv::Mat b = cv::imread("/home/hedgehao/test/cpp/tflite/images/dog.jpg", cv::IMREAD_COLOR);
+    cv::Mat b = cv::imread("/home/hedgehao/test/BlazeFace-TFLite-Inference/img/image.jpg", cv::IMREAD_COLOR);
     cv::cvtColor(b, b, cv::COLOR_BGR2RGB);
     cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
     cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
@@ -465,9 +465,11 @@ static void flutter_vision_plugin_handle_method_call(
 
     if (self->models.size())
     {
+      printf("TF Test\n");
       cv::Mat img = cv::imread("/home/hedgehao/test/BlazeFace-TFLite-Inference/img/image.jpg");
+      img = img(cv::Range(0, 448), cv::Range(0, 448));
       img.convertTo(img, CV_32FC2, 1.0f / 255.0f);
-      cv::resize(img, img, cv::Size(128, 128), cv::INTER_CUBIC);
+      cv::resize(img, img, cv::Size(128, 128));
       self->tfPipeline->run(img, g, b, *self->models[0]);
     }
 

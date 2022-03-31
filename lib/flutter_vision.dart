@@ -224,15 +224,18 @@ class LipsPipeline {
     });
   }
 
-  Future<void> convertTo(int mode, double alpha) async {
-    List<Object?> list = await FlutterVision._channel.invokeMethod("_float2uint8", {'value': alpha});
-    Uint8List alphaBytes = Uint8List.fromList(list.map((e) => e as int).toList());
+  Future<void> convertTo(int mode, double scale, {double? shift}) async {
+    List<Object?> scaleList = await FlutterVision._channel.invokeMethod("_float2uint8", {'value': scale});
+    Uint8List scaleBytes = Uint8List.fromList(scaleList.map((e) => e as int).toList());
+
+    List<Object?> shiftList = await FlutterVision._channel.invokeMethod("_float2uint8", {'value': shift ?? 0});
+    Uint8List shiftBytes = Uint8List.fromList(shiftList.map((e) => e as int).toList());
 
     await FlutterVision._channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_CONVERTO,
-      'params': Uint8List.fromList([mode, ...alphaBytes]),
-      'len': 5
+      'params': Uint8List.fromList([mode, ...scaleBytes, ...shiftBytes]),
+      'len': 9
     });
   }
 

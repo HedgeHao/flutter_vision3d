@@ -74,8 +74,9 @@ void PipelineFuncShow(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegist
 void PipelineFuncOpencvConvertTo(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf)
 {
     // printf("ConvertTo:Param:%d\n", params[0]);
-    float alpha = *reinterpret_cast<float *>(&params[1]);
-    img.convertTo(img, params[0], alpha);
+    float scale = *reinterpret_cast<float *>(&params[1]);
+    float shift = *reinterpret_cast<float *>(&params[5]);
+    img.convertTo(img, params[0], scale, shift);
 }
 
 void PipelineFuncOpencvApplyColorMap(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf)
