@@ -216,10 +216,11 @@ class _MyAppState extends State<MyApp> {
                       await rgbPipeline.clear();
                       // await rgbPipeline.crop(80, 560, 0, 480);
                       await rgbPipeline.cvtColor(0);
+                      // await rgbPipeline.rotate(OpenCV.ROTATE_90_CLOCKWISE);
                       await rgbPipeline.show();
                       await rgbPipeline.resize(28, 28);
                       await rgbPipeline.cvtColor(7);
-                      await rgbPipeline.convertTo(3, 255.0 / 1024.0);
+                      await rgbPipeline.convertTo(3, 255.0 / 1024.0, shift: 0);
 
                       LipsPipeline depthPipeline = LipsPipeline(2);
                       await depthPipeline.clear();

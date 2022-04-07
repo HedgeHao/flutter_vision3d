@@ -532,32 +532,30 @@ namespace
         path = std::get<std::string>(flPath->second);
       }
 
+      int cvtCode = 0;
+      auto flCvtCode = arguments->find(flutter::EncodableValue("cvtCode"));
+      if (flCvtCode != arguments->end())
+      {
+        cvtCode = std::get<int>(flCvtCode->second);
+      }
+
       bool ret = false;
       cv::Mat frame;
       if (index == VideoIndex::RGB)
       {
-        rgbTexture->cvImage.copyTo(frame);
+        rgbTexture->pipeline->screenshot(path.c_str(), cvtCode);
       }
       else if (index == VideoIndex::Depth)
       {
-        depthTexture->cvImage.copyTo(frame);
+        depthTexture->pipeline->screenshot(path.c_str(), cvtCode);
       }
       else if (index == VideoIndex::IR)
       {
-        irTexture->cvImage.copyTo(frame);
+        irTexture->pipeline->screenshot(path.c_str(), cvtCode);
       }
       else if (index == VideoIndex::Camera2D)
       {
-        uvcTexture->cvImage.copyTo(frame);
-      }
-      else
-      {
-        emptyMat.copyTo(frame);
-      }
-
-      if (!frame.empty())
-      {
-        ret = cv::imwrite(path, frame);
+        uvcTexture->pipeline->screenshot(path.c_str(), cvtCode);
       }
 
       result->Success(flutter::EncodableValue(ret));
