@@ -313,6 +313,11 @@ class OpenCV {
   static const COLORMAP_TWILIGHT = 18;
   static const COLORMAP_TWILIGHT_SHIFTED = 19;
   static const COLORMAP_TURBO = 20;
+
+  /* Rotate Code */
+  static const ROTATE_90_CLOCKWISE = 0;
+  static const ROTATE_180 = 1;
+  static const ROTATE_90_COUNTERCLOCKWISE = 2;
 }
 
 const List<String> COCO_CLASSES = [

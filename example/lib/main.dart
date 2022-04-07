@@ -9,7 +9,6 @@ import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision_example/configurePanel.dart';
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter_vision/constants.dart';
-import 'package:flutter_vision/algorithm.dart';
 
 const texture_width = 240.0;
 const texture_height = 180.0;
@@ -21,6 +20,7 @@ enum MOUSEBUTTON {
   unknown,
   middle,
 }
+
 void main() {
   runApp(const MyApp());
   if (!Platform.isWindows) {
@@ -216,10 +216,11 @@ class _MyAppState extends State<MyApp> {
                       await rgbPipeline.clear();
                       // await rgbPipeline.crop(80, 560, 0, 480);
                       await rgbPipeline.cvtColor(0);
+                      // await rgbPipeline.rotate(OpenCV.ROTATE_90_CLOCKWISE);
                       await rgbPipeline.show();
                       await rgbPipeline.resize(28, 28);
                       await rgbPipeline.cvtColor(7);
-                      await rgbPipeline.convertTo(3, 255.0 / 1024.0);
+                      await rgbPipeline.convertTo(3, 255.0 / 1024.0, shift: 0);
 
                       LipsPipeline depthPipeline = LipsPipeline(2);
                       await depthPipeline.clear();
@@ -245,6 +246,8 @@ class _MyAppState extends State<MyApp> {
                       await uvcPipeline.show();
 
                       await FlutterVision.test();
+
+                      await FlutterVision.videoScreenshot(16, '/home/hedgehao/Desktop/test.jpg');
 
                       print('');
                     },

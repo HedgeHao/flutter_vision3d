@@ -66,6 +66,8 @@ public:
         {
             funcs[i].func(rgb, depth, ir, funcs[i].params, model);
         }
+
+        // TODO: need callback after TF invoke
     }
 
     void clear()

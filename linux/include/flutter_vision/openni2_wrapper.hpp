@@ -170,11 +170,11 @@ public:
   void getEnabledVideoModes(FlValueWrapper *ret)
   {
     int enableVideoMode = 0;
-    if (enableRgb)
+    if (niRgbAvailable)
       enableVideoMode += VideoIndex::RGB;
-    if (enableDepth)
+    if (niDepthAvailable)
       enableVideoMode += VideoIndex::Depth;
-    if (enableIr)
+    if (niIrAvailable)
       enableVideoMode += VideoIndex::IR;
     ret->value = fl_value_new_int(enableVideoMode);
   }
@@ -193,17 +193,17 @@ public:
     if ((videoMode & VideoIndex::RGB) > 0 && vsColor.create(*device, SENSOR_COLOR) == STATUS_OK)
     {
       vsColor.setMirroringEnabled(false);
-      enableRgb = true;
+      niRgbAvailable = true;
     }
     if ((videoMode & VideoIndex::Depth) > 0 && vsDepth.create(*device, SENSOR_DEPTH) == STATUS_OK)
     {
       vsDepth.setMirroringEnabled(false);
-      enableDepth = true;
+      niDepthAvailable = true;
     }
     if ((videoMode & VideoIndex::IR) > 0 && vsIR.create(*device, SENSOR_IR) == STATUS_OK)
     {
       vsIR.setMirroringEnabled(false);
-      enableIr = true;
+      niIrAvailable = true;
     }
   }
 
@@ -217,45 +217,51 @@ public:
 
     int isValid = 0;
 
-    if (((index & VideoIndex::RGB) > 0) && enableRgb)
+    if (((index & VideoIndex::RGB) > 0) && niRgbAvailable)
     {
       if (*enable)
       {
         vsColor.start();
         if (vsColor.isValid())
           isValid += VideoIndex::RGB;
+        enableRgb = true;
       }
       else
       {
         vsColor.stop();
+        enableRgb = false;
       }
     }
 
-    if (((index & VideoIndex::Depth) > 0) && enableDepth)
+    if (((index & VideoIndex::Depth) > 0) && niDepthAvailable)
     {
       if (*enable)
       {
         vsDepth.start();
         if (vsDepth.isValid())
           isValid += VideoIndex::Depth;
+        enableDepth = true;
       }
       else
       {
         vsDepth.stop();
+        enableDepth = false;
       }
     }
 
-    if (((index & VideoIndex::IR) > 0) && enableIr)
+    if (((index & VideoIndex::IR) > 0) && niIrAvailable)
     {
       if (*enable)
       {
         vsIR.start();
         if (vsIR.isValid())
           isValid += VideoIndex::IR;
+        enableIr = true;
       }
       else
       {
         vsIR.stop();
+        enableIr = false;
       }
     }
 
@@ -288,6 +294,9 @@ private:
   std::vector<TFLiteModel *> *models;
   TfPipeline *tfPipeline;
 
+  bool niRgbAvailable = false;
+  bool niDepthAvailable = false;
+  bool niIrAvailable = false;
   bool enableRgb = false;
   bool enableDepth = false;
   bool enableIr = false;
@@ -387,7 +396,7 @@ private:
       depthNewFrame = false;
       irNewFrame = false;
 
-      if (enableRgb && vsColor.isValid())
+      if (niRgbAvailable && enableRgb && vsColor.isValid())
       {
         if (vsColor.readFrame(&rgbFrame) == STATUS_OK)
         {
@@ -397,7 +406,7 @@ private:
         }
       }
 
-      if (enableDepth && vsDepth.isValid())
+      if (niDepthAvailable && enableIr && vsDepth.isValid())
       {
         if (vsDepth.readFrame(&depthFrame) == STATUS_OK)
         {
@@ -407,7 +416,7 @@ private:
         }
       }
 
-      if (enableIr && vsDepth.isValid())
+      if (niIrAvailable && enableDepth && vsDepth.isValid())
       {
         if (vsIR.readFrame(&irFrame) == STATUS_OK)
         {
@@ -423,7 +432,7 @@ private:
         tfPipeline->run(rgbCls->cvImage, depthCls->cvImage, irCls->cvImage, *models->at(0));
       }
 
-      if (enableRgb && depthNewFrame && rgbNewFrame)
+      if (niRgbAvailable && depthNewFrame && rgbNewFrame)
       {
         niComputeCloud(vsDepth, (const openni::DepthPixel *)depthFrame.getData(), (const openni::RGB888Pixel *)rgbFrame.getData(), glfl->modelPointCloud->vertices, glfl->modelPointCloud->colors, glfl->modelPointCloud->colorsMap, &glfl->modelPointCloud->vertexPoints);
       }

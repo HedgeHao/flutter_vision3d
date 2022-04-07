@@ -136,8 +136,8 @@ class FlutterVision {
     return await _channel.invokeMethod('cameraConfig', {'index': index, 'start': start});
   }
 
-  static Future<bool> videoScreenshot(int index, String path) async {
-    return await _channel.invokeMethod('screenshot', {'index': index, 'path': path});
+  static Future<bool> videoScreenshot(int index, String path, {int? cvtCode}) async {
+    return await _channel.invokeMethod('screenshot', {'index': index, 'path': path, 'cvtCode': cvtCode ?? -1});
   }
 
   static Future<void> test() async {
@@ -156,6 +156,7 @@ const FUNC_RESIZE = 6;
 const FUNC_CROP = 7;
 const FUNC_IMREAD = 8;
 const FUNC_CV_RECTANGLE = 9;
+const FUNC_CV_ROTATE = 10;
 
 const FUNC_SET_INPUT_TENSOR = 0;
 const FUNC_INFERENCE = 1;
@@ -165,6 +166,7 @@ class LipsPipeline {
   static const RGB_FRAME = 0;
   static const DEPTH_FRAME = 1;
   static const IR_FRAME = 2;
+  static const UVC_FRAME = 3;
 
   static const DATATYPE_UINT8 = 0;
   static const DATATYPE_FLOAT = 1;
@@ -222,15 +224,18 @@ class LipsPipeline {
     });
   }
 
-  Future<void> convertTo(int mode, double alpha) async {
-    List<Object?> list = await FlutterVision._channel.invokeMethod("_float2uint8", {'value': alpha});
-    Uint8List alphaBytes = Uint8List.fromList(list.map((e) => e as int).toList());
+  Future<void> convertTo(int mode, double scale, {double? shift}) async {
+    List<Object?> scaleList = await FlutterVision._channel.invokeMethod("_float2uint8", {'value': scale});
+    Uint8List scaleBytes = Uint8List.fromList(scaleList.map((e) => e as int).toList());
+
+    List<Object?> shiftList = await FlutterVision._channel.invokeMethod("_float2uint8", {'value': shift ?? 0});
+    Uint8List shiftBytes = Uint8List.fromList(shiftList.map((e) => e as int).toList());
 
     await FlutterVision._channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_CONVERTO,
-      'params': Uint8List.fromList([mode, ...alphaBytes]),
-      'len': 5
+      'params': Uint8List.fromList([mode, ...scaleBytes, ...shiftBytes]),
+      'len': 9
     });
   }
 
@@ -275,6 +280,16 @@ class LipsPipeline {
       'funcIndex': FUNC_CV_RECTANGLE,
       'params': Uint8List.fromList([...x1f, ...y1f, ...x2f, ...y2f, r, g, b, alpha ?? 255, thickness ?? 1, lineType ?? OpenCV.LINE_TYPE_LINE_8, shift ?? 0]),
       'len': 23,
+      'at': at ?? -1
+    });
+  }
+
+  Future<void> rotate(int rotateCode, {int? at}) async {
+    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+      'index': index,
+      'funcIndex': FUNC_CV_ROTATE,
+      'params': Uint8List.fromList([rotateCode]),
+      'len': 1,
       'at': at ?? -1
     });
   }

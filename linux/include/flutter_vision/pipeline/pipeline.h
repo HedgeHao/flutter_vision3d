@@ -74,8 +74,9 @@ void PipelineFuncShow(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegist
 void PipelineFuncOpencvConvertTo(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf)
 {
     // printf("ConvertTo:Param:%d\n", params[0]);
-    float alpha = *reinterpret_cast<float *>(&params[1]);
-    img.convertTo(img, params[0], alpha);
+    float scale = *reinterpret_cast<float *>(&params[1]);
+    float shift = *reinterpret_cast<float *>(&params[5]);
+    img.convertTo(img, params[0], scale, shift);
 }
 
 void PipelineFuncOpencvApplyColorMap(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf)
@@ -128,6 +129,11 @@ void PipelineFuncOpencvRectangle(cv::Mat &img, std::vector<uint8_t> params, FlTe
     cv::rectangle(img, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(b, g, r, alpha), thickness, lineType, shift);
 }
 
+void PipelineFuncOpencvRotate(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf)
+{
+    cv::rotate(img, img, params[0]);
+}
+
 const FuncDef pipelineFuncs[] = {
     {0, "test", PipelineFuncTest},
     {1, "cvtColor", PipelineFuncOpencvCvtColor},
@@ -139,10 +145,15 @@ const FuncDef pipelineFuncs[] = {
     {7, "crop", PipelineFuncCrop},
     {8, "imread", PipelineFuncOpencvImread},
     {9, "cvRectangle", PipelineFuncOpencvRectangle},
+    {10, "rotate", PipelineFuncOpencvRotate},
 };
 
 class Pipeline
 {
+    bool doScreenshot = false;
+    std::string screenshotSavePath;
+    int screenshotCvtColor = -1;
+
 public:
     void add(unsigned int index, const uint8_t *params, unsigned int len, int insertAt = -1)
     {
@@ -163,6 +174,30 @@ public:
         {
             funcs[i].func(img, funcs[i].params, registrar, texture, texture_width, texture_height, pixelBuf);
         }
+        if (doScreenshot)
+        {
+            if (!img.empty())
+            {
+                if (screenshotCvtColor > 0)
+                {
+                    cv::Mat temp;
+                    cv::cvtColor(img, temp, screenshotCvtColor);
+                    cv::imwrite(screenshotSavePath.c_str(), temp);
+                }
+                else
+                {
+                    cv::imwrite(screenshotSavePath.c_str(), img);
+                }
+            }
+            doScreenshot = false;
+        }
+    }
+
+    void screenshot(const char *filePath, int convert = -1)
+    {
+        doScreenshot = true;
+        screenshotSavePath = std::string(filePath);
+        screenshotCvtColor = convert;
     }
 
     void clear()
