@@ -260,6 +260,9 @@ class _MyAppState extends State<MyApp> {
                     child: const Text('Replace pipeline')),
                 TextButton(
                   onPressed: () async {
+                    TFLiteModel model = await TFLiteModel.create('/home/hedgehao/test/cpp/tflite/models/efficientdet.tflite');
+                    models.add(model);
+
                     LipsPipeline rgbPipeline = LipsPipeline(1);
                     await rgbPipeline.clear();
                     await rgbPipeline.resize(320, 320, mode: OpenCV.INTER_CUBIC);
@@ -268,14 +271,8 @@ class _MyAppState extends State<MyApp> {
                     await rgbPipeline.show();
                     await rgbPipeline.cvtColor(OpenCV.CV_8UC1);
                     await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2BGR);
-
-                    TFLiteModel model = await TFLiteModel.create('/home/hedgehao/test/cpp/tflite/models/efficientdet.tflite');
-                    models.add(model);
-
-                    LipsPipeline tfPipeline = LipsPipeline(8);
-                    await tfPipeline.clear();
-                    await tfPipeline.setInputTensorData(LipsPipeline.RGB_FRAME, 0, LipsPipeline.DATATYPE_UINT8);
-                    await tfPipeline.inference();
+                    await rgbPipeline.setInputTensorData(model.index, 0, LipsPipeline.DATATYPE_UINT8);
+                    await rgbPipeline.inference(model.index);
 
                     await FlutterVision.test();
 
@@ -283,7 +280,8 @@ class _MyAppState extends State<MyApp> {
                     Float32List outputClass = await model.getTensorOutput(1, [25]) as Float32List;
                     Float32List outputScore = await model.getTensorOutput(2, [25]) as Float32List;
 
-                    List<String> classes = outputClass.map((e) => COCO_CLASSES[e.toInt()]).toList();
+                    print('Class(raw):$outputClass');
+                    List<String> classes = outputClass.map((e) => e == 0 ? '' : COCO_CLASSES[e.toInt() - 1]).toList();
 
                     print('Class:$classes');
                     print('Score:${outputScore.map((e) => e.toStringAsFixed(2)).toList()}');

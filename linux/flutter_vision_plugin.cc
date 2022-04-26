@@ -454,24 +454,24 @@ static void flutter_vision_plugin_handle_method_call(
   else if (strcmp(method, "test") == 0)
   {
     // cv::Mat b(1280, 720, CV_8UC4, cv::Scalar(255, 0, 0, 255));
-    cv::Mat b = cv::imread("/home/hedgehao/test/BlazeFace-TFLite-Inference/img/image.jpg", cv::IMREAD_COLOR);
+    cv::Mat b = cv::imread("/home/hedgehao/test/cpp/tflite/images/dog.jpg", cv::IMREAD_COLOR);
     cv::cvtColor(b, b, cv::COLOR_BGR2RGB);
     cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
     cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
 
-    RGB_TEXTURE_GET_CLASS(self->rgbTexture)->pipeline->run(b, *self->texture_registrar, *FL_TEXTURE(self->rgbTexture), RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_width, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_height, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->buffer);
-    DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->pipeline->run(g, *self->texture_registrar, *FL_TEXTURE(self->depthTexture), DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->video_width, DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->video_height, DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->buffer);
-    IR_TEXTURE_GET_CLASS(self->irTexture)->pipeline->run(r, *self->texture_registrar, *FL_TEXTURE(self->irTexture), IR_TEXTURE_GET_CLASS(self->irTexture)->video_width, IR_TEXTURE_GET_CLASS(self->irTexture)->video_height, IR_TEXTURE_GET_CLASS(self->irTexture)->buffer);
+    RGB_TEXTURE_GET_CLASS(self->rgbTexture)->pipeline->run(b, *self->texture_registrar, *FL_TEXTURE(self->rgbTexture), RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_width, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_height, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->buffer, &self->models);
+    DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->pipeline->run(g, *self->texture_registrar, *FL_TEXTURE(self->depthTexture), DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->video_width, DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->video_height, DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->buffer, &self->models);
+    IR_TEXTURE_GET_CLASS(self->irTexture)->pipeline->run(r, *self->texture_registrar, *FL_TEXTURE(self->irTexture), IR_TEXTURE_GET_CLASS(self->irTexture)->video_width, IR_TEXTURE_GET_CLASS(self->irTexture)->video_height, IR_TEXTURE_GET_CLASS(self->irTexture)->buffer, &self->models);
 
-    if (self->models.size())
-    {
-      printf("TF Test\n");
-      cv::Mat img = cv::imread("/home/hedgehao/test/BlazeFace-TFLite-Inference/img/image.jpg");
-      img = img(cv::Range(0, 448), cv::Range(0, 448));
-      img.convertTo(img, CV_32FC2, 1.0f / 255.0f);
-      cv::resize(img, img, cv::Size(128, 128));
-      self->tfPipeline->run(img, g, b, *self->models[0]);
-    }
+    // if (self->models.size())
+    // {
+    //   printf("TF Test\n");
+    //   cv::Mat img = cv::imread("/home/hedgehao/test/BlazeFace-TFLite-Inference/img/image.jpg");
+    //   img = img(cv::Range(0, 448), cv::Range(0, 448));
+    //   img.convertTo(img, CV_32FC2, 1.0f / 255.0f);
+    //   cv::resize(img, img, cv::Size(128, 128));
+    //   self->tfPipeline->run(img, g, b, *self->models[0]);
+    // }
 
     fl_texture_registrar_mark_texture_frame_available(self->texture_registrar, FL_TEXTURE(self->rgbTexture));
 
@@ -529,6 +529,7 @@ void flutter_vision_plugin_register_with_registrar(FlPluginRegistrar *registrar)
   UVC_TEXTURE_GET_CLASS(plugin->uvcTexture)->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(plugin->uvcTexture));
   fl_texture_registrar_mark_texture_frame_available(plugin->texture_registrar, FL_TEXTURE(plugin->uvcTexture));
   UVC_TEXTURE_GET_CLASS(plugin->uvcTexture)->pipeline = new Pipeline();
+  UVC_TEXTURE_GET_CLASS(plugin->uvcTexture)->models = &plugin->models;
 
   plugin->rgbTexture = RGB_TEXTURE(g_object_new(rgb_texture_get_type(), nullptr));
   FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(plugin->rgbTexture)->copy_pixels = rgb_texture_copy_pixels;

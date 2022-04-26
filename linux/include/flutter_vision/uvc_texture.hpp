@@ -7,6 +7,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include "pipeline/pipeline.h"
+#include "tflite.h"
 struct _UvcTextureClass
 {
     FlPixelBufferTextureClass parent_class;
@@ -17,6 +18,7 @@ struct _UvcTextureClass
     bool video_start = false;
     cv::Mat cvImage;
     Pipeline *pipeline;
+    std::vector<TFLiteModel *> *models;
 };
 
 G_DECLARE_DERIVABLE_TYPE(UvcTexture,
@@ -105,7 +107,7 @@ private:
 
             if (newFrame)
             {
-                cls->pipeline->run(cls->cvImage, *registrar, *FL_TEXTURE(texture), cls->video_width, cls->video_height, cls->buffer);
+                cls->pipeline->run(cls->cvImage, *registrar, *FL_TEXTURE(texture), cls->video_width, cls->video_height, cls->buffer, cls->models);
             }
         }
     }

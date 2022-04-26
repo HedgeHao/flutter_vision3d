@@ -401,7 +401,7 @@ private:
         if (vsColor.readFrame(&rgbFrame) == STATUS_OK)
         {
           rgbCls->cvImage = cv::Mat(rgbFrame.getHeight(), rgbFrame.getWidth(), CV_8UC3, (void *)rgbFrame.getData());
-          rgbCls->pipeline->run(rgbCls->cvImage, *registrar, *FL_TEXTURE(rgbTexture), rgbCls->video_width, rgbCls->video_height, rgbCls->buffer);
+          rgbCls->pipeline->run(rgbCls->cvImage, *registrar, *FL_TEXTURE(rgbTexture), rgbCls->video_width, rgbCls->video_height, rgbCls->buffer, models);
           rgbNewFrame = true;
         }
       }
@@ -411,7 +411,7 @@ private:
         if (vsDepth.readFrame(&depthFrame) == STATUS_OK)
         {
           depthCls->cvImage = cv::Mat(depthFrame.getHeight(), depthFrame.getWidth(), CV_16UC1, (void *)depthFrame.getData());
-          depthCls->pipeline->run(depthCls->cvImage, *registrar, *FL_TEXTURE(depthTexture), depthCls->video_width, depthCls->video_height, depthCls->buffer);
+          depthCls->pipeline->run(depthCls->cvImage, *registrar, *FL_TEXTURE(depthTexture), depthCls->video_width, depthCls->video_height, depthCls->buffer, models);
           depthNewFrame = true;
         }
       }
@@ -421,7 +421,7 @@ private:
         if (vsIR.readFrame(&irFrame) == STATUS_OK)
         {
           irCls->cvImage = cv::Mat(irFrame.getHeight(), irFrame.getWidth(), CV_16UC1, (void *)irFrame.getData());
-          irCls->pipeline->run(irCls->cvImage, *registrar, *FL_TEXTURE(irTexture), irCls->video_width, irCls->video_height, irCls->buffer);
+          irCls->pipeline->run(irCls->cvImage, *registrar, *FL_TEXTURE(irTexture), irCls->video_width, irCls->video_height, irCls->buffer, models);
           irNewFrame = true;
         }
       }

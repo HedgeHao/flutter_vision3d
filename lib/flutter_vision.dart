@@ -158,8 +158,8 @@ const FUNC_IMREAD = 8;
 const FUNC_CV_RECTANGLE = 9;
 const FUNC_CV_ROTATE = 10;
 
-const FUNC_SET_INPUT_TENSOR = 0;
-const FUNC_INFERENCE = 1;
+const FUNC_SET_INPUT_TENSOR = 11;
+const FUNC_INFERENCE = 12;
 
 // TODO: check method can be added to that pipeline
 class LipsPipeline {
@@ -294,18 +294,24 @@ class LipsPipeline {
     });
   }
 
-  Future<void> setInputTensorData(int frame, int tensorIndex, int dataType, {int? at}) async {
+  Future<void> setInputTensorData(int modelIndex, int tensorIndex, int dataType, {int? at}) async {
     await FlutterVision._channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_SET_INPUT_TENSOR,
-      'params': Uint8List.fromList([frame, tensorIndex, dataType]),
+      'params': Uint8List.fromList([modelIndex, tensorIndex, dataType]),
       'len': 3,
       'at': at ?? -1
     });
   }
 
-  Future<void> inference({int? at}) async {
-    await FlutterVision._channel.invokeMethod('pipelineAdd', {'index': index, 'funcIndex': FUNC_INFERENCE, 'params': null, 'len': 0, 'at': at ?? -1});
+  Future<void> inference(int modelIndex, {int? at}) async {
+    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+      'index': index,
+      'funcIndex': FUNC_INFERENCE,
+      'params': Uint8List.fromList([modelIndex]),
+      'len': 1,
+      'at': at ?? -1
+    });
   }
 }
 
