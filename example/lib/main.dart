@@ -9,6 +9,7 @@ import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision_example/configurePanel.dart';
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter_vision/constants.dart';
+import 'package:flutter_vision_example/demo/LIPSFace.dart';
 
 const texture_width = 240.0;
 const texture_height = 180.0;
@@ -302,6 +303,38 @@ class _MyAppState extends State<MyApp> {
                   },
                   child: const Text('EfficientNet'),
                 ),
+                TextButton(
+                    onPressed: () async {
+                      TFLiteModel model = await TFLiteModel.create('/home/hedgehao/Documents/lips/LIPSface_v2_10_clean/Data/models/190625_faceDetector_t1.tflite');
+                      models.add(model);
+
+                      LipsPipeline rgbPipeline = LipsPipeline(1);
+                      await rgbPipeline.clear();
+                      await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
+                      await rgbPipeline.show();
+                      await rgbPipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
+                      await rgbPipeline.cvtColor(OpenCV.COLOR_RGBA2RGB);
+                      await rgbPipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
+                      await rgbPipeline.setInputTensorData(model.index, 0, LipsPipeline.DATATYPE_FLOAT);
+                      await rgbPipeline.inference(model.index);
+
+                      await FlutterVision.test();
+
+                      Float32List output = await model.getTensorOutput(0, [28, 28, 5]) as Float32List;
+                      List<FaceInfo> faces = processFaceDetectorOutputs(output, 240, 180);
+                      faces = nms(faces, 0.3);
+                      List<PositionedRect> r = [];
+                      if (faces.isNotEmpty) {
+                        for (FaceInfo f in faces) {
+                          r.add(PositionedRect(f.x1, f.y1, f.x2 - f.x1, f.y2 - f.y1, Colors.red));
+                        }
+                      }
+
+                      setState(() {
+                        rects = r;
+                      });
+                    },
+                    child: const Text('SW200')),
                 TextButton(
                     onPressed: () {
                       FlutterVision.openglSetCamAngle(90, 0);

@@ -139,7 +139,6 @@ void PipelineFuncOpencvRotate(cv::Mat &img, std::vector<uint8_t> params, FlTextu
 
 void PipelineFuncTfSetInputTensor(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models)
 {
-    printf("PipelineFuncTfSetInputTensor:%d, %d, %d\n", params[0], params[1], params[2]);
     if (params[2] == 0)
         models->at(params[0])->setInput<uint8_t>(params[1], img, img.cols * img.rows * img.channels());
     else if (params[2] == 1)
@@ -148,7 +147,6 @@ void PipelineFuncTfSetInputTensor(cv::Mat &img, std::vector<uint8_t> params, FlT
 
 void PipelineFuncTfInference(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models)
 {
-    printf("PipelineFuncTfInference:%d\n", params[0]);
     bool success = models->at(params[0])->inference();
     if (!success)
         printf("Inference Failed!!!!\n");
@@ -194,7 +192,6 @@ public:
     {
         for (int i = 0; i < funcs.size(); i++)
         {
-            printf("Run:%s\n", funcs[i].name);
             funcs[i].func(img, funcs[i].params, registrar, texture, texture_width, texture_height, pixelBuf, models);
         }
         if (doScreenshot)
