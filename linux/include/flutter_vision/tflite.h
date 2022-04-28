@@ -91,7 +91,18 @@ public:
     {
         if (!valid)
             return false;
-        return interpreter->Invoke() == TfLiteStatus::kTfLiteOk;
+
+        bool ret;
+        try
+        {
+            ret = interpreter->Invoke() == TfLiteStatus::kTfLiteOk;
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+
+        return ret;
     }
 
     template <typename T>

@@ -75,7 +75,7 @@ double getIOU(FaceInfo a, FaceInfo b) {
 
 List<FaceInfo> nms(List<FaceInfo> faceInfos, double iouThreshold) {
   int removeNum = 0;
-  faceInfos.sort((a, b) => a.confProb > b.confProb ? 0 : 1);
+  faceInfos.sort((a, b) => (b.confProb - a.confProb).toInt());
   for (int i = 0; i < faceInfos.length; i++) {
     if (faceInfos[i].confProb < 0) {
       continue;
@@ -93,7 +93,7 @@ List<FaceInfo> nms(List<FaceInfo> faceInfos, double iouThreshold) {
     }
   }
 
-  faceInfos.sort((a, b) => a.confProb > b.confProb ? 0 : 1);
+  faceInfos.sort((a, b) => (b.confProb - a.confProb).toInt());
   faceInfos.removeRange(faceInfos.length - removeNum, faceInfos.length);
   return faceInfos;
 }

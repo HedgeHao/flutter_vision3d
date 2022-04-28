@@ -62,11 +62,12 @@ public:
     int capIndex = -1;
     cv::VideoCapture *cap = nullptr;
 
-    OpenCVCamera(int index, UvcTexture *t, FlTextureRegistrar *r)
+    OpenCVCamera(int index, UvcTexture *t, FlTextureRegistrar *r, FlMethodChannel *c)
     {
         texture = t;
         capIndex = index;
         registrar = r;
+        flChannel = c;
     }
 
     bool open()
@@ -92,6 +93,7 @@ public:
 
 private:
     FlTextureRegistrar *registrar;
+    FlMethodChannel *flChannel;
     bool videoStart = false;
     void _readVideoFeed()
     {
@@ -107,7 +109,7 @@ private:
 
             if (newFrame)
             {
-                cls->pipeline->run(cls->cvImage, *registrar, *FL_TEXTURE(texture), cls->video_width, cls->video_height, cls->buffer, cls->models);
+                cls->pipeline->run(cls->cvImage, *registrar, *FL_TEXTURE(texture), cls->video_width, cls->video_height, cls->buffer, cls->models, flChannel);
             }
         }
     }

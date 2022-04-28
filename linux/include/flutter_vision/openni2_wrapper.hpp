@@ -270,6 +270,12 @@ public:
       *enable = false;
     }
 
+    if (!enableRgb && !enableIr && !enableDepth)
+    {
+      videoStart = false;
+      *enable = false;
+    }
+
     ret->value = fl_value_new_bool(isValid);
   }
 
@@ -401,7 +407,7 @@ private:
         if (vsColor.readFrame(&rgbFrame) == STATUS_OK)
         {
           rgbCls->cvImage = cv::Mat(rgbFrame.getHeight(), rgbFrame.getWidth(), CV_8UC3, (void *)rgbFrame.getData());
-          rgbCls->pipeline->run(rgbCls->cvImage, *registrar, *FL_TEXTURE(rgbTexture), rgbCls->video_width, rgbCls->video_height, rgbCls->buffer, models);
+          rgbCls->pipeline->run(rgbCls->cvImage, *registrar, *FL_TEXTURE(rgbTexture), rgbCls->video_width, rgbCls->video_height, rgbCls->buffer, models, flChannel);
           rgbNewFrame = true;
         }
       }
@@ -411,7 +417,7 @@ private:
         if (vsDepth.readFrame(&depthFrame) == STATUS_OK)
         {
           depthCls->cvImage = cv::Mat(depthFrame.getHeight(), depthFrame.getWidth(), CV_16UC1, (void *)depthFrame.getData());
-          depthCls->pipeline->run(depthCls->cvImage, *registrar, *FL_TEXTURE(depthTexture), depthCls->video_width, depthCls->video_height, depthCls->buffer, models);
+          depthCls->pipeline->run(depthCls->cvImage, *registrar, *FL_TEXTURE(depthTexture), depthCls->video_width, depthCls->video_height, depthCls->buffer, models, flChannel);
           depthNewFrame = true;
         }
       }
@@ -421,23 +427,27 @@ private:
         if (vsIR.readFrame(&irFrame) == STATUS_OK)
         {
           irCls->cvImage = cv::Mat(irFrame.getHeight(), irFrame.getWidth(), CV_16UC1, (void *)irFrame.getData());
-          irCls->pipeline->run(irCls->cvImage, *registrar, *FL_TEXTURE(irTexture), irCls->video_width, irCls->video_height, irCls->buffer, models);
+          irCls->pipeline->run(irCls->cvImage, *registrar, *FL_TEXTURE(irTexture), irCls->video_width, irCls->video_height, irCls->buffer, models, flChannel);
           irNewFrame = true;
         }
       }
 
-      // TODO: chose model
-      if ((rgbNewFrame || depthNewFrame || irNewFrame) && models->size())
-      {
-        tfPipeline->run(rgbCls->cvImage, depthCls->cvImage, irCls->cvImage, *models->at(0));
-      }
+      // // TODO: chose model
+      // if ((rgbNewFrame || depthNewFrame || irNewFrame) && models->size())
+      // {
+      //   tfPipeline->run(rgbCls->cvImage, depthCls->cvImage, irCls->cvImage, *models->at(0));
+      // }
 
-      if (niRgbAvailable && depthNewFrame && rgbNewFrame)
-      {
-        niComputeCloud(vsDepth, (const openni::DepthPixel *)depthFrame.getData(), (const openni::RGB888Pixel *)rgbFrame.getData(), glfl->modelPointCloud->vertices, glfl->modelPointCloud->colors, glfl->modelPointCloud->colorsMap, &glfl->modelPointCloud->vertexPoints);
-      }
+      // if (niRgbAvailable && depthNewFrame && rgbNewFrame)
+      // {
+      //   niComputeCloud(vsDepth, (const openni::DepthPixel *)depthFrame.getData(), (const openni::RGB888Pixel *)rgbFrame.getData(), glfl->modelPointCloud->vertices, glfl->modelPointCloud->colors, glfl->modelPointCloud->colorsMap, &glfl->modelPointCloud->vertexPoints);
+      // }
 
       fl_method_channel_invoke_method(flChannel, "onFrame", nullptr, nullptr, nullptr, NULL);
     }
+
+    rgbCls->pipeline->reset();
+    depthCls->pipeline->reset();
+    irCls->pipeline->reset();
   }
 };

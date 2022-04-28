@@ -60,6 +60,8 @@ class _MyAppState extends State<MyApp> {
 
   List<PositionedRect> rects = [];
 
+  int ts = 0;
+
   void updateMouseClick(PointerEvent details) {
     setState(() {
       mouseDown = details.down;
@@ -132,27 +134,24 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<dynamic> update(MethodCall call) async {
-    if (call.method == 'onFrame') {
-      Float32List outputBoxes = await models[0].getTensorOutput(0, [25, 4]) as Float32List;
-      Float32List outputClass = await models[0].getTensorOutput(1, [25]) as Float32List;
-      Float32List outputScore = await models[0].getTensorOutput(2, [25]) as Float32List;
+    if (call.method == 'onInference') {
+      Float32List output = await models[0].getTensorOutput(0, [28, 28, 5]) as Float32List;
+      List<FaceInfo> faces = processFaceDetectorOutputs(output, 240, 180);
+      if (faces.isEmpty) return;
 
-      print('Class:${COCO_CLASSES[outputClass[0].toInt()]}, Score: ${outputScore[0]}');
-
+      faces = nms(faces, 0.3);
+      if (faces.length > 2) return;
       List<PositionedRect> r = [];
-      for (int i = 0; i < 3; i++) {
-        double x = texture_width * outputBoxes[i * 4 + 1];
-        double y = texture_height * outputBoxes[i * 4];
-        double width = texture_width * outputBoxes[i * 4 + 3] - x;
-        double height = texture_height * outputBoxes[i * 4 + 2] - y;
-        r.add(PositionedRect(x, y, width, height, Colors.red));
+      if (faces.isNotEmpty) {
+        for (FaceInfo f in faces) {
+          r.add(PositionedRect(f.x1, f.y1, f.x2 - f.x1, f.y2 - f.y1, Colors.red));
+        }
       }
 
       setState(() {
         rects = r;
-        debugText = '${COCO_CLASSES[outputClass[0].toInt() - 1]} ${outputScore[0]}';
       });
-    }
+    } else if (call.method == 'onFrame') {}
   }
 
   @override
@@ -305,24 +304,36 @@ class _MyAppState extends State<MyApp> {
                 ),
                 TextButton(
                     onPressed: () async {
-                      TFLiteModel model = await TFLiteModel.create('/home/hedgehao/Documents/lips/LIPSface_v2_10_clean/Data/models/190625_faceDetector_t1.tflite');
-                      models.add(model);
+                      if (models.isEmpty) {
+                        TFLiteModel model = await TFLiteModel.create('/home/hedgehao/Documents/lips/LIPSface_v2_10_clean/Data/models/190625_faceDetector_t1.tflite');
+                        models.add(model);
 
-                      LipsPipeline rgbPipeline = LipsPipeline(1);
-                      await rgbPipeline.clear();
-                      await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
-                      await rgbPipeline.show();
-                      await rgbPipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
-                      await rgbPipeline.cvtColor(OpenCV.COLOR_RGBA2RGB);
-                      await rgbPipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
-                      await rgbPipeline.setInputTensorData(model.index, 0, LipsPipeline.DATATYPE_FLOAT);
-                      await rgbPipeline.inference(model.index);
+                        LipsPipeline rgbPipeline = LipsPipeline(1);
+                        await rgbPipeline.clear();
+                        // await rgbPipeline.imwrite('/home/hedgehao/Desktop/test.jpg', interval: 1000);
+
+                        // await rgbPipeline.imread("/home/hedgehao/test/cpp/tflite/images/faces.jpg");
+                        // await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGB);
+
+                        await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
+                        await rgbPipeline.show();
+                        await rgbPipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
+                        await rgbPipeline.cvtColor(OpenCV.COLOR_RGBA2RGB);
+                        await rgbPipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
+                        await rgbPipeline.setInputTensorData(models[0].index, 0, LipsPipeline.DATATYPE_FLOAT);
+                        await rgbPipeline.inference(models[0].index, interval: 100);
+                      }
 
                       await FlutterVision.test();
 
-                      Float32List output = await model.getTensorOutput(0, [28, 28, 5]) as Float32List;
+                      Float32List output = await models[0].getTensorOutput(0, [28, 28, 5]) as Float32List;
+                      print('${output.length}, ${output.map((e) => e.toStringAsFixed(2)).toList().sublist(0, 10)}');
                       List<FaceInfo> faces = processFaceDetectorOutputs(output, 240, 180);
+                      if (faces.isEmpty) return;
+
+                      print('Face raw:${faces.length}');
                       faces = nms(faces, 0.3);
+                      print('Face:${faces.length}');
                       List<PositionedRect> r = [];
                       if (faces.isNotEmpty) {
                         for (FaceInfo f in faces) {
