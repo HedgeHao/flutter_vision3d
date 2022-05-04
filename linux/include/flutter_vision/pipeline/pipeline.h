@@ -209,24 +209,6 @@ public:
 
     void run(cv::Mat &img, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
     {
-        for (int i = 0; i < funcs.size(); i++)
-        {
-            if (funcs[i].interval > 0)
-            {
-                getCurrentTime(&ts);
-                if (ts - funcs[i].timer < funcs[i].interval)
-                {
-                    continue;
-                }
-                        }
-
-            funcs[i].func(img, funcs[i].params, registrar, texture, texture_width, texture_height, pixelBuf, models, flChannel);
-
-            if (funcs[i].interval > 0)
-            {
-                getCurrentTime(&funcs[i].timer);
-            }
-        }
         if (doScreenshot)
         {
             if (!img.empty())
@@ -243,6 +225,24 @@ public:
                 }
             }
             doScreenshot = false;
+        }
+        for (int i = 0; i < funcs.size(); i++)
+        {
+            if (funcs[i].interval > 0)
+            {
+                getCurrentTime(&ts);
+                if (ts - funcs[i].timer < funcs[i].interval)
+                {
+                    continue;
+                }
+            }
+
+            funcs[i].func(img, funcs[i].params, registrar, texture, texture_width, texture_height, pixelBuf, models, flChannel);
+
+            if (funcs[i].interval > 0)
+            {
+                getCurrentTime(&funcs[i].timer);
+            }
         }
     }
 

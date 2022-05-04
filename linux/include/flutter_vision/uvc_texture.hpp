@@ -126,5 +126,8 @@ private:
                 cls->pipeline->run(cls->cvImage, *registrar, *FL_TEXTURE(texture), cls->video_width, cls->video_height, cls->buffer, cls->models, flChannel);
             }
         }
+
+        printf("Release VideoCap\n");
+        cap->release();
     }
 };

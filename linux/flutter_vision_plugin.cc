@@ -493,16 +493,7 @@ static void flutter_vision_plugin_handle_method_call(
     RGB_TEXTURE_GET_CLASS(self->rgbTexture)->pipeline->run(b, *self->texture_registrar, *FL_TEXTURE(self->rgbTexture), RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_width, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_height, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->buffer, &self->models, self->flChannel);
     DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->pipeline->run(g, *self->texture_registrar, *FL_TEXTURE(self->depthTexture), DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->video_width, DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->video_height, DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->buffer, &self->models, self->flChannel);
     IR_TEXTURE_GET_CLASS(self->irTexture)->pipeline->run(r, *self->texture_registrar, *FL_TEXTURE(self->irTexture), IR_TEXTURE_GET_CLASS(self->irTexture)->video_width, IR_TEXTURE_GET_CLASS(self->irTexture)->video_height, IR_TEXTURE_GET_CLASS(self->irTexture)->buffer, &self->models, self->flChannel);
-
-    // if (self->models.size())
-    // {
-    //   printf("TF Test\n");
-    //   cv::Mat img = cv::imread("/home/hedgehao/test/BlazeFace-TFLite-Inference/img/image.jpg");
-    //   img = img(cv::Range(0, 448), cv::Range(0, 448));
-    //   img.convertTo(img, CV_32FC2, 1.0f / 255.0f);
-    //   cv::resize(img, img, cv::Size(128, 128));
-    //   self->tfPipeline->run(img, g, b, *self->models[0]);
-    // }
+    UVC_TEXTURE_GET_CLASS(self->uvcTexture)->pipeline->run(b, *self->texture_registrar, *FL_TEXTURE(self->uvcTexture), IR_TEXTURE_GET_CLASS(self->uvcTexture)->video_width, IR_TEXTURE_GET_CLASS(self->uvcTexture)->video_height, IR_TEXTURE_GET_CLASS(self->uvcTexture)->buffer, &self->models, self->flChannel);
 
     fl_texture_registrar_mark_texture_frame_available(self->texture_registrar, FL_TEXTURE(self->rgbTexture));
 

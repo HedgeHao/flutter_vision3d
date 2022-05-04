@@ -179,7 +179,7 @@ class _MyAppState extends State<MyApp> {
                           height: texture_height,
                           child: Stack(children: [
                             Texture(textureId: rgbTextureId),
-                            ...rects,
+                            // ...rects,
                           ]),
                         ),
                   const SizedBox(width: 10),
@@ -187,7 +187,16 @@ class _MyAppState extends State<MyApp> {
                   const SizedBox(width: 10),
                   irTextureId == 0 ? const SizedBox() : Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 240, height: 180, child: Texture(textureId: irTextureId)),
                   const SizedBox(width: 10),
-                  cameraTextureId == 0 ? const SizedBox() : Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 240, height: 180, child: Texture(textureId: cameraTextureId)),
+                  cameraTextureId == 0
+                      ? const SizedBox()
+                      : Container(
+                          decoration: BoxDecoration(border: Border.all(width: 1)),
+                          width: 240,
+                          height: 180,
+                          child: Stack(children: [
+                            Texture(textureId: cameraTextureId),
+                            ...rects,
+                          ])),
                   const SizedBox(width: 10),
                 ],
               ),
@@ -242,7 +251,7 @@ class _MyAppState extends State<MyApp> {
 
                       LipsPipeline uvcPipeline = LipsPipeline(16);
                       await uvcPipeline.clear();
-                      await uvcPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+                      // await uvcPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
                       await uvcPipeline.show();
 
                       await FlutterVision.test();
@@ -308,7 +317,7 @@ class _MyAppState extends State<MyApp> {
                         TFLiteModel model = await TFLiteModel.create('/home/hedgehao/Documents/lips/LIPSface_v2_10_clean/Data/models/190625_faceDetector_t1.tflite');
                         models.add(model);
 
-                        LipsPipeline rgbPipeline = LipsPipeline(1);
+                        LipsPipeline rgbPipeline = LipsPipeline(16);
                         await rgbPipeline.clear();
                         // await rgbPipeline.imwrite('/home/hedgehao/Desktop/test.jpg', interval: 1000);
 
