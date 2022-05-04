@@ -387,9 +387,30 @@ static void flutter_vision_plugin_handle_method_call(
     if (newCam)
     {
       OpenCVCamera *c = new OpenCVCamera(index, self->uvcTexture, self->texture_registrar, self->flChannel);
-      c->open();
       self->cameras.push_back(c);
       result = c->cap->isOpened();
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(result)));
+  }
+  else if (strcmp(method, "uvcConfig") == 0)
+  {
+    FlValue *flIndex = fl_value_lookup_string(args, "index");
+    int index = fl_value_get_int(flIndex);
+    FlValue *flProp = fl_value_lookup_string(args, "prop");
+    int prop = fl_value_get_int(flProp);
+    FlValue *flValue = fl_value_lookup_string(args, "value");
+    float value = fl_value_get_float(flValue);
+
+    bool result = false;
+    for (int i = 0; i < self->cameras.size(); i++)
+    {
+      if (self->cameras[i]->capIndex == index)
+      {
+        self->cameras[i]->config(prop, value);
+        result = true;
+        break;
+      }
     }
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(result)));
@@ -408,7 +429,12 @@ static void flutter_vision_plugin_handle_method_call(
       {
         if (start)
         {
-          self->cameras[i]->start();
+          int ret = self->cameras[i]->start();
+          if (ret < 0)
+          {
+            result = false;
+            break;
+          }
         }
         else
         {

@@ -65,25 +65,39 @@ public:
     OpenCVCamera(int index, UvcTexture *t, FlTextureRegistrar *r, FlMethodChannel *c)
     {
         texture = t;
-        capIndex = index;
         registrar = r;
         flChannel = c;
+        capIndex = index;
+        if (cap == nullptr)
+        {
+            cap = new cv::VideoCapture();
+        }
+    }
+
+    void config(int prop, float value)
+    {
+        cap->set(prop, value);
     }
 
     bool open()
     {
-        cap = new cv::VideoCapture(capIndex);
+        cap->open(capIndex);
         return cap->isOpened();
     }
 
-    void start()
+    int start()
     {
         if (cap == nullptr)
-            return;
+            return -1;
+
+        bool ret = cap->open(capIndex);
+        if (!ret)
+            return -2;
 
         videoStart = true;
         std::thread t(&OpenCVCamera::_readVideoFeed, this);
         t.detach();
+        return 0;
     }
 
     void stop()

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision_example/ui.dart';
 import 'package:flutter_vision_example/viewModel.dart' as ViewModel;
@@ -166,7 +167,10 @@ class Camera2dConfigure extends StatelessWidget {
         SizedBox(width: 50, child: TextField(controller: ctl, textAlign: TextAlign.center)),
         TextButton(
             onPressed: () async {
+              int index = int.parse(ctl.text);
               await FlutterVision.cameraOpen(int.parse(ctl.text));
+              await FlutterVision.uvcConfig(index, OpenCV.CAP_PROP_FRAME_WIDTH, 640);
+              await FlutterVision.uvcConfig(index, OpenCV.CAP_PROP_FRAME_HEIGHT, 480);
             },
             child: const Text('Open')),
         TextButton(

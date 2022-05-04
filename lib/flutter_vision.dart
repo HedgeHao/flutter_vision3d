@@ -132,6 +132,10 @@ class FlutterVision {
     return await _channel.invokeMethod('cameraOpen', {'index': index});
   }
 
+  static Future<bool> uvcConfig(int index, int prop, double value) async {
+    return await _channel.invokeMethod('uvcConfig', {'index': index, 'prop': prop, 'value': value});
+  }
+
   static Future<void> cameraConfig(int index, bool start) async {
     return await _channel.invokeMethod('cameraConfig', {'index': index, 'start': start});
   }
