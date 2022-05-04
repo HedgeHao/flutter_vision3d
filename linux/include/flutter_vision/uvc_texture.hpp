@@ -91,7 +91,7 @@ public:
             return -1;
 
         bool ret = cap->open(capIndex);
-        if (!ret)
+        if (!ret && !cap->isOpened())
             return -2;
 
         videoStart = true;

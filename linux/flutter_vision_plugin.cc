@@ -388,7 +388,6 @@ static void flutter_vision_plugin_handle_method_call(
     {
       OpenCVCamera *c = new OpenCVCamera(index, self->uvcTexture, self->texture_registrar, self->flChannel);
       self->cameras.push_back(c);
-      result = c->cap->isOpened();
     }
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(result)));

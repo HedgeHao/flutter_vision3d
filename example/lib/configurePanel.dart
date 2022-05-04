@@ -169,6 +169,8 @@ class Camera2dConfigure extends StatelessWidget {
             onPressed: () async {
               int index = int.parse(ctl.text);
               await FlutterVision.cameraOpen(int.parse(ctl.text));
+              await FlutterVision.uvcConfig(index, OpenCV.CAP_PROP_MODE, 1);
+              await FlutterVision.uvcConfig(index, OpenCV.CAP_PROP_FPS, 30.0);
               await FlutterVision.uvcConfig(index, OpenCV.CAP_PROP_FRAME_WIDTH, 640);
               await FlutterVision.uvcConfig(index, OpenCV.CAP_PROP_FRAME_HEIGHT, 480);
             },
