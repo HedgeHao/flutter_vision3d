@@ -35,12 +35,14 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
 
 find_package(OpenCV REQUIRED PATHS ${OpenCV_DIR})
 target_link_libraries(${PLUGIN_NAME} PRIVATE
+  "${PROJECT_SOURCE_DIR}/lib/tensorflowlite_c.dll.if.lib"
+  "${PROJECT_SOURCE_DIR}/lib/tensorflowlite.dll.if.lib"
+  "${PROJECT_SOURCE_DIR}/lib/flatbuffers.lib"
   "${PROJECT_SOURCE_DIR}/lib/glew32.lib"
   "${PROJECT_SOURCE_DIR}/lib/glfw3.lib"
   "${OPENNI_DIR}/Lib/OpenNI2.lib"
   ${OpenCV_LIBS}
   opengl32
-  "${PROJECT_SOURCE_DIR}/lib/tensorflowlite_c.lib"
 )
 
 # List of absolute paths to libraries that should be bundled with the plugin
