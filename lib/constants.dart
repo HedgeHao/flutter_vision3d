@@ -366,6 +366,12 @@ class OpenCV {
   static const CAP_PROP_AUTO_WB = 44;
   static const CAP_PROP_WB_TEMPERATURE = 45;
   static const CAP_PROP_CODEC_PIXEL_FORMAT = 46;
+
+  /* VideoCaptureModes */
+  static const CAP_MODE_BGR = 0;
+  static const CAP_MODE_RGB = 1;
+  static const CAP_MODE_GRAY = 2;
+  static const CAP_MODE_YUYV = 3;
 }
 
 const List<String> COCO_CLASSES = [
