@@ -62,13 +62,14 @@ public:
     flChannel = c;
   }
 
-  void registerFlContext(flutter::TextureRegistrar *re, RgbTexture *r, DepthTexture *d, IrTexture *i, OpenGLFL *g)
+  void registerFlContext(flutter::TextureRegistrar *re, RgbTexture *r, DepthTexture *d, IrTexture *i, OpenGLFL *g, std::vector<TFLiteModel *> *m)
   {
     rgbTexture = r;
     depthTexture = d;
     irTexture = i;
     glfl = g;
     registrar = re;
+    models = m;
   }
 
   int init()
@@ -247,6 +248,12 @@ public:
     {
       *enable = false;
     }
+
+    if (!enableRgb && !enableIr && !enableDepth)
+    {
+      videoStart = false;
+      *enable = false;
+    }
   }
 
   void readVideoFeed()
@@ -266,6 +273,7 @@ public:
 
 private:
   flutter::MethodChannel<flutter::EncodableValue> *flChannel;
+  std::vector<TFLiteModel *> *models;
 
   bool niRgbAvailable = false;
   bool niDepthAvailable = false;
@@ -379,7 +387,7 @@ private:
         if (vsColor.readFrame(&rgbFrame) == STATUS_OK)
         {
           rgbTexture->cvImage = cv::Mat(rgbFrame.getHeight(), rgbFrame.getWidth(), CV_8UC3, (void *)rgbFrame.getData());
-          rgbTexture->pipeline->run(rgbTexture->cvImage, registrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer);
+          rgbTexture->pipeline->run(rgbTexture->cvImage, registrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer, models, flChannel);
           rgbTexture->setPixelBuffer();
           rgbNewFrame = true;
         }
@@ -390,7 +398,7 @@ private:
         if (vsDepth.readFrame(&depthFrame) == STATUS_OK)
         {
           depthTexture->cvImage = cv::Mat(depthFrame.getHeight(), depthFrame.getWidth(), CV_16UC1, (void *)depthFrame.getData());
-          depthTexture->pipeline->run(depthTexture->cvImage, registrar, depthTexture->textureId, depthTexture->videoWidth, depthTexture->videoHeight, depthTexture->buffer);
+          depthTexture->pipeline->run(depthTexture->cvImage, registrar, depthTexture->textureId, depthTexture->videoWidth, depthTexture->videoHeight, depthTexture->buffer, models, flChannel);
           depthTexture->setPixelBuffer();
           depthNewFrame = true;
         }
@@ -401,7 +409,7 @@ private:
         if (vsIR.readFrame(&irFrame) == STATUS_OK)
         {
           irTexture->cvImage = cv::Mat(irFrame.getHeight(), irFrame.getWidth(), CV_16UC1, (void *)irFrame.getData());
-          irTexture->pipeline->run(irTexture->cvImage, registrar, irTexture->textureId, irTexture->videoWidth, irTexture->videoHeight, irTexture->buffer);
+          irTexture->pipeline->run(irTexture->cvImage, registrar, irTexture->textureId, irTexture->videoWidth, irTexture->videoHeight, irTexture->buffer, models, flChannel);
           irTexture->setPixelBuffer();
           irNewFrame = true;
         }

@@ -25,53 +25,54 @@ public:
     bool valid = false;
     std::string error;
     std::vector<TensorOutput> outputTensors{};
-    std::unique_ptr<tflite::Interpreter> interpreter;
 
     TFLiteModel(const char *modelPath)
     {
         std::cout << "Debug1:" << modelPath << std::endl;
-        model = tflite::FlatBufferModel::BuildFromFile(modelPath);
-        // if (!model)
-        // {
-        //     error = "Failed to load model";
-        //     return;
-        // }
+        model = tflite::FlatBufferModel::BuildFromFile("D:\\test\\190625_faceDetector_t1.tflite");
+        if (!model)
+        {
+            error = "Failed to load model";
+            std::cout << "error:" << error << std::endl;
+            return;
+        }
 
-        // std::cout << "Debug2\n";
-        // tflite::ops::builtin::BuiltinOpResolver resolver;
-        // tflite::InterpreterBuilder(*model, resolver)(&interpreter);
-        // if (!interpreter)
-        // {
-        //     error = "Failed to create interpreter builder";
-        //     return;
-        // }
-        // interpreter->SetAllowFp16PrecisionForFp32(true);
-        // interpreter->SetNumThreads(4);
+        std::cout << "Debug2" << std::endl;
 
-        // std::cout << "Debug3\n";
-        // if (interpreter->AllocateTensors() != TfLiteStatus::kTfLiteOk)
-        // {
-        //     error = "Failed to allocate tensors";
-        //     return;
-        // }
+        tflite::InterpreterBuilder(*model, resolver)(&interpreter);
+        if (!interpreter)
+        {
+            error = "Failed to create interpreter builder";
+            return;
+        }
+        std::cout << "Debug3\n";
+        interpreter->SetAllowFp16PrecisionForFp32(true);
+        interpreter->SetNumThreads(4);
 
-        // std::cout << "Debug4\n";
+        std::cout << "Debug4\n";
+        if (interpreter->AllocateTensors() != TfLiteStatus::kTfLiteOk)
+        {
+            error = "Failed to allocate tensors";
+            return;
+        }
 
-        // for (unsigned int i = 0; i < interpreter->outputs().size(); i++)
-        // {
-        //     auto t = interpreter->tensor(interpreter->outputs()[i]);
-        //     unsigned int size = 1;
-        //     for (int j = 0; j < t->dims->size; j++)
-        //     {
-        //         size *= t->dims->data[j];
-        //     }
+        std::cout << "Debug5\n";
 
-        //     // TODO: check type
-        //     outputTensors.push_back(TensorOutput{interpreter->outputs()[i], i, size, 0, t->name});
-        // }
+        for (unsigned int i = 0; i < interpreter->outputs().size(); i++)
+        {
+            auto t = interpreter->tensor(interpreter->outputs()[i]);
+            unsigned int size = 1;
+            for (int j = 0; j < t->dims->size; j++)
+            {
+                size *= t->dims->data[j];
+            }
 
-        // std::cout << "Debug5\n";
-        // valid = true;
+            // TODO: check type
+            outputTensors.push_back(TensorOutput{interpreter->outputs()[i], i, size, 0, t->name});
+        }
+
+        std::cout << "Debug5\n";
+        valid = true;
     }
 
     ~TFLiteModel() {}
@@ -113,5 +114,7 @@ public:
 
 private:
     std::unique_ptr<tflite::FlatBufferModel> model;
+    tflite::ops::builtin::BuiltinOpResolver resolver;
+    std::unique_ptr<tflite::Interpreter> interpreter;
 };
 #endif

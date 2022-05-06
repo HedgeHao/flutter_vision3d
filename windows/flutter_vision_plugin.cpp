@@ -93,7 +93,7 @@ namespace
     uvcTexture = std::make_unique<UvcTexture>(textureRegistrar);
     glfl = new OpenGLFL(textureRegistrar);
 
-    ni2->registerFlContext(textureRegistrar, rgbTexture.get(), depthTexture.get(), irTexture.get(), glfl);
+    ni2->registerFlContext(textureRegistrar, rgbTexture.get(), depthTexture.get(), irTexture.get(), glfl, &models);
 
     rgbTexture->stream = &ni2->vsColor;
     depthTexture->stream = &ni2->vsDepth;
@@ -365,25 +365,28 @@ namespace
         insertAt = std::get<int>(flAt->second);
       }
 
+      int interval = 0;
+      auto flInterval = arguments->find(flutter::EncodableValue("interval"));
+      if (flInterval != arguments->end())
+      {
+        interval = std::get<int>(flInterval->second);
+      }
+
       if (index == VideoIndex::RGB)
       {
-        rgbTexture->pipeline->add(funcIndex, params, len, insertAt);
+        rgbTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
       }
       else if (index == VideoIndex::Depth)
       {
-        depthTexture->pipeline->add(funcIndex, params, len, insertAt);
+        depthTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
       }
       else if (index == VideoIndex::IR)
       {
-        irTexture->pipeline->add(funcIndex, params, len, insertAt);
+        irTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
       }
       else if (index == VideoIndex::Camera2D)
       {
-        uvcTexture->pipeline->add(funcIndex, params, len, insertAt);
-      }
-      else if (index == PIPELINE_INDEX_TFLITE)
-      {
-        // self->tfPipeline->add(funcIndex, params, len, insertAt);
+        uvcTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
       }
       else
       {
@@ -455,7 +458,7 @@ namespace
 
       if (newCam)
       {
-        OpenCVCamera *c = new OpenCVCamera(index, uvcTexture.get(), textureRegistrar);
+        OpenCVCamera *c = new OpenCVCamera(index, uvcTexture.get(), textureRegistrar, &models, flChannel);
         c->open();
         cameras.push_back(c);
         ret = c->cap->isOpened();
@@ -625,16 +628,16 @@ namespace
     else if (method_call.method_name().compare("test") == 0)
     {
       // cv::Mat b(1280, 720, CV_8UC4, cv::Scalar(255, 0, 0, 255));
-      cv::Mat b = cv::imread("C:/Users/000279/Desktop/dog.jpg", cv::IMREAD_COLOR);
+      cv::Mat b = cv::imread("D:/test/faces.jpg", cv::IMREAD_COLOR);
       cv::cvtColor(b, b, cv::COLOR_BGR2RGB);
       cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
       cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
 
-      rgbTexture->pipeline->run(b, textureRegistrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer);
+      rgbTexture->pipeline->run(b, textureRegistrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer, &models, flChannel);
       rgbTexture->setPixelBuffer();
-      irTexture->pipeline->run(g, textureRegistrar, irTexture->textureId, irTexture->videoWidth, irTexture->videoHeight, irTexture->buffer);
+      irTexture->pipeline->run(g, textureRegistrar, irTexture->textureId, irTexture->videoWidth, irTexture->videoHeight, irTexture->buffer, &models, flChannel);
       irTexture->setPixelBuffer();
-      depthTexture->pipeline->run(r, textureRegistrar, depthTexture->textureId, depthTexture->videoWidth, depthTexture->videoHeight, depthTexture->buffer);
+      depthTexture->pipeline->run(r, textureRegistrar, depthTexture->textureId, depthTexture->videoWidth, depthTexture->videoHeight, depthTexture->buffer, &models, flChannel);
       depthTexture->setPixelBuffer();
 
       // rgbTexture->genPixels();

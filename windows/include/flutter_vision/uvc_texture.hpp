@@ -40,11 +40,13 @@ public:
     int capIndex = -1;
     cv::VideoCapture *cap = nullptr;
 
-    OpenCVCamera(int index, UvcTexture *t, flutter::TextureRegistrar *r)
+    OpenCVCamera(int index, UvcTexture *t, flutter::TextureRegistrar *r, std::vector<TFLiteModel *> *m, flutter::MethodChannel<flutter::EncodableValue> *c)
     {
         texture = t;
         capIndex = index;
         registrar = r;
+        models = m;
+        flChannel = c;
     }
 
     bool open()
@@ -69,7 +71,9 @@ public:
     }
 
 private:
+    flutter::MethodChannel<flutter::EncodableValue> *flChannel;
     flutter::TextureRegistrar *registrar;
+    std::vector<TFLiteModel *> *models;
     bool videoStart = false;
     void _readVideoFeed()
     {
@@ -84,7 +88,7 @@ private:
 
             if (newFrame)
             {
-                texture->pipeline->run(texture->cvImage, registrar, texture->textureId, texture->videoWidth, texture->videoHeight, texture->buffer);
+                texture->pipeline->run(texture->cvImage, registrar, texture->textureId, texture->videoWidth, texture->videoHeight, texture->buffer, models, flChannel);
                 texture->setPixelBuffer();
             }
         }

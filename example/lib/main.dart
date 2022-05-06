@@ -314,45 +314,45 @@ class _MyAppState extends State<MyApp> {
                 TextButton(
                     onPressed: () async {
                       if (models.isEmpty) {
-                        TFLiteModel model = await TFLiteModel.create('/home/hedgehao/Documents/lips/LIPSface_v2_10_clean/Data/models/190625_faceDetector_t1.tflite');
+                        TFLiteModel model = await TFLiteModel.create('D:\\test\\models\\190625_faceDetector_t1.tflite');
                         models.add(model);
 
-                        LipsPipeline rgbPipeline = LipsPipeline(16);
-                        await rgbPipeline.clear();
-                        // await rgbPipeline.imwrite('/home/hedgehao/Desktop/test.jpg', interval: 1000);
+                        // LipsPipeline rgbPipeline = LipsPipeline(16);
+                        // await rgbPipeline.clear();
+                        // // await rgbPipeline.imwrite('/home/hedgehao/Desktop/test.jpg', interval: 1000);
 
-                        // await rgbPipeline.imread("/home/hedgehao/test/cpp/tflite/images/faces.jpg");
-                        // await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGB);
+                        // // await rgbPipeline.imread("/home/hedgehao/test/cpp/tflite/images/faces.jpg");
+                        // // await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGB);
 
-                        await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
-                        await rgbPipeline.show();
-                        await rgbPipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
-                        await rgbPipeline.cvtColor(OpenCV.COLOR_RGBA2RGB);
-                        await rgbPipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
-                        await rgbPipeline.setInputTensorData(models[0].index, 0, LipsPipeline.DATATYPE_FLOAT);
-                        await rgbPipeline.inference(models[0].index, interval: 100);
+                        // await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
+                        // await rgbPipeline.show();
+                        // await rgbPipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
+                        // await rgbPipeline.cvtColor(OpenCV.COLOR_RGBA2RGB);
+                        // await rgbPipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
+                        // await rgbPipeline.setInputTensorData(models[0].index, 0, LipsPipeline.DATATYPE_FLOAT);
+                        // await rgbPipeline.inference(models[0].index, interval: 100);
                       }
 
-                      await FlutterVision.test();
+                      // await FlutterVision.test();
 
-                      Float32List output = await models[0].getTensorOutput(0, [28, 28, 5]) as Float32List;
-                      print('${output.length}, ${output.map((e) => e.toStringAsFixed(2)).toList().sublist(0, 10)}');
-                      List<FaceInfo> faces = processFaceDetectorOutputs(output, 240, 180);
-                      if (faces.isEmpty) return;
+                      // Float32List output = await models[0].getTensorOutput(0, [28, 28, 5]) as Float32List;
+                      // print('${output.length}, ${output.map((e) => e.toStringAsFixed(2)).toList().sublist(0, 10)}');
+                      // List<FaceInfo> faces = processFaceDetectorOutputs(output, 240, 180);
+                      // if (faces.isEmpty) return;
 
-                      print('Face raw:${faces.length}');
-                      faces = nms(faces, 0.3);
-                      print('Face:${faces.length}');
-                      List<PositionedRect> r = [];
-                      if (faces.isNotEmpty) {
-                        for (FaceInfo f in faces) {
-                          r.add(PositionedRect(f.x1, f.y1, f.x2 - f.x1, f.y2 - f.y1, Colors.red));
-                        }
-                      }
+                      // print('Face raw:${faces.length}');
+                      // faces = nms(faces, 0.3);
+                      // print('Face:${faces.length}');
+                      // List<PositionedRect> r = [];
+                      // if (faces.isNotEmpty) {
+                      //   for (FaceInfo f in faces) {
+                      //     r.add(PositionedRect(f.x1, f.y1, f.x2 - f.x1, f.y2 - f.y1, Colors.red));
+                      //   }
+                      // }
 
-                      setState(() {
-                        rects = r;
-                      });
+                      // setState(() {
+                      //   rects = r;
+                      // });
                     },
                     child: const Text('SW200')),
                 TextButton(
@@ -360,6 +360,7 @@ class _MyAppState extends State<MyApp> {
                       FlutterVision.openglSetCamAngle(90, 0);
                       FlutterVision.openglSetCamPosition(0, 0, -3);
                       FlutterVision.openglSetCamFov(45.0);
+                      print('');
                     },
                     child: const Text('Reset')),
                 TextButton(
