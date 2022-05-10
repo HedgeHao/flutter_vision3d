@@ -46,6 +46,7 @@ public:
   VideoStream vsColor;
   VideoStream vsIR;
   bool videoStart = false;
+  bool enablePointCloud = false;
 
   ~OpenNi2Wrapper() {}
   OpenNi2Wrapper()
@@ -415,9 +416,9 @@ private:
         }
       }
 
-      if (niRgbAvailable && depthNewFrame && rgbNewFrame)
+      if (enablePointCloud && niRgbAvailable && depthNewFrame && rgbNewFrame)
       {
-        // niComputeCloud(vsDepth, (const openni::DepthPixel *)depthFrame.getData(), (const openni::RGB888Pixel *)rgbFrame.getData(), glfl->modelPointCloud->vertices, glfl->modelPointCloud->colors, glfl->modelPointCloud->colorsMap, &glfl->modelPointCloud->vertexPoints);
+        niComputeCloud(vsDepth, (const openni::DepthPixel *)depthFrame.getData(), (const openni::RGB888Pixel *)rgbFrame.getData(), glfl->modelPointCloud->vertices, glfl->modelPointCloud->colors, glfl->modelPointCloud->colorsMap, &glfl->modelPointCloud->vertexPoints);
       }
 
       flChannel->InvokeMethod("onFrame", nullptr, nullptr);

@@ -18,6 +18,7 @@ class ConfigurationViewModel {
   OpenNi2Device? selectedDevice;
   int lastRequestTS = 0;
   late File serial;
+  bool pointCloud = false;
 
   List<VideoModeData> videoModes = [
     VideoModeData('RGB', 1),

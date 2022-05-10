@@ -145,6 +145,10 @@ class FlutterVision {
     return await _channel.invokeMethod('screenshot', {'index': index, 'path': path, 'cvtCode': cvtCode ?? -1});
   }
 
+  static Future<void> enablePointCloud(bool enable) async {
+    return await _channel.invokeMethod('enablePointCloud', {'enable': enable});
+  }
+
   static Future<void> test() async {
     await _channel.invokeMethod('test');
     print('');
