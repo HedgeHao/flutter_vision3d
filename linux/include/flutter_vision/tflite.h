@@ -43,6 +43,7 @@ public:
             error = "Failed to create interpreter builder";
             return;
         }
+
         interpreter->SetAllowFp16PrecisionForFp32(true);
         interpreter->SetNumThreads(4);
 
@@ -66,6 +67,7 @@ public:
         }
 
         valid = true;
+        printf("Load Model OK\n");
     }
 
     ~TFLiteModel() {}

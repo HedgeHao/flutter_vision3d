@@ -2,13 +2,13 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision_example/configurePanel.dart';
-import 'package:desktop_window/desktop_window.dart';
-import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision_example/demo/LIPSFace.dart';
 
 const texture_width = 240.0;
@@ -135,7 +135,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<dynamic> update(MethodCall call) async {
     if (call.method == 'onInference') {
-      Float32List output = await models[0].getTensorOutput(0, [28, 28, 5]) as Float32List;
+      Float32List output = await models[0].getTensorOutput(0, [28, 28, 5]);
       List<FaceInfo> faces = processFaceDetectorOutputs(output, 240, 180);
       if (faces.isEmpty) return;
 
@@ -208,7 +208,11 @@ class _MyAppState extends State<MyApp> {
                       onPointerUp: updateMouseClick,
                       onPointerMove: updateMousePosition,
                       onPointerSignal: updateMouseWheel,
-                      child: Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 540, height: 405, child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
+                      child: Container(
+                          decoration: BoxDecoration(border: Border.all(width: 1)),
+                          width: 540,
+                          height: 405,
+                          child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
               Text(debugText, style: const TextStyle(fontSize: 30)),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 TextButton(
@@ -285,9 +289,9 @@ class _MyAppState extends State<MyApp> {
 
                     await FlutterVision.test();
 
-                    Float32List outputBoxes = await model.getTensorOutput(0, [25, 4]) as Float32List;
-                    Float32List outputClass = await model.getTensorOutput(1, [25]) as Float32List;
-                    Float32List outputScore = await model.getTensorOutput(2, [25]) as Float32List;
+                    Float32List outputBoxes = await model.getTensorOutput(0, [25, 4]);
+                    Float32List outputClass = await model.getTensorOutput(1, [25]);
+                    Float32List outputScore = await model.getTensorOutput(2, [25]);
 
                     print('Class(raw):$outputClass');
                     List<String> classes = outputClass.map((e) => e == 0 ? '' : COCO_CLASSES[e.toInt() - 1]).toList();
@@ -314,7 +318,7 @@ class _MyAppState extends State<MyApp> {
                 TextButton(
                     onPressed: () async {
                       if (models.isEmpty) {
-                        TFLiteModel model = await TFLiteModel.create('D:/test/190625_faceDetector_t1.tflite');
+                        TFLiteModel model = await TFLiteModel.create('/home/hedgehao/Documents/lips/LIPSFaceSDK/original_model/FaceDetector/tensorflow/190625_faceDetector_t1.tflite');
                         models.add(model);
 
                         LipsPipeline rgbPipeline = LipsPipeline(16);

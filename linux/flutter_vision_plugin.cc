@@ -485,7 +485,7 @@ static void flutter_vision_plugin_handle_method_call(
   else if (strcmp(method, "test") == 0)
   {
     // cv::Mat b(1280, 720, CV_8UC4, cv::Scalar(255, 0, 0, 255));
-    cv::Mat b = cv::imread("/home/hedgehao/test/cpp/tflite/images/faces.jpg", cv::IMREAD_COLOR);
+    cv::Mat b = cv::imread("/home/hedgehao/test/faces.jpg", cv::IMREAD_COLOR);
     cv::cvtColor(b, b, cv::COLOR_BGR2RGB);
     cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
     cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
