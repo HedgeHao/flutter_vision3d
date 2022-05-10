@@ -1,6 +1,6 @@
 name: flutter_vision
 description: Framework for 2D and 3D image processing. Integrate with OpenCV, OpenNI2, TensorFlow.
-version: 0.0.7
+version: 0.0.8
 homepage:
 
 environment:

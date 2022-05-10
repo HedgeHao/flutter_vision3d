@@ -2,13 +2,14 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision_example/configurePanel.dart';
-import 'package:desktop_window/desktop_window.dart';
-import 'package:flutter_vision/constants.dart';
+import 'package:flutter_vision_example/demo/LIPSFace.dart';
 
 const texture_width = 240.0;
 const texture_height = 180.0;
@@ -58,6 +59,8 @@ class _MyAppState extends State<MyApp> {
   List<TFLiteModel> models = [];
 
   List<PositionedRect> rects = [];
+
+  int ts = 0;
 
   void updateMouseClick(PointerEvent details) {
     setState(() {
@@ -131,27 +134,24 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<dynamic> update(MethodCall call) async {
-    if (call.method == 'onFrame') {
-      Float32List outputBoxes = await models[0].getTensorOutput(0, [25, 4]) as Float32List;
-      Float32List outputClass = await models[0].getTensorOutput(1, [25]) as Float32List;
-      Float32List outputScore = await models[0].getTensorOutput(2, [25]) as Float32List;
+    if (call.method == 'onInference') {
+      Float32List output = await models[0].getTensorOutput(0, [28, 28, 5]);
+      List<FaceInfo> faces = processFaceDetectorOutputs(output, 240, 180);
+      if (faces.isEmpty) return;
 
-      print('Class:${COCO_CLASSES[outputClass[0].toInt()]}, Score: ${outputScore[0]}');
-
+      faces = nms(faces, 0.3);
+      if (faces.length > 2) return;
       List<PositionedRect> r = [];
-      for (int i = 0; i < 3; i++) {
-        double x = texture_width * outputBoxes[i * 4 + 1];
-        double y = texture_height * outputBoxes[i * 4];
-        double width = texture_width * outputBoxes[i * 4 + 3] - x;
-        double height = texture_height * outputBoxes[i * 4 + 2] - y;
-        r.add(PositionedRect(x, y, width, height, Colors.red));
+      if (faces.isNotEmpty) {
+        for (FaceInfo f in faces) {
+          r.add(PositionedRect(f.x1, f.y1, f.x2 - f.x1, f.y2 - f.y1, Colors.red));
+        }
       }
 
       setState(() {
         rects = r;
-        debugText = '${COCO_CLASSES[outputClass[0].toInt() - 1]} ${outputScore[0]}';
       });
-    }
+    } else if (call.method == 'onFrame') {}
   }
 
   @override
@@ -179,7 +179,7 @@ class _MyAppState extends State<MyApp> {
                           height: texture_height,
                           child: Stack(children: [
                             Texture(textureId: rgbTextureId),
-                            ...rects,
+                            // ...rects,
                           ]),
                         ),
                   const SizedBox(width: 10),
@@ -187,7 +187,16 @@ class _MyAppState extends State<MyApp> {
                   const SizedBox(width: 10),
                   irTextureId == 0 ? const SizedBox() : Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 240, height: 180, child: Texture(textureId: irTextureId)),
                   const SizedBox(width: 10),
-                  cameraTextureId == 0 ? const SizedBox() : Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 240, height: 180, child: Texture(textureId: cameraTextureId)),
+                  cameraTextureId == 0
+                      ? const SizedBox()
+                      : Container(
+                          decoration: BoxDecoration(border: Border.all(width: 1)),
+                          width: 240,
+                          height: 180,
+                          child: Stack(children: [
+                            Texture(textureId: cameraTextureId),
+                            ...rects,
+                          ])),
                   const SizedBox(width: 10),
                 ],
               ),
@@ -199,7 +208,11 @@ class _MyAppState extends State<MyApp> {
                       onPointerUp: updateMouseClick,
                       onPointerMove: updateMousePosition,
                       onPointerSignal: updateMouseWheel,
-                      child: Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 540, height: 405, child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
+                      child: Container(
+                          decoration: BoxDecoration(border: Border.all(width: 1)),
+                          width: 540,
+                          height: 405,
+                          child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
               Text(debugText, style: const TextStyle(fontSize: 30)),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 TextButton(
@@ -242,7 +255,7 @@ class _MyAppState extends State<MyApp> {
 
                       LipsPipeline uvcPipeline = LipsPipeline(16);
                       await uvcPipeline.clear();
-                      await uvcPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+                      // await uvcPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
                       await uvcPipeline.show();
 
                       await FlutterVision.test();
@@ -260,6 +273,9 @@ class _MyAppState extends State<MyApp> {
                     child: const Text('Replace pipeline')),
                 TextButton(
                   onPressed: () async {
+                    TFLiteModel model = await TFLiteModel.create('/home/hedgehao/test/cpp/tflite/models/efficientdet.tflite');
+                    models.add(model);
+
                     LipsPipeline rgbPipeline = LipsPipeline(1);
                     await rgbPipeline.clear();
                     await rgbPipeline.resize(320, 320, mode: OpenCV.INTER_CUBIC);
@@ -268,22 +284,17 @@ class _MyAppState extends State<MyApp> {
                     await rgbPipeline.show();
                     await rgbPipeline.cvtColor(OpenCV.CV_8UC1);
                     await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2BGR);
-
-                    TFLiteModel model = await TFLiteModel.create('/home/hedgehao/test/cpp/tflite/models/efficientdet.tflite');
-                    models.add(model);
-
-                    LipsPipeline tfPipeline = LipsPipeline(8);
-                    await tfPipeline.clear();
-                    await tfPipeline.setInputTensorData(LipsPipeline.RGB_FRAME, 0, LipsPipeline.DATATYPE_UINT8);
-                    await tfPipeline.inference();
+                    await rgbPipeline.setInputTensorData(model.index, 0, LipsPipeline.DATATYPE_UINT8);
+                    await rgbPipeline.inference(model.index);
 
                     await FlutterVision.test();
 
-                    Float32List outputBoxes = await model.getTensorOutput(0, [25, 4]) as Float32List;
-                    Float32List outputClass = await model.getTensorOutput(1, [25]) as Float32List;
-                    Float32List outputScore = await model.getTensorOutput(2, [25]) as Float32List;
+                    Float32List outputBoxes = await model.getTensorOutput(0, [25, 4]);
+                    Float32List outputClass = await model.getTensorOutput(1, [25]);
+                    Float32List outputScore = await model.getTensorOutput(2, [25]);
 
-                    List<String> classes = outputClass.map((e) => COCO_CLASSES[e.toInt()]).toList();
+                    print('Class(raw):$outputClass');
+                    List<String> classes = outputClass.map((e) => e == 0 ? '' : COCO_CLASSES[e.toInt() - 1]).toList();
 
                     print('Class:$classes');
                     print('Score:${outputScore.map((e) => e.toStringAsFixed(2)).toList()}');
@@ -305,10 +316,56 @@ class _MyAppState extends State<MyApp> {
                   child: const Text('EfficientNet'),
                 ),
                 TextButton(
+                    onPressed: () async {
+                      if (models.isEmpty) {
+                        TFLiteModel model = await TFLiteModel.create('/home/hedgehao/Documents/lips/LIPSFaceSDK/original_model/FaceDetector/tensorflow/190625_faceDetector_t1.tflite');
+                        models.add(model);
+
+                        LipsPipeline rgbPipeline = LipsPipeline(16);
+                        await rgbPipeline.clear();
+                        // // await rgbPipeline.imwrite('/home/hedgehao/Desktop/test.jpg', interval: 1000);
+
+                        // // await rgbPipeline.imread("/home/hedgehao/test/cpp/tflite/images/faces.jpg");
+                        // // await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGB);
+
+                        await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
+                        await rgbPipeline.show();
+                        await rgbPipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
+                        await rgbPipeline.cvtColor(OpenCV.COLOR_RGBA2RGB);
+                        await rgbPipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
+                        await rgbPipeline.setInputTensorData(models[0].index, 0, LipsPipeline.DATATYPE_FLOAT);
+                        await rgbPipeline.inference(models[0].index, interval: 100);
+                      }
+
+                      await FlutterVision.test();
+
+                      Float32List output = await models[0].getTensorOutput(0, [28, 28, 5]);
+
+                      print('${output.length}, ${output.map((e) => e.toStringAsFixed(2)).toList().sublist(0, 10)}');
+                      List<FaceInfo> faces = processFaceDetectorOutputs(output, 240, 180);
+                      if (faces.isEmpty) return;
+
+                      print('Face raw:${faces.length}');
+                      faces = nms(faces, 0.3);
+                      print('Face:${faces.length}');
+                      List<PositionedRect> r = [];
+                      if (faces.isNotEmpty) {
+                        for (FaceInfo f in faces) {
+                          r.add(PositionedRect(f.x1, f.y1, f.x2 - f.x1, f.y2 - f.y1, Colors.red));
+                        }
+                      }
+
+                      setState(() {
+                        rects = r;
+                      });
+                    },
+                    child: const Text('SW200')),
+                TextButton(
                     onPressed: () {
                       FlutterVision.openglSetCamAngle(90, 0);
                       FlutterVision.openglSetCamPosition(0, 0, -3);
                       FlutterVision.openglSetCamFov(45.0);
+                      print('');
                     },
                     child: const Text('Reset')),
                 TextButton(

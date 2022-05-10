@@ -7,6 +7,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include "pipeline/pipeline.h"
+#include "tflite.h"
 struct _UvcTextureClass
 {
     FlPixelBufferTextureClass parent_class;
@@ -17,6 +18,7 @@ struct _UvcTextureClass
     bool video_start = false;
     cv::Mat cvImage;
     Pipeline *pipeline;
+    std::vector<TFLiteModel *> *models;
 };
 
 G_DECLARE_DERIVABLE_TYPE(UvcTexture,
@@ -60,27 +62,42 @@ public:
     int capIndex = -1;
     cv::VideoCapture *cap = nullptr;
 
-    OpenCVCamera(int index, UvcTexture *t, FlTextureRegistrar *r)
+    OpenCVCamera(int index, UvcTexture *t, FlTextureRegistrar *r, FlMethodChannel *c)
     {
         texture = t;
-        capIndex = index;
         registrar = r;
+        flChannel = c;
+        capIndex = index;
+        if (cap == nullptr)
+        {
+            cap = new cv::VideoCapture();
+        }
+    }
+
+    void config(int prop, float value)
+    {
+        cap->set(prop, value);
     }
 
     bool open()
     {
-        cap = new cv::VideoCapture(capIndex);
+        cap->open(capIndex);
         return cap->isOpened();
     }
 
-    void start()
+    int start()
     {
         if (cap == nullptr)
-            return;
+            return -1;
+
+        bool ret = cap->open(capIndex);
+        if (!ret && !cap->isOpened())
+            return -2;
 
         videoStart = true;
         std::thread t(&OpenCVCamera::_readVideoFeed, this);
         t.detach();
+        return 0;
     }
 
     void stop()
@@ -90,6 +107,7 @@ public:
 
 private:
     FlTextureRegistrar *registrar;
+    FlMethodChannel *flChannel;
     bool videoStart = false;
     void _readVideoFeed()
     {
@@ -105,8 +123,11 @@ private:
 
             if (newFrame)
             {
-                cls->pipeline->run(cls->cvImage, *registrar, *FL_TEXTURE(texture), cls->video_width, cls->video_height, cls->buffer);
+                cls->pipeline->run(cls->cvImage, *registrar, *FL_TEXTURE(texture), cls->video_width, cls->video_height, cls->buffer, cls->models, flChannel);
             }
         }
+
+        printf("Release VideoCap\n");
+        cap->release();
     }
 };

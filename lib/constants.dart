@@ -318,6 +318,60 @@ class OpenCV {
   static const ROTATE_90_CLOCKWISE = 0;
   static const ROTATE_180 = 1;
   static const ROTATE_90_COUNTERCLOCKWISE = 2;
+
+  /* VideoCaptureProperties */
+  static const CAP_PROP_POS_MSEC = 0;
+  static const CAP_PROP_POS_FRAMES = 1;
+  static const CAP_PROP_POS_AVI_RATIO = 2;
+  static const CAP_PROP_FRAME_WIDTH = 3;
+  static const CAP_PROP_FRAME_HEIGHT = 4;
+  static const CAP_PROP_FPS = 5;
+  static const CAP_PROP_FOURCC = 6;
+  static const CAP_PROP_FRAME_COUNT = 7;
+  static const CAP_PROP_FORMAT = 8;
+  static const CAP_PROP_MODE = 9;
+  static const CAP_PROP_BRIGHTNESS = 10;
+  static const CAP_PROP_CONTRAST = 11;
+  static const CAP_PROP_SATURATION = 12;
+  static const CAP_PROP_HUE = 13;
+  static const CAP_PROP_GAIN = 14;
+  static const CAP_PROP_EXPOSURE = 15;
+  static const CAP_PROP_CONVERT_RGB = 16;
+  static const CAP_PROP_WHITE_BALANCE_BLUE_U = 17;
+  static const CAP_PROP_RECTIFICATION = 18;
+  static const CAP_PROP_MONOCHROME = 19;
+  static const CAP_PROP_SHARPNESS = 20;
+  static const CAP_PROP_AUTO_EXPOSURE = 21;
+  static const CAP_PROP_GAMMA = 22;
+  static const CAP_PROP_TEMPERATURE = 23;
+  static const CAP_PROP_TRIGGER = 24;
+  static const CAP_PROP_TRIGGER_DELAY = 25;
+  static const CAP_PROP_WHITE_BALANCE_RED_V = 26;
+  static const CAP_PROP_ZOOM = 27;
+  static const CAP_PROP_FOCUS = 28;
+  static const CAP_PROP_GUID = 29;
+  static const CAP_PROP_ISO_SPEED = 30;
+  static const CAP_PROP_BACKLIGHT = 32;
+  static const CAP_PROP_PAN = 33;
+  static const CAP_PROP_TILT = 34;
+  static const CAP_PROP_ROLL = 35;
+  static const CAP_PROP_IRIS = 36;
+  static const CAP_PROP_SETTINGS = 37;
+  static const CAP_PROP_BUFFERSIZE = 38;
+  static const CAP_PROP_AUTOFOCUS = 39;
+  static const CAP_PROP_SAR_NUM = 40;
+  static const CAP_PROP_SAR_DEN = 41;
+  static const CAP_PROP_BACKEND = 42;
+  static const CAP_PROP_CHANNEL = 43;
+  static const CAP_PROP_AUTO_WB = 44;
+  static const CAP_PROP_WB_TEMPERATURE = 45;
+  static const CAP_PROP_CODEC_PIXEL_FORMAT = 46;
+
+  /* VideoCaptureModes */
+  static const CAP_MODE_BGR = 0;
+  static const CAP_MODE_RGB = 1;
+  static const CAP_MODE_GRAY = 2;
+  static const CAP_MODE_YUYV = 3;
 }
 
 const List<String> COCO_CLASSES = [

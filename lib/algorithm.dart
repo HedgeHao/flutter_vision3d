@@ -1,5 +1,9 @@
 import 'dart:math';
 
+double sigmoid(double x) {
+  return 1 / (1 + exp(-x));
+}
+
 List<double> softmax(List<double> input) {
   int i;
   double m, sum, constant;
