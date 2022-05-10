@@ -157,6 +157,8 @@ void PipelineFuncTfInference(cv::Mat &img, std::vector<uint8_t> params, flutter:
     bool success = models->at(params[0])->inference();
     if (!success)
         printf("Inference Failed!!!!\n");
+
+    flChannel->InvokeMethod("onInference", nullptr, nullptr);
 }
 
 const FuncDef pipelineFuncs[] = {

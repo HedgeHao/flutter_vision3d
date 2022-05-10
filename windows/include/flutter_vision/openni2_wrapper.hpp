@@ -420,7 +420,7 @@ private:
         // niComputeCloud(vsDepth, (const openni::DepthPixel *)depthFrame.getData(), (const openni::RGB888Pixel *)rgbFrame.getData(), glfl->modelPointCloud->vertices, glfl->modelPointCloud->colors, glfl->modelPointCloud->colorsMap, &glfl->modelPointCloud->vertexPoints);
       }
 
-      // TODO: onFrame callback
+      flChannel->InvokeMethod("onFrame", nullptr, nullptr);
     }
   }
 };
