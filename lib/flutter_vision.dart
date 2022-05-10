@@ -190,7 +190,7 @@ class LipsPipeline {
       'params': Uint8List.fromList([t]),
       'len': 1,
       'at': at ?? -1,
-      'interval': interval,
+      'interval': interval ?? 0,
     });
   }
 
@@ -201,7 +201,7 @@ class LipsPipeline {
       'params': Uint8List.fromList([mode]),
       'len': 1,
       'at': at ?? -1,
-      'interval': interval,
+      'interval': interval ?? 0,
     });
   }
 
@@ -212,7 +212,7 @@ class LipsPipeline {
       'params': Uint8List.fromList([path.length, ...utf8.encode(path)]),
       'len': path.length + 1,
       'at': at ?? -1,
-      'interval': interval,
+      'interval': interval ?? 0,
     });
   }
 
@@ -223,7 +223,7 @@ class LipsPipeline {
       'params': Uint8List.fromList([path.length, ...utf8.encode(path)]),
       'len': path.length + 1,
       'at': at ?? -1,
-      'interval': interval,
+      'interval': interval ?? 0,
     });
   }
 
@@ -234,7 +234,7 @@ class LipsPipeline {
       'params': null,
       'len': 0,
       'at': at ?? -1,
-      'interval': interval,
+      'interval': interval ?? 0,
     });
   }
 
@@ -251,7 +251,7 @@ class LipsPipeline {
       'params': Uint8List.fromList([mode, ...scaleBytes, ...shiftBytes]),
       'len': 9,
       'at': at ?? -1,
-      'interval': interval,
+      'interval': interval ?? 0,
     });
   }
 
@@ -262,7 +262,7 @@ class LipsPipeline {
       'params': Uint8List.fromList([colorMap]),
       'len': 1,
       'at': at ?? -1,
-      'interval': interval,
+      'interval': interval ?? 0,
     });
   }
 
@@ -273,7 +273,7 @@ class LipsPipeline {
       'params': Uint8List.fromList([(width >> 8) & 0xff, width & 0xff, (height >> 8) & 0xff, height & 0xff, mode ?? OpenCV.INTER_NEAREST]),
       'len': 5,
       'at': at ?? -1,
-      'interval': interval,
+      'interval': interval ?? 0,
     });
   }
 
@@ -284,7 +284,7 @@ class LipsPipeline {
       'params': Uint8List.fromList([xStart >> 8, xStart & 0xff, xEnd >> 8, xEnd & 0xff, yStart >> 8, yStart & 0xff, yEnd >> 8, yEnd & 0xff]),
       'len': 8,
       'at': at ?? -1,
-      'interval': interval,
+      'interval': interval ?? 0,
     });
   }
 
@@ -300,7 +300,7 @@ class LipsPipeline {
       'params': Uint8List.fromList([...x1f, ...y1f, ...x2f, ...y2f, r, g, b, alpha ?? 255, thickness ?? 1, lineType ?? OpenCV.LINE_TYPE_LINE_8, shift ?? 0]),
       'len': 23,
       'at': at ?? -1,
-      'interval': interval,
+      'interval': interval ?? 0,
     });
   }
 
@@ -311,7 +311,7 @@ class LipsPipeline {
       'params': Uint8List.fromList([rotateCode]),
       'len': 1,
       'at': at ?? -1,
-      'interval': interval,
+      'interval': interval ?? 0,
     });
   }
 
@@ -322,7 +322,7 @@ class LipsPipeline {
       'params': Uint8List.fromList([modelIndex, tensorIndex, dataType]),
       'len': 3,
       'at': at ?? -1,
-      'interval': interval,
+      'interval': interval ?? 0,
     });
   }
 
@@ -333,7 +333,7 @@ class LipsPipeline {
       'params': Uint8List.fromList([modelIndex]),
       'len': 1,
       'at': at ?? -1,
-      'interval': interval,
+      'interval': interval ?? 0,
     });
   }
 }
