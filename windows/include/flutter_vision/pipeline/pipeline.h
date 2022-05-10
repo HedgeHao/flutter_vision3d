@@ -209,6 +209,7 @@ public:
                 }
             }
 
+            // std::cout << "Run:" << funcs[i].name << std::endl;
             funcs[i].func(img, funcs[i].params, registrar, textureId, texture_width, texture_height, pixelBuf, models, flChannel);
 
             if (funcs[i].interval > 0)

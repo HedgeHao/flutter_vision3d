@@ -556,11 +556,13 @@ namespace
         outputSize *= size[i];
       float *data = new float[outputSize];
 
+
       models[0]->retrieveOutput<float>(index, outputSize, data);
 
       flutter::EncodableList fl = flutter::EncodableList();
-      for (int i = 0; i < size.size(); i++)
-        fl.push_back(flutter::EncodableValue(*(data + i)));
+      for (int i = 0; i < outputSize; i++){
+        fl.push_back(*(data + i));
+      }
 
       result->Success(fl);
     }
@@ -639,6 +641,8 @@ namespace
       irTexture->setPixelBuffer();
       depthTexture->pipeline->run(r, textureRegistrar, depthTexture->textureId, depthTexture->videoWidth, depthTexture->videoHeight, depthTexture->buffer, &models, flChannel);
       depthTexture->setPixelBuffer();
+      uvcTexture->pipeline->run(b, textureRegistrar, uvcTexture->textureId, uvcTexture->videoWidth, uvcTexture->videoHeight, uvcTexture->buffer, &models, flChannel);
+      uvcTexture->setPixelBuffer();
 
       // rgbTexture->genPixels();
       // depthTexture->genPixels();

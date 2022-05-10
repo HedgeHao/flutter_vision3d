@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
@@ -351,8 +352,18 @@ class TFLiteModel {
     return TFLiteModel._create(modelPath, _tflite_model_counter_++);
   }
 
-  Future<List> getTensorOutput(int tensorIndex, List<int> size) async {
-    return await FlutterVision._channel.invokeMethod('tfliteGetTensorOutput', {'tensorIndex': tensorIndex, 'size': Int32List.fromList(size)}) as Float32List;
+  Future<Float32List> getTensorOutput(int tensorIndex, List<int> size) async {
+    List l = await FlutterVision._channel.invokeMethod('tfliteGetTensorOutput', {'tensorIndex': tensorIndex, 'size': Int32List.fromList(size)});
+
+    if (Platform.isWindows) {
+      Float32List flist = Float32List(l.length);
+      for (int i = 0; i < l.length; i++) {
+        flist[i] = l[i] as double;
+      }
+      return flist;
+    } else {
+      return l as Float32List;
+    }
   }
 
   Future<dynamic> _getModelInfo(String key) async {
