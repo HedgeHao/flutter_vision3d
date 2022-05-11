@@ -182,7 +182,18 @@ class LipsPipeline {
 
   int index;
 
+  static Future<LipsPipeline> create() async {
+    int pipelineIndex = await FlutterVision._channel.invokeMethod('pipelineCreate');
+    print('Create New Pipeline:$pipelineIndex');
+
+    return LipsPipeline(pipelineIndex);
+  }
+
   LipsPipeline(this.index);
+
+  Future<void> run() async {
+    await FlutterVision._channel.invokeMethod('pipelineRun', {'index': index});
+  }
 
   Future<void> clear() async {
     await FlutterVision._channel.invokeMethod('pipelineClear', {'index': index});

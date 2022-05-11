@@ -140,7 +140,7 @@ class _MyAppState extends State<MyApp> {
       if (faces.isEmpty) return;
 
       faces = nms(faces, 0.3);
-      if (faces.length > 2) return;
+      // if (faces.length > 2) return;
       List<PositionedRect> r = [];
       if (faces.isNotEmpty) {
         for (FaceInfo f in faces) {
@@ -255,7 +255,7 @@ class _MyAppState extends State<MyApp> {
 
                       LipsPipeline uvcPipeline = LipsPipeline(16);
                       await uvcPipeline.clear();
-                      // await uvcPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
+                      await uvcPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
                       await uvcPipeline.show();
 
                       await FlutterVision.test();
@@ -377,7 +377,26 @@ class _MyAppState extends State<MyApp> {
                         FlutterVision.openglIsRendering = false;
                       }
                     },
-                    child: const Text('Render'))
+                    child: const Text('Render')),
+                TextButton(
+                    onPressed: () async {
+                      TFLiteModel model = await TFLiteModel.create('/home/hedgehao/Documents/lips/LIPSFaceSDK/original_model/FaceDetector/tensorflow/190625_faceDetector_t1.tflite');
+                      models.add(model);
+
+                      LipsPipeline pipeline = await LipsPipeline.create();
+                      await pipeline.clear();
+                      await pipeline.imread("/home/hedgehao/test/faces.jpg");
+                      await pipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+                      await pipeline.show();
+                      await pipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
+                      await pipeline.cvtColor(OpenCV.COLOR_RGBA2RGB);
+                      await pipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
+                      await pipeline.setInputTensorData(model.index, 0, LipsPipeline.DATATYPE_FLOAT);
+                      await pipeline.inference(model.index, interval: 100);
+                      await pipeline.run();
+                      print('');
+                    },
+                    child: const Text('Pipeline'))
               ])
             ])),
           ],

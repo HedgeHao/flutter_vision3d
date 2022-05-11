@@ -41,6 +41,7 @@ struct _FlutterVisionPlugin
   TfPipeline *tfPipeline;
   std::vector<TFLiteModel *> models{};
   std::vector<OpenCVCamera *> cameras{};
+  std::vector<Pipeline *> pipelines{};
 };
 
 G_DEFINE_TYPE(FlutterVisionPlugin, flutter_vision_plugin, g_object_get_type())
@@ -289,8 +290,27 @@ static void flutter_vision_plugin_handle_method_call(
     // }
     else
     {
-      return;
+      // TODO: fix index
+      self->pipelines[index - 100]->add(funcIndex, params, len, insertAt, interval);
     }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+  }
+  else if (strcmp(method, "pipelineCreate") == 0)
+  {
+    Pipeline *p = new Pipeline();
+    self->pipelines.push_back(p);
+
+    // TODO: Fix index
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(self->pipelines.size() - 1 + 100)));
+  }
+  else if (strcmp(method, "pipelineRun") == 0)
+  {
+    FlValue *valueIndex = fl_value_lookup_string(args, "index");
+    const int index = fl_value_get_int(valueIndex) - 100;
+
+    // TODO: normal pipline should have their own texture.
+    self->pipelines[index]->runOnce(*self->texture_registrar, *FL_TEXTURE(self->rgbTexture), RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_width, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_height, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->buffer, &self->models, self->flChannel);
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
@@ -500,7 +520,7 @@ static void flutter_vision_plugin_handle_method_call(
     RGB_TEXTURE_GET_CLASS(self->rgbTexture)->pipeline->run(b, *self->texture_registrar, *FL_TEXTURE(self->rgbTexture), RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_width, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_height, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->buffer, &self->models, self->flChannel);
     DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->pipeline->run(g, *self->texture_registrar, *FL_TEXTURE(self->depthTexture), DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->video_width, DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->video_height, DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->buffer, &self->models, self->flChannel);
     IR_TEXTURE_GET_CLASS(self->irTexture)->pipeline->run(r, *self->texture_registrar, *FL_TEXTURE(self->irTexture), IR_TEXTURE_GET_CLASS(self->irTexture)->video_width, IR_TEXTURE_GET_CLASS(self->irTexture)->video_height, IR_TEXTURE_GET_CLASS(self->irTexture)->buffer, &self->models, self->flChannel);
-    UVC_TEXTURE_GET_CLASS(self->uvcTexture)->pipeline->run(b, *self->texture_registrar, *FL_TEXTURE(self->uvcTexture), IR_TEXTURE_GET_CLASS(self->uvcTexture)->video_width, IR_TEXTURE_GET_CLASS(self->uvcTexture)->video_height, IR_TEXTURE_GET_CLASS(self->uvcTexture)->buffer, &self->models, self->flChannel);
+    // UVC_TEXTURE_GET_CLASS(self->uvcTexture)->pipeline->run(b, *self->texture_registrar, *FL_TEXTURE(self->uvcTexture), IR_TEXTURE_GET_CLASS(self->uvcTexture)->video_width, IR_TEXTURE_GET_CLASS(self->uvcTexture)->video_height, IR_TEXTURE_GET_CLASS(self->uvcTexture)->buffer, &self->models, self->flChannel);
 
     fl_texture_registrar_mark_texture_frame_available(self->texture_registrar, FL_TEXTURE(self->rgbTexture));
 
@@ -558,7 +578,7 @@ void flutter_vision_plugin_register_with_registrar(FlPluginRegistrar *registrar)
   fl_texture_registrar_register_texture(plugin->texture_registrar, FL_TEXTURE(plugin->uvcTexture));
   UVC_TEXTURE_GET_CLASS(plugin->uvcTexture)->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(plugin->uvcTexture));
   fl_texture_registrar_mark_texture_frame_available(plugin->texture_registrar, FL_TEXTURE(plugin->uvcTexture));
-  UVC_TEXTURE_GET_CLASS(plugin->uvcTexture)->pipeline = new Pipeline();
+  UVC_TEXTURE_GET_CLASS(plugin->uvcTexture)->pipeline = new Pipeline(&UVC_TEXTURE_GET_CLASS(plugin->uvcTexture)->cvImage);
   UVC_TEXTURE_GET_CLASS(plugin->uvcTexture)->models = &plugin->models;
 
   plugin->rgbTexture = RGB_TEXTURE(g_object_new(rgb_texture_get_type(), nullptr));
@@ -566,21 +586,21 @@ void flutter_vision_plugin_register_with_registrar(FlPluginRegistrar *registrar)
   fl_texture_registrar_register_texture(plugin->texture_registrar, FL_TEXTURE(plugin->rgbTexture));
   RGB_TEXTURE_GET_CLASS(plugin->rgbTexture)->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(plugin->rgbTexture));
   fl_texture_registrar_mark_texture_frame_available(plugin->texture_registrar, FL_TEXTURE(plugin->rgbTexture));
-  RGB_TEXTURE_GET_CLASS(plugin->rgbTexture)->pipeline = new Pipeline();
+  RGB_TEXTURE_GET_CLASS(plugin->rgbTexture)->pipeline = new Pipeline(&UVC_TEXTURE_GET_CLASS(plugin->rgbTexture)->cvImage);
 
   plugin->depthTexture = DEPTH_TEXTURE(g_object_new(depth_texture_get_type(), nullptr));
   FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(plugin->depthTexture)->copy_pixels = depth_texture_copy_pixels;
   fl_texture_registrar_register_texture(plugin->texture_registrar, FL_TEXTURE(plugin->depthTexture));
   DEPTH_TEXTURE_GET_CLASS(plugin->depthTexture)->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(plugin->depthTexture));
   fl_texture_registrar_mark_texture_frame_available(plugin->texture_registrar, FL_TEXTURE(plugin->depthTexture));
-  DEPTH_TEXTURE_GET_CLASS(plugin->depthTexture)->pipeline = new Pipeline();
+  DEPTH_TEXTURE_GET_CLASS(plugin->depthTexture)->pipeline = new Pipeline(&UVC_TEXTURE_GET_CLASS(plugin->depthTexture)->cvImage);
 
   plugin->irTexture = IR_TEXTURE(g_object_new(ir_texture_get_type(), nullptr));
   FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(plugin->irTexture)->copy_pixels = ir_texture_copy_pixels;
   fl_texture_registrar_register_texture(plugin->texture_registrar, FL_TEXTURE(plugin->irTexture));
   IR_TEXTURE_GET_CLASS(plugin->irTexture)->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(plugin->irTexture));
   fl_texture_registrar_mark_texture_frame_available(plugin->texture_registrar, FL_TEXTURE(plugin->irTexture));
-  IR_TEXTURE_GET_CLASS(plugin->irTexture)->pipeline = new Pipeline();
+  IR_TEXTURE_GET_CLASS(plugin->irTexture)->pipeline = new Pipeline(&UVC_TEXTURE_GET_CLASS(plugin->irTexture)->cvImage);
 
   plugin->openglTexture = OPENGL_TEXTURE(g_object_new(opengl_texture_get_type(), nullptr));
   OPENGL_TEXTURE_GET_CLASS(plugin->openglTexture)->video_width = 1280;
@@ -593,8 +613,8 @@ void flutter_vision_plugin_register_with_registrar(FlPluginRegistrar *registrar)
   plugin->glfl = new OpenGLFL(gtk_widget_get_parent_window(GTK_WIDGET(plugin->flView)), plugin->texture_registrar, plugin->openglTexture);
   OPENGL_TEXTURE_GET_CLASS(plugin->openglTexture)->buffer = plugin->glfl->pixelBuffer;
 
-  plugin->tfPipeline = new TfPipeline();
-  plugin->ni2->registerFlContext(plugin->texture_registrar, plugin->rgbTexture, plugin->depthTexture, plugin->irTexture, channel, plugin->glfl, &plugin->models, plugin->tfPipeline);
+  // plugin->tfPipeline = new TfPipeline();
+  // plugin->ni2->registerFlContext(plugin->texture_registrar, plugin->rgbTexture, plugin->depthTexture, plugin->irTexture, channel, plugin->glfl, &plugin->models, plugin->tfPipeline);
 
   g_object_unref(plugin);
 }

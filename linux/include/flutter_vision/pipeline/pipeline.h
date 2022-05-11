@@ -188,11 +188,18 @@ const FuncDef pipelineFuncs[] = {
 
 class Pipeline
 {
-    bool doScreenshot = false;
-    std::string screenshotSavePath;
-    int screenshotCvtColor = -1;
-
 public:
+    Pipeline()
+    {
+        img = cv::Mat(1, 1, CV_8UC4, cv::Scalar(255, 0, 0, 255));
+        imgPtr = &img;
+    }
+
+    Pipeline(cv::Mat *m)
+    {
+        imgPtr = m;
+    }
+
     void add(unsigned int index, const uint8_t *params, unsigned int len, int insertAt = -1, int interval = 0)
     {
         FuncDef f = pipelineFuncs[index];
@@ -205,6 +212,15 @@ public:
             funcs.push_back(f);
         else
             funcs.at(insertAt) = f;
+    }
+
+    void runOnce(FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+    {
+        for (int i = 0; i < funcs.size(); i++)
+        {
+            printf("Run:%s\n", funcs[i].name);
+            funcs[i].func(img, funcs[i].params, registrar, texture, texture_width, texture_height, pixelBuf, models, flChannel);
+        }
     }
 
     void run(cv::Mat &img, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
@@ -269,5 +285,10 @@ public:
 private:
     std::vector<FuncDef> funcs = {};
     int64_t ts = 0;
+    bool doScreenshot = false;
+    std::string screenshotSavePath;
+    int screenshotCvtColor = -1;
+    cv::Mat *imgPtr;
+    cv::Mat img;
 };
 #endif
