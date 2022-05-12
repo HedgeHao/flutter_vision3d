@@ -6,6 +6,8 @@ project(${PROJECT_NAME} LANGUAGES CXX)
 # not be changed
 set(PLUGIN_NAME "flutter_vision_plugin")
 
+add_subdirectory("${PROJECT_SOURCE_DIR}/../handler/" "handler/")
+
 include_directories(
   "${PROJECT_SOURCE_DIR}/include/tensorflow"
 )
@@ -38,10 +40,12 @@ find_package( GLEW REQUIRED )
 target_link_libraries( ${PLUGIN_NAME} PRIVATE GLEW::GLEW)
 
 target_link_libraries( ${PLUGIN_NAME} PRIVATE tensorflowlite)
+target_link_libraries( ${PLUGIN_NAME} PRIVATE flutterVisionHandler)
 
 
 # List of absolute paths to libraries that should be bundled with the plugin
 set(flutter_vision_bundled_libraries
   "${PROJECT_SOURCE_DIR}/lib/libtensorflowlite.so"
+  "${CMAKE_BINARY_DIR}/plugins/flutter_vision/handler/libflutterVisionHandler.so"
   PARENT_SCOPE
 )

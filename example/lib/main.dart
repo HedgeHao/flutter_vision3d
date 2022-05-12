@@ -151,7 +151,12 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         rects = r;
       });
-    } else if (call.method == 'onFrame') {}
+    } else if (call.method == 'onUvcFrame') {
+    } else if (call.method == 'onNiFrame') {
+    } else if (call.method == 'onHandled') {
+      var result = call.arguments as Float32List;
+      print(result);
+    }
   }
 
   @override
@@ -323,11 +328,6 @@ class _MyAppState extends State<MyApp> {
 
                         LipsPipeline rgbPipeline = LipsPipeline(16);
                         await rgbPipeline.clear();
-                        // // await rgbPipeline.imwrite('/home/hedgehao/Desktop/test.jpg', interval: 1000);
-
-                        // // await rgbPipeline.imread("/home/hedgehao/test/cpp/tflite/images/faces.jpg");
-                        // // await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGB);
-
                         await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
                         await rgbPipeline.show();
                         await rgbPipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
@@ -396,7 +396,18 @@ class _MyAppState extends State<MyApp> {
                       await pipeline.run();
                       print('');
                     },
-                    child: const Text('Pipeline'))
+                    child: const Text('Pipeline')),
+                TextButton(
+                    onPressed: () async {
+                      LipsPipeline pipeline = await LipsPipeline.create();
+                      await pipeline.clear();
+                      await pipeline.imread("/home/hedgehao/test/faces.jpg");
+                      await pipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+                      await pipeline.customHandler(5);
+                      await pipeline.show();
+                      await pipeline.run();
+                    },
+                    child: const Text('Handler')),
               ])
             ])),
           ],

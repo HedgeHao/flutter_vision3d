@@ -170,6 +170,8 @@ const FUNC_CV_ROTATE = 10;
 const FUNC_SET_INPUT_TENSOR = 11;
 const FUNC_INFERENCE = 12;
 
+const FUNC_CUSTOM_HANDLER = 13;
+
 // TODO: check method can be added to that pipeline
 class LipsPipeline {
   static const RGB_FRAME = 0;
@@ -348,6 +350,17 @@ class LipsPipeline {
       'funcIndex': FUNC_INFERENCE,
       'params': Uint8List.fromList([modelIndex]),
       'len': 1,
+      'at': at ?? -1,
+      'interval': interval ?? 0,
+    });
+  }
+
+  Future<void> customHandler(int size, {int? at, int? interval}) async {
+    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+      'index': index,
+      'funcIndex': FUNC_CUSTOM_HANDLER,
+      'params': Uint8List.fromList([size >> 8, size & 0xff]),
+      'len': 2,
       'at': at ?? -1,
       'interval': interval ?? 0,
     });

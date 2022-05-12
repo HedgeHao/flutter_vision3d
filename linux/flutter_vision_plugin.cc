@@ -520,7 +520,7 @@ static void flutter_vision_plugin_handle_method_call(
     RGB_TEXTURE_GET_CLASS(self->rgbTexture)->pipeline->run(b, *self->texture_registrar, *FL_TEXTURE(self->rgbTexture), RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_width, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_height, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->buffer, &self->models, self->flChannel);
     DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->pipeline->run(g, *self->texture_registrar, *FL_TEXTURE(self->depthTexture), DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->video_width, DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->video_height, DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->buffer, &self->models, self->flChannel);
     IR_TEXTURE_GET_CLASS(self->irTexture)->pipeline->run(r, *self->texture_registrar, *FL_TEXTURE(self->irTexture), IR_TEXTURE_GET_CLASS(self->irTexture)->video_width, IR_TEXTURE_GET_CLASS(self->irTexture)->video_height, IR_TEXTURE_GET_CLASS(self->irTexture)->buffer, &self->models, self->flChannel);
-    // UVC_TEXTURE_GET_CLASS(self->uvcTexture)->pipeline->run(b, *self->texture_registrar, *FL_TEXTURE(self->uvcTexture), IR_TEXTURE_GET_CLASS(self->uvcTexture)->video_width, IR_TEXTURE_GET_CLASS(self->uvcTexture)->video_height, IR_TEXTURE_GET_CLASS(self->uvcTexture)->buffer, &self->models, self->flChannel);
+    UVC_TEXTURE_GET_CLASS(self->uvcTexture)->pipeline->run(b, *self->texture_registrar, *FL_TEXTURE(self->uvcTexture), IR_TEXTURE_GET_CLASS(self->uvcTexture)->video_width, IR_TEXTURE_GET_CLASS(self->uvcTexture)->video_height, IR_TEXTURE_GET_CLASS(self->uvcTexture)->buffer, &self->models, self->flChannel);
 
     fl_texture_registrar_mark_texture_frame_available(self->texture_registrar, FL_TEXTURE(self->rgbTexture));
 
