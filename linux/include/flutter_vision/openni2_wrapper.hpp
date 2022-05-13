@@ -65,6 +65,7 @@ public:
   VideoStream vsColor;
   VideoStream vsIR;
   bool videoStart;
+  bool enablePointCloud = false;
 
   void registerFlContext(FlTextureRegistrar *r, RgbTexture *rgb, DepthTexture *depth, IrTexture *ir, FlMethodChannel *channel, OpenGLFL *g, std::vector<TFLiteModel *> *m, TfPipeline *tp)
   {
@@ -432,16 +433,10 @@ private:
         }
       }
 
-      // // TODO: chose model
-      // if ((rgbNewFrame || depthNewFrame || irNewFrame) && models->size())
-      // {
-      //   tfPipeline->run(rgbCls->cvImage, depthCls->cvImage, irCls->cvImage, *models->at(0));
-      // }
-
-      // if (niRgbAvailable && depthNewFrame && rgbNewFrame)
-      // {
-      //   niComputeCloud(vsDepth, (const openni::DepthPixel *)depthFrame.getData(), (const openni::RGB888Pixel *)rgbFrame.getData(), glfl->modelPointCloud->vertices, glfl->modelPointCloud->colors, glfl->modelPointCloud->colorsMap, &glfl->modelPointCloud->vertexPoints);
-      // }
+      if (enablePointCloud && niRgbAvailable && depthNewFrame && rgbNewFrame)
+      {
+        niComputeCloud(vsDepth, (const openni::DepthPixel *)depthFrame.getData(), (const openni::RGB888Pixel *)rgbFrame.getData(), glfl->modelPointCloud->vertices, glfl->modelPointCloud->colors, glfl->modelPointCloud->colorsMap, &glfl->modelPointCloud->vertexPoints);
+      }
 
       fl_method_channel_invoke_method(flChannel, "onFrame", nullptr, nullptr, nullptr, NULL);
     }

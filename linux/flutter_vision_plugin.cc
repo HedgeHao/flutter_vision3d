@@ -230,6 +230,13 @@ static void flutter_vision_plugin_handle_method_call(
     self->glfl->render();
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
+  else if (strcmp(method, "enablePointCloud") == 0)
+  {
+    FlValue *valueEnable = fl_value_lookup_string(args, "enable");
+    const bool enable = fl_value_get_bool(valueEnable);
+    self->ni2->enablePointCloud = enable;
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+  }
   else if (strcmp(method, "pipelineAdd") == 0)
   {
     FlValue *valueIndex = fl_value_lookup_string(args, "index");

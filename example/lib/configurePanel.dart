@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_switch/flutter_switch.dart';
 import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision_example/ui.dart';
@@ -11,9 +12,12 @@ class VideoConfig extends StatefulWidget {
   VideoConfigState createState() => VideoConfigState();
 }
 
-class VideoStreamingConfig extends StatelessWidget {
-  const VideoStreamingConfig({Key? key}) : super(key: key);
+class VideoStreamingConfig extends StatefulWidget {
+  @override
+  VideoStreamingConfigState createState() => VideoStreamingConfigState();
+}
 
+class VideoStreamingConfigState extends State<VideoStreamingConfig> {
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -30,6 +34,20 @@ class VideoStreamingConfig extends StatelessWidget {
               await FlutterVision.configVideoStream(7, false);
             },
             child: const Text('Stop')),
+        const Text('PointCloud'),
+        const SizedBox(width: 5),
+        SizedBox(
+            height: 25,
+            width: 50,
+            child: FlutterSwitch(
+                value: ViewModel.configuration.pointCloud,
+                onToggle: (v) async {
+                  await FlutterVision.enablePointCloud(v);
+
+                  setState(() {
+                    ViewModel.configuration.pointCloud = v;
+                  });
+                }))
       ],
     );
   }
@@ -220,7 +238,7 @@ class ConfigurePannel extends StatelessWidget {
             const VideoConfig(),
             StaticUI.divider,
             Text('Streaming', style: subTitleStyle),
-            const VideoStreamingConfig(),
+            VideoStreamingConfig(),
             StaticUI.divider,
             Text('2D Camera', style: subTitleStyle),
             Camera2dConfigure(),

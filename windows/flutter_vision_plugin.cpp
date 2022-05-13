@@ -325,6 +325,18 @@ namespace
 
       result->Success(flutter::EncodableValue(nullptr));
     }
+    else if(method_call.method_name().compare("enablePointCloud") == 0)
+    {
+      bool enable = false;
+      auto flEnable = arguments->find(flutter::EncodableValue("enable"));
+      if (flEnable != arguments->end())
+      {
+        enable = std::get<bool>(flEnable->second);
+      }
+
+      ni2->enablePointCloud = enable;
+      result->Success(flutter::EncodableValue(nullptr));
+    }
     else if (method_call.method_name().compare("pipelineAdd") == 0)
     {
       int index = -1;
