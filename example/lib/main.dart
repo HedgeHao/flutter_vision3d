@@ -131,6 +131,8 @@ class _MyAppState extends State<MyApp> {
     cameraTextureId = await FlutterVision.getVideoTextureId(16);
 
     setState(() {});
+
+    print('Texture Ready');
   }
 
   Future<dynamic> update(MethodCall call) async {
@@ -140,7 +142,7 @@ class _MyAppState extends State<MyApp> {
       if (faces.isEmpty) return;
 
       faces = nms(faces, 0.3);
-      if (faces.length > 2) return;
+      // if (faces.length > 2) return;
       List<PositionedRect> r = [];
       if (faces.isNotEmpty) {
         for (FaceInfo f in faces) {
@@ -151,7 +153,12 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         rects = r;
       });
-    } else if (call.method == 'onFrame') {}
+    } else if (call.method == 'onUvcFrame') {
+    } else if (call.method == 'onNiFrame') {
+    } else if (call.method == 'onHandled') {
+      var result = call.arguments as Float32List;
+      print(result);
+    }
   }
 
   @override
@@ -208,11 +215,7 @@ class _MyAppState extends State<MyApp> {
                       onPointerUp: updateMouseClick,
                       onPointerMove: updateMousePosition,
                       onPointerSignal: updateMouseWheel,
-                      child: Container(
-                          decoration: BoxDecoration(border: Border.all(width: 1)),
-                          width: 540,
-                          height: 405,
-                          child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
+                      child: Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 540, height: 405, child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
               Text(debugText, style: const TextStyle(fontSize: 30)),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 TextButton(
@@ -255,7 +258,7 @@ class _MyAppState extends State<MyApp> {
 
                       LipsPipeline uvcPipeline = LipsPipeline(16);
                       await uvcPipeline.clear();
-                      // await uvcPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
+                      await uvcPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
                       await uvcPipeline.show();
 
                       await FlutterVision.test();
@@ -318,16 +321,11 @@ class _MyAppState extends State<MyApp> {
                 TextButton(
                     onPressed: () async {
                       if (models.isEmpty) {
-                        TFLiteModel model = await TFLiteModel.create('/home/hedgehao/Documents/lips/LIPSFaceSDK/original_model/FaceDetector/tensorflow/190625_faceDetector_t1.tflite');
+                        TFLiteModel model = await TFLiteModel.create('D:/test/190625_faceDetector_t1.tflite');
                         models.add(model);
 
                         LipsPipeline rgbPipeline = LipsPipeline(16);
                         await rgbPipeline.clear();
-                        // // await rgbPipeline.imwrite('/home/hedgehao/Desktop/test.jpg', interval: 1000);
-
-                        // // await rgbPipeline.imread("/home/hedgehao/test/cpp/tflite/images/faces.jpg");
-                        // // await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGB);
-
                         await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
                         await rgbPipeline.show();
                         await rgbPipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
@@ -377,7 +375,37 @@ class _MyAppState extends State<MyApp> {
                         FlutterVision.openglIsRendering = false;
                       }
                     },
-                    child: const Text('Render'))
+                    child: const Text('Render')),
+                TextButton(
+                    onPressed: () async {
+                      TFLiteModel model = await TFLiteModel.create('D:/test/190625_faceDetector_t1.tflite');
+                      models.add(model);
+
+                      LipsPipeline pipeline = await LipsPipeline.create();
+                      await pipeline.clear();
+                      await pipeline.imread("D:/test/faces.jpg");
+                      await pipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+                      await pipeline.show();
+                      await pipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
+                      await pipeline.cvtColor(OpenCV.COLOR_RGBA2RGB);
+                      await pipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
+                      await pipeline.setInputTensorData(model.index, 0, LipsPipeline.DATATYPE_FLOAT);
+                      await pipeline.inference(model.index, interval: 100);
+                      await pipeline.run();
+                      print('');
+                    },
+                    child: const Text('Pipeline')),
+                TextButton(
+                    onPressed: () async {
+                      LipsPipeline pipeline = await LipsPipeline.create();
+                      await pipeline.clear();
+                      await pipeline.imread("D:/test/faces.jpg");
+                      await pipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+                      await pipeline.customHandler(5);
+                      await pipeline.show();
+                      await pipeline.run();
+                    },
+                    child: const Text('Handler')),
               ])
             ])),
           ],

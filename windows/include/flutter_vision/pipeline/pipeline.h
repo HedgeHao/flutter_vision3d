@@ -11,6 +11,7 @@
 #include <algorithm>
 
 #include "../tflite.h"
+#include "flutter_vision_handler.h"
 
 void getCurrentTime(int64_t *timer)
 {
@@ -161,6 +162,18 @@ void PipelineFuncTfInference(cv::Mat &img, std::vector<uint8_t> params, flutter:
     flChannel->InvokeMethod("onInference", nullptr, nullptr);
 }
 
+void PipelineFuncCustomHandler(cv::Mat &img, std::vector<uint8_t> params, flutter::TextureRegistrar *registrar, int64_t &textureId, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel)
+{
+    int size = (params[0] << 8) + params[1];
+    float *result = new float[size]{0};
+    flutterVisionHandler(img, result);
+
+    std::vector<float> list(result, result+size);
+    std::unique_ptr<flutter::EncodableValue> test = std::make_unique<flutter::EncodableValue>(list);
+
+    flChannel->InvokeMethod("onHandled", std::move(test), nullptr);
+}
+
 const FuncDef pipelineFuncs[] = {
     {0, "test", 0, 0, PipelineFuncTest},
     {1, "cvtColor", 0, 0, PipelineFuncOpencvCvtColor},
@@ -175,15 +188,23 @@ const FuncDef pipelineFuncs[] = {
     {10, "rotate", 0, 0, PipelineFuncOpencvRotate},
     {11, "tfSetTenorInput", 0, 0, PipelineFuncTfSetInputTensor},
     {12, "tfInference", 0, 0, PipelineFuncTfInference},
+    {13, "PipelineFuncCustomHandler", 0, 0, PipelineFuncCustomHandler},
 };
 
 class Pipeline
 {
-    bool doScreenshot = false;
-    std::string screenshotSavePath;
-    int screenshotCvtColor = -1;
-
 public:
+    Pipeline()
+    {
+        img = cv::Mat(1, 1, CV_8UC4, cv::Scalar(255, 0, 0, 255));
+        imgPtr = &img;
+    }
+
+    Pipeline(cv::Mat *m)
+    {
+        imgPtr = m;
+    }
+
     void add(unsigned int index, const std::vector<uint8_t> &params, unsigned int len, int insertAt = -1, int interval = 0)
     {
         FuncDef f = pipelineFuncs[index];
@@ -196,6 +217,15 @@ public:
             funcs.push_back(f);
         else
             funcs.at(insertAt) = f;
+    }
+
+     void runOnce(flutter::TextureRegistrar *registrar, int64_t &textureId, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel)
+    {
+        for (int i = 0; i < funcs.size(); i++)
+        {
+            // std::cout << "RunOnce:" << funcs[i].name << std::endl;
+            funcs[i].func(img, funcs[i].params, registrar, textureId, texture_width, texture_height, pixelBuf, models, flChannel);
+        }
     }
 
     void run(cv::Mat &img, flutter::TextureRegistrar *registrar, int64_t &textureId, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel)
@@ -254,5 +284,10 @@ public:
 private:
     std::vector<FuncDef> funcs = {};
     int64_t ts = 0;
+    bool doScreenshot = false;
+    std::string screenshotSavePath;
+    int screenshotCvtColor = -1;
+    cv::Mat *imgPtr;
+    cv::Mat img;
 };
 #endif

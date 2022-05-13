@@ -37,9 +37,10 @@ namespace
     OpenNi2Wrapper *ni2 = new OpenNi2Wrapper();
     OpenGLFL *glfl;
 
-    TfPipeline *tfPipeline;
+    // TfPipeline *tfPipeline;
     std::vector<TFLiteModel *> models{};
     std::vector<OpenCVCamera *> cameras{};
+    std::vector<Pipeline *> pipelines{};
 
     static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);
 
@@ -63,7 +64,6 @@ namespace
   void FlutterVisionPlugin::RegisterWithRegistrar(
       flutter::PluginRegistrarWindows *registrar)
   {
-
     auto plugin = std::make_unique<FlutterVisionPlugin>(registrar->texture_registrar());
 
     plugin->flChannel =
@@ -402,8 +402,35 @@ namespace
       }
       else
       {
-        return;
+        pipelines[index-100]->add(funcIndex, params, len, insertAt, interval);
       }
+
+      result->Success(flutter::EncodableValue(nullptr));
+    } 
+    else if (method_call.method_name().compare("pipelineCreate") == 0)
+    {
+      Pipeline *p = new Pipeline();
+      pipelines.push_back(p);
+
+      // TODO: Fix index
+      int index = pipelines.size()-1+100;
+      result->Success(flutter::EncodableValue(index));
+    } 
+    else if (method_call.method_name().compare("pipelineRun") == 0)
+    {
+      int index = -1;
+      auto flIndex = arguments->find(flutter::EncodableValue("index"));
+      if (flIndex != arguments->end())
+      {
+        // TODO: Fix index
+        index = std::get<int>(flIndex->second) - 100;
+      }
+
+      std::cout << "PipelineRun:" << index << std::endl;
+
+      // TODO: normal pipline should have their own texture.
+      pipelines[index]->runOnce(textureRegistrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer, &models, flChannel);
+      rgbTexture->setPixelBuffer();
 
       result->Success(flutter::EncodableValue(nullptr));
     }
@@ -437,7 +464,7 @@ namespace
       }
       else
       {
-        return;
+        pipelines[index-100]->clear();
       }
 
       result->Success(flutter::EncodableValue(nullptr));
@@ -474,6 +501,42 @@ namespace
         c->open();
         cameras.push_back(c);
         ret = c->cap->isOpened();
+      }
+
+      result->Success(flutter::EncodableValue(ret));
+    }
+    else if (method_call.method_name().compare("uvcConfig") == 0)
+    {
+      int index = 0;
+      auto flIndex = arguments->find(flutter::EncodableValue("index"));
+      if (flIndex != arguments->end())
+      {
+        index = std::get<int>(flIndex->second);
+      }
+
+      int prop = 0;
+      auto flProp = arguments->find(flutter::EncodableValue("prop"));
+      if (flProp != arguments->end())
+      {
+        prop = std::get<int>(flProp->second);
+      }
+
+      float value = 0.0f;
+      auto flValue = arguments->find(flutter::EncodableValue("value"));
+      if(flValue != arguments->end())
+      {
+        value = std::get<double>(flValue->second);
+      }
+
+      bool ret = false;
+      for (int i = 0; i < cameras.size(); i++)
+      {
+        if (cameras[i]->capIndex == index)
+        {
+          cameras[i]->config(prop, value);
+          ret = true;
+          break;
+        }
       }
 
       result->Success(flutter::EncodableValue(ret));
@@ -647,12 +710,12 @@ namespace
       cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
       cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
 
-      rgbTexture->pipeline->run(b, textureRegistrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer, &models, flChannel);
-      rgbTexture->setPixelBuffer();
-      irTexture->pipeline->run(g, textureRegistrar, irTexture->textureId, irTexture->videoWidth, irTexture->videoHeight, irTexture->buffer, &models, flChannel);
-      irTexture->setPixelBuffer();
-      depthTexture->pipeline->run(r, textureRegistrar, depthTexture->textureId, depthTexture->videoWidth, depthTexture->videoHeight, depthTexture->buffer, &models, flChannel);
-      depthTexture->setPixelBuffer();
+      // rgbTexture->pipeline->run(b, textureRegistrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer, &models, flChannel);
+      // rgbTexture->setPixelBuffer();
+      // irTexture->pipeline->run(g, textureRegistrar, irTexture->textureId, irTexture->videoWidth, irTexture->videoHeight, irTexture->buffer, &models, flChannel);
+      // irTexture->setPixelBuffer();
+      // depthTexture->pipeline->run(r, textureRegistrar, depthTexture->textureId, depthTexture->videoWidth, depthTexture->videoHeight, depthTexture->buffer, &models, flChannel);
+      // depthTexture->setPixelBuffer();
       uvcTexture->pipeline->run(b, textureRegistrar, uvcTexture->textureId, uvcTexture->videoWidth, uvcTexture->videoHeight, uvcTexture->buffer, &models, flChannel);
       uvcTexture->setPixelBuffer();
 

@@ -47,22 +47,36 @@ public:
         registrar = r;
         models = m;
         flChannel = c;
+        if(cap == nullptr){
+            cap = new cv::VideoCapture();
+        }
+    }
+
+    void config(int prop, float value)
+    {
+        cap->set(prop, value);
     }
 
     bool open()
     {
-        cap = new cv::VideoCapture(capIndex);
+        cap->open(capIndex);
         return cap->isOpened();
     }
 
-    void start()
+    int start()
     {
         if (cap == nullptr)
-            return;
+            return -1;
+
+        bool ret = cap->open(capIndex);
+        if(!ret && !cap->isOpened())
+            return -2;
 
         videoStart = true;
         std::thread t(&OpenCVCamera::_readVideoFeed, this);
         t.detach();
+
+        return 0;
     }
 
     void stop()
@@ -90,6 +104,7 @@ private:
             {
                 texture->pipeline->run(texture->cvImage, registrar, texture->textureId, texture->videoWidth, texture->videoHeight, texture->buffer, models, flChannel);
                 texture->setPixelBuffer();
+                flChannel->InvokeMethod("onUvcFrame", nullptr, nullptr);
             }
         }
     }

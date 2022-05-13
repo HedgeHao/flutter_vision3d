@@ -124,6 +124,7 @@ private:
             if (newFrame)
             {
                 cls->pipeline->run(cls->cvImage, *registrar, *FL_TEXTURE(texture), cls->video_width, cls->video_height, cls->buffer, cls->models, flChannel);
+                fl_method_channel_invoke_method(flChannel, "onUvcFrame", nullptr, nullptr, nullptr, NULL);
             }
         }
 
