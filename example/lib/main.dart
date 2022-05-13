@@ -399,7 +399,7 @@ class _MyAppState extends State<MyApp> {
                     onPressed: () async {
                       LipsPipeline pipeline = await LipsPipeline.create();
                       await pipeline.clear();
-                      await pipeline.imread("/home/hedgehao/test/faces.jpg");
+                      await pipeline.imread("D:/test/faces.jpg");
                       await pipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
                       await pipeline.customHandler(5);
                       await pipeline.show();

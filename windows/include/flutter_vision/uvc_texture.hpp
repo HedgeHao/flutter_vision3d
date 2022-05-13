@@ -104,6 +104,7 @@ private:
             {
                 texture->pipeline->run(texture->cvImage, registrar, texture->textureId, texture->videoWidth, texture->videoHeight, texture->buffer, models, flChannel);
                 texture->setPixelBuffer();
+                flChannel->InvokeMethod("onUvcFrame", nullptr, nullptr);
             }
         }
     }

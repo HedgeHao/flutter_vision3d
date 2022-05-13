@@ -11,6 +11,7 @@
 #include <algorithm>
 
 #include "../tflite.h"
+#include "flutter_vision_handler.h"
 
 void getCurrentTime(int64_t *timer)
 {
@@ -161,6 +162,18 @@ void PipelineFuncTfInference(cv::Mat &img, std::vector<uint8_t> params, flutter:
     flChannel->InvokeMethod("onInference", nullptr, nullptr);
 }
 
+void PipelineFuncCustomHandler(cv::Mat &img, std::vector<uint8_t> params, flutter::TextureRegistrar *registrar, int64_t &textureId, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel)
+{
+    int size = (params[0] << 8) + params[1];
+    float *result = new float[size]{0};
+    flutterVisionHandler(img, result);
+
+    std::vector<float> list(result, result+size);
+    std::unique_ptr<flutter::EncodableValue> test = std::make_unique<flutter::EncodableValue>(list);
+
+    flChannel->InvokeMethod("onHandled", std::move(test), nullptr);
+}
+
 const FuncDef pipelineFuncs[] = {
     {0, "test", 0, 0, PipelineFuncTest},
     {1, "cvtColor", 0, 0, PipelineFuncOpencvCvtColor},
@@ -175,6 +188,7 @@ const FuncDef pipelineFuncs[] = {
     {10, "rotate", 0, 0, PipelineFuncOpencvRotate},
     {11, "tfSetTenorInput", 0, 0, PipelineFuncTfSetInputTensor},
     {12, "tfInference", 0, 0, PipelineFuncTfInference},
+    {13, "PipelineFuncCustomHandler", 0, 0, PipelineFuncCustomHandler},
 };
 
 class Pipeline
