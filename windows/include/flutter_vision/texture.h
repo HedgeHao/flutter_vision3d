@@ -23,7 +23,7 @@ public:
 
     Texture()
     {
-        pipeline = new Pipeline();
+        pipeline = new Pipeline(&cvImage);
 
         flutterPixelBuffer.buffer = buffer.data();
         flutterPixelBuffer.width = videoWidth;

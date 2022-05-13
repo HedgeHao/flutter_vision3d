@@ -131,6 +131,8 @@ class _MyAppState extends State<MyApp> {
     cameraTextureId = await FlutterVision.getVideoTextureId(16);
 
     setState(() {});
+
+    print('Texture Ready');
   }
 
   Future<dynamic> update(MethodCall call) async {
@@ -213,11 +215,7 @@ class _MyAppState extends State<MyApp> {
                       onPointerUp: updateMouseClick,
                       onPointerMove: updateMousePosition,
                       onPointerSignal: updateMouseWheel,
-                      child: Container(
-                          decoration: BoxDecoration(border: Border.all(width: 1)),
-                          width: 540,
-                          height: 405,
-                          child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
+                      child: Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 540, height: 405, child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
               Text(debugText, style: const TextStyle(fontSize: 30)),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 TextButton(
@@ -323,7 +321,7 @@ class _MyAppState extends State<MyApp> {
                 TextButton(
                     onPressed: () async {
                       if (models.isEmpty) {
-                        TFLiteModel model = await TFLiteModel.create('/home/hedgehao/Documents/lips/LIPSFaceSDK/original_model/FaceDetector/tensorflow/190625_faceDetector_t1.tflite');
+                        TFLiteModel model = await TFLiteModel.create('D:/test/190625_faceDetector_t1.tflite');
                         models.add(model);
 
                         LipsPipeline rgbPipeline = LipsPipeline(16);
@@ -380,12 +378,12 @@ class _MyAppState extends State<MyApp> {
                     child: const Text('Render')),
                 TextButton(
                     onPressed: () async {
-                      TFLiteModel model = await TFLiteModel.create('/home/hedgehao/Documents/lips/LIPSFaceSDK/original_model/FaceDetector/tensorflow/190625_faceDetector_t1.tflite');
+                      TFLiteModel model = await TFLiteModel.create('D:/test/190625_faceDetector_t1.tflite');
                       models.add(model);
 
                       LipsPipeline pipeline = await LipsPipeline.create();
                       await pipeline.clear();
-                      await pipeline.imread("/home/hedgehao/test/faces.jpg");
+                      await pipeline.imread("D:/test/faces.jpg");
                       await pipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
                       await pipeline.show();
                       await pipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);

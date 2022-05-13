@@ -37,9 +37,10 @@ namespace
     OpenNi2Wrapper *ni2 = new OpenNi2Wrapper();
     OpenGLFL *glfl;
 
-    TfPipeline *tfPipeline;
+    // TfPipeline *tfPipeline;
     std::vector<TFLiteModel *> models{};
     std::vector<OpenCVCamera *> cameras{};
+    std::vector<Pipeline *> pipelines{};
 
     static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);
 
@@ -63,7 +64,6 @@ namespace
   void FlutterVisionPlugin::RegisterWithRegistrar(
       flutter::PluginRegistrarWindows *registrar)
   {
-
     auto plugin = std::make_unique<FlutterVisionPlugin>(registrar->texture_registrar());
 
     plugin->flChannel =
@@ -402,8 +402,35 @@ namespace
       }
       else
       {
-        return;
+        pipelines[index-100]->add(funcIndex, params, len, insertAt, interval);
       }
+
+      result->Success(flutter::EncodableValue(nullptr));
+    } 
+    else if (method_call.method_name().compare("pipelineCreate") == 0)
+    {
+      Pipeline *p = new Pipeline();
+      pipelines.push_back(p);
+
+      // TODO: Fix index
+      int index = pipelines.size()-1+100;
+      result->Success(flutter::EncodableValue(index));
+    } 
+    else if (method_call.method_name().compare("pipelineRun") == 0)
+    {
+      int index = -1;
+      auto flIndex = arguments->find(flutter::EncodableValue("index"));
+      if (flIndex != arguments->end())
+      {
+        // TODO: Fix index
+        index = std::get<int>(flIndex->second) - 100;
+      }
+
+      std::cout << "PipelineRun:" << index << std::endl;
+
+      // TODO: normal pipline should have their own texture.
+      pipelines[index]->runOnce(textureRegistrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer, &models, flChannel);
+      rgbTexture->setPixelBuffer();
 
       result->Success(flutter::EncodableValue(nullptr));
     }
@@ -437,7 +464,7 @@ namespace
       }
       else
       {
-        return;
+        pipelines[index-100]->clear();
       }
 
       result->Success(flutter::EncodableValue(nullptr));
