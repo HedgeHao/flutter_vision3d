@@ -53,49 +53,49 @@ class OpenNi2Device {
 enum OPENNI_DEVICE_STATUS { INVALID, VALID }
 
 class FlutterVision {
-  static const MethodChannel _channel = MethodChannel('flutter_vision');
+  static const MethodChannel channel = MethodChannel('flutter_vision');
   static bool openglIsRendering = false;
 
   static listen(Future<dynamic> Function(MethodCall) callback) {
-    _channel.setMethodCallHandler(callback);
+    channel.setMethodCallHandler(callback);
   }
 
   /* ***** Realsense ***** */
   static Future<List<String>> rsEnumerateDevices() async {
-    List<Object?> list = await _channel.invokeMethod('rsEnumerateDevices');
+    List<Object?> list = await channel.invokeMethod('rsEnumerateDevices');
 
     return list.map((e) => e.toString()).toList();
   }
 
   static Future<int> rsOpenDevice(String serial, {int? videoMode}) async {
-    int ret = await _channel.invokeMethod('rsOpenDevice', {'serial': serial, 'videoMode': videoMode ?? 7});
+    int ret = await channel.invokeMethod('rsOpenDevice', {'serial': serial, 'videoMode': videoMode ?? 7});
 
     return ret;
   }
 
   static Future<void> rsCloseDevice() async {
-    await _channel.invokeMethod('rsCloseDevice');
+    await channel.invokeMethod('rsCloseDevice');
   }
 
   static Future<bool> rsConfigVideoStream(String serial, int videoModeIndex, bool enable) async {
-    return await _channel.invokeMethod('rsConfigVideoStream', {'serial': serial, 'videoModeIndex': videoModeIndex, 'enable': enable});
+    return await channel.invokeMethod('rsConfigVideoStream', {'serial': serial, 'videoModeIndex': videoModeIndex, 'enable': enable});
   }
 
   static Future<bool> rsDeviceIsConnected() async {
-    return await _channel.invokeMethod('rsDeviceIsConnected');
+    return await channel.invokeMethod('rsDeviceIsConnected');
   }
 
   static Future<int> rsGetTextureId(String serial, int videoModeIndex) async {
-    return await _channel.invokeMethod('rsGetTextureId', {'serial': serial, 'videoModeIndex': videoModeIndex});
+    return await channel.invokeMethod('rsGetTextureId', {'serial': serial, 'videoModeIndex': videoModeIndex});
   }
   /* ***** Realsense ***** */
 
   static Future<int> initialize() async {
-    return await _channel.invokeMethod('ni2Initialize') ?? OpenNi2Status.STATUS_ERROR;
+    return await channel.invokeMethod('ni2Initialize') ?? OpenNi2Status.STATUS_ERROR;
   }
 
   static Future<List<OpenNi2Device>> enumerateDevices() async {
-    List<Object?> list = await _channel.invokeMethod('ni2EnumerateDevices');
+    List<Object?> list = await channel.invokeMethod('ni2EnumerateDevices');
 
     List<OpenNi2Device> deviceList = <OpenNi2Device>[];
 
@@ -105,82 +105,82 @@ class FlutterVision {
   }
 
   static Future<int> openDevice(OpenNi2Device device, {int? videoMode}) async {
-    int ret = await _channel.invokeMethod('ni2OpenDevice', {'uri': device.uri, 'videoMode': videoMode ?? 7});
+    int ret = await channel.invokeMethod('ni2OpenDevice', {'uri': device.uri, 'videoMode': videoMode ?? 7});
     // if (ret == 1) print('SN not valid');
 
     return ret;
   }
 
   static Future<void> closeDevice() async {
-    await _channel.invokeMethod('ni2CloseDevice');
+    await channel.invokeMethod('ni2CloseDevice');
   }
 
   static Future<bool> deviceIsConnected() async {
-    return await _channel.invokeMethod('ni2DeviceIsConnected');
+    return await channel.invokeMethod('ni2DeviceIsConnected');
   }
 
   static Future<int> getEnabledVideoModes() async {
-    return await _channel.invokeMethod('ni2GetEnabledVideoModes');
+    return await channel.invokeMethod('ni2GetEnabledVideoModes');
   }
 
   static Future<bool> configVideoStream(int videoModeIndex, bool enable) async {
-    return await _channel.invokeMethod('ni2ConfigVideoStream', {'videoMode': videoModeIndex, 'enable': enable});
+    return await channel.invokeMethod('ni2ConfigVideoStream', {'videoMode': videoModeIndex, 'enable': enable});
   }
 
   static Future<int> getVideoTextureId(int videoModeIndex) async {
-    return await _channel.invokeMethod('ni2GetVideoTexture', {'videoIndex': videoModeIndex});
+    return await channel.invokeMethod('ni2GetVideoTexture', {'videoIndex': videoModeIndex});
   }
 
   static Future<int> getVideoFramePointer(int videoModeIndex) async {
-    return await _channel.invokeMethod('ni2GetFramePointer', {'videoIndex': videoModeIndex});
+    return await channel.invokeMethod('ni2GetFramePointer', {'videoIndex': videoModeIndex});
   }
 
   static Future<void> setVideoSize(int videoIndex, int width, int height) async {
-    await _channel.invokeMethod('ni2SetVideoSize', {'videoIndex': videoIndex, 'width': width, 'height': height});
+    await channel.invokeMethod('ni2SetVideoSize', {'videoIndex': videoIndex, 'width': width, 'height': height});
   }
 
   static Future<void> openglSetCamPosition(double x, double y, double z) async {
-    return await _channel.invokeMethod('openglSetCamPosition', {'x': x, 'y': y, 'z': z});
+    return await channel.invokeMethod('openglSetCamPosition', {'x': x, 'y': y, 'z': z});
   }
 
   static Future<void> openglSetCamAngle(double yaw, double pitch) async {
-    return await _channel.invokeMethod('openglSetCamAngle', {'yaw': yaw, 'pitch': pitch});
+    return await channel.invokeMethod('openglSetCamAngle', {'yaw': yaw, 'pitch': pitch});
   }
 
   static Future<void> openglSetCamFov(double fov) async {
-    return await _channel.invokeMethod('openglSetCamFov', {'fov': fov});
+    return await channel.invokeMethod('openglSetCamFov', {'fov': fov});
   }
 
   static Future<void> openglRender() async {
-    return await _channel.invokeMethod('openglRender');
+    return await channel.invokeMethod('openglRender');
   }
 
   static Future<void> tfliteCreateModel(String modelPath) async {
-    return await _channel.invokeMethod('tfliteCreateModel', {'modelPath': modelPath});
+    return await channel.invokeMethod('tfliteCreateModel', {'modelPath': modelPath});
   }
 
   static Future<void> cameraOpen(int index) async {
-    return await _channel.invokeMethod('cameraOpen', {'index': index});
+    return await channel.invokeMethod('cameraOpen', {'index': index});
   }
 
   static Future<bool> uvcConfig(int index, int prop, double value) async {
-    return await _channel.invokeMethod('uvcConfig', {'index': index, 'prop': prop, 'value': value});
+    return await channel.invokeMethod('uvcConfig', {'index': index, 'prop': prop, 'value': value});
   }
 
   static Future<void> cameraConfig(int index, bool start) async {
-    return await _channel.invokeMethod('cameraConfig', {'index': index, 'start': start});
+    return await channel.invokeMethod('cameraConfig', {'index': index, 'start': start});
   }
 
   static Future<bool> videoScreenshot(int index, String path, {int? cvtCode}) async {
-    return await _channel.invokeMethod('screenshot', {'index': index, 'path': path, 'cvtCode': cvtCode ?? -1});
+    return await channel.invokeMethod('screenshot', {'index': index, 'path': path, 'cvtCode': cvtCode ?? -1});
   }
 
   static Future<void> enablePointCloud(bool enable) async {
-    return await _channel.invokeMethod('enablePointCloud', {'enable': enable});
+    return await channel.invokeMethod('enablePointCloud', {'enable': enable});
   }
 
   static Future<void> test() async {
-    await _channel.invokeMethod('test');
+    await channel.invokeMethod('test');
     print('');
   }
 }
@@ -203,7 +203,7 @@ const FUNC_INFERENCE = 12;
 const FUNC_CUSTOM_HANDLER = 13;
 
 // TODO: check method can be added to that pipeline
-class LipsPipeline {
+class FvPipeline {
   static const RGB_FRAME = 0;
   static const DEPTH_FRAME = 1;
   static const IR_FRAME = 2;
@@ -214,25 +214,25 @@ class LipsPipeline {
 
   int index;
 
-  static Future<LipsPipeline> create() async {
-    int pipelineIndex = await FlutterVision._channel.invokeMethod('pipelineCreate');
+  static Future<FvPipeline> create() async {
+    int pipelineIndex = await FlutterVision.channel.invokeMethod('pipelineCreate');
     print('Create New Pipeline:$pipelineIndex');
 
-    return LipsPipeline(pipelineIndex);
+    return FvPipeline(pipelineIndex);
   }
 
-  LipsPipeline(this.index);
+  FvPipeline(this.index);
 
   Future<void> run() async {
-    await FlutterVision._channel.invokeMethod('pipelineRun', {'index': index});
+    await FlutterVision.channel.invokeMethod('pipelineRun', {'index': index});
   }
 
   Future<void> clear() async {
-    await FlutterVision._channel.invokeMethod('pipelineClear', {'index': index});
+    await FlutterVision.channel.invokeMethod('pipelineClear', {'index': index});
   }
 
   Future<void> test(int t, {int? at, int? interval}) async {
-    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_TEST,
       'params': Uint8List.fromList([t]),
@@ -243,7 +243,7 @@ class LipsPipeline {
   }
 
   Future<void> cvtColor(int mode, {int? at, int? interval}) async {
-    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_CVTCOLOR,
       'params': Uint8List.fromList([mode]),
@@ -254,7 +254,7 @@ class LipsPipeline {
   }
 
   Future<void> imwrite(String path, {int? at, int? interval}) async {
-    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_IMWRITE,
       'params': Uint8List.fromList([path.length, ...utf8.encode(path)]),
@@ -265,7 +265,7 @@ class LipsPipeline {
   }
 
   Future<void> imread(String path, {int? at, int? interval}) async {
-    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_IMREAD,
       'params': Uint8List.fromList([path.length, ...utf8.encode(path)]),
@@ -276,7 +276,7 @@ class LipsPipeline {
   }
 
   Future<void> show({int? at, int? interval}) async {
-    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_SHOW,
       'params': null,
@@ -287,13 +287,13 @@ class LipsPipeline {
   }
 
   Future<void> convertTo(int mode, double scale, {int? at, double? shift, int? interval}) async {
-    List<Object?> scaleList = await FlutterVision._channel.invokeMethod("_float2uint8", {'value': scale});
+    List<Object?> scaleList = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': scale});
     Uint8List scaleBytes = Uint8List.fromList(scaleList.map((e) => e as int).toList());
 
-    List<Object?> shiftList = await FlutterVision._channel.invokeMethod("_float2uint8", {'value': shift ?? 0});
+    List<Object?> shiftList = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': shift ?? 0});
     Uint8List shiftBytes = Uint8List.fromList(shiftList.map((e) => e as int).toList());
 
-    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_CONVERTO,
       'params': Uint8List.fromList([mode, ...scaleBytes, ...shiftBytes]),
@@ -304,7 +304,7 @@ class LipsPipeline {
   }
 
   Future<void> applyColorMap(int colorMap, {int? at, int? interval}) async {
-    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_APPLY_COLOR_MAP,
       'params': Uint8List.fromList([colorMap]),
@@ -315,7 +315,7 @@ class LipsPipeline {
   }
 
   Future<void> resize(int width, int height, {int? at, int? mode, int? interval}) async {
-    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_RESIZE,
       'params': Uint8List.fromList([(width >> 8) & 0xff, width & 0xff, (height >> 8) & 0xff, height & 0xff, mode ?? OpenCV.INTER_NEAREST]),
@@ -326,7 +326,7 @@ class LipsPipeline {
   }
 
   Future<void> crop(int xStart, int xEnd, int yStart, int yEnd, {int? at, int? interval}) async {
-    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_CROP,
       'params': Uint8List.fromList([xStart >> 8, xStart & 0xff, xEnd >> 8, xEnd & 0xff, yStart >> 8, yStart & 0xff, yEnd >> 8, yEnd & 0xff]),
@@ -337,12 +337,12 @@ class LipsPipeline {
   }
 
   Future<void> cvRectangle(double x1, double y1, double x2, double y2, int r, int g, int b, {int? at, int? thickness, int? lineType, int? shift, int? alpha, int? interval}) async {
-    Uint8List x1f = await FlutterVision._channel.invokeMethod("_float2uint8", {'value': x1});
-    Uint8List y1f = await FlutterVision._channel.invokeMethod("_float2uint8", {'value': y1});
-    Uint8List x2f = await FlutterVision._channel.invokeMethod("_float2uint8", {'value': x2});
-    Uint8List y2f = await FlutterVision._channel.invokeMethod("_float2uint8", {'value': y2});
+    Uint8List x1f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': x1});
+    Uint8List y1f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': y1});
+    Uint8List x2f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': x2});
+    Uint8List y2f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': y2});
 
-    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_CV_RECTANGLE,
       'params': Uint8List.fromList([...x1f, ...y1f, ...x2f, ...y2f, r, g, b, alpha ?? 255, thickness ?? 1, lineType ?? OpenCV.LINE_TYPE_LINE_8, shift ?? 0]),
@@ -353,7 +353,7 @@ class LipsPipeline {
   }
 
   Future<void> rotate(int rotateCode, {int? at, int? interval}) async {
-    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_CV_ROTATE,
       'params': Uint8List.fromList([rotateCode]),
@@ -364,7 +364,7 @@ class LipsPipeline {
   }
 
   Future<void> setInputTensorData(int modelIndex, int tensorIndex, int dataType, {int? at, int? interval}) async {
-    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_SET_INPUT_TENSOR,
       'params': Uint8List.fromList([modelIndex, tensorIndex, dataType]),
@@ -375,7 +375,7 @@ class LipsPipeline {
   }
 
   Future<void> inference(int modelIndex, {int? at, int? interval}) async {
-    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_INFERENCE,
       'params': Uint8List.fromList([modelIndex]),
@@ -386,7 +386,7 @@ class LipsPipeline {
   }
 
   Future<void> customHandler(int size, {int? at, int? interval}) async {
-    await FlutterVision._channel.invokeMethod('pipelineAdd', {
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_CUSTOM_HANDLER,
       'params': Uint8List.fromList([size >> 8, size & 0xff]),
@@ -411,7 +411,7 @@ class TFLiteModel {
   }
 
   Future<Float32List> getTensorOutput(int tensorIndex, List<int> size) async {
-    List l = await FlutterVision._channel.invokeMethod('tfliteGetTensorOutput', {'tensorIndex': tensorIndex, 'size': Int32List.fromList(size)});
+    List l = await FlutterVision.channel.invokeMethod('tfliteGetTensorOutput', {'tensorIndex': tensorIndex, 'size': Int32List.fromList(size)});
 
     if (Platform.isWindows) {
       Float32List flist = Float32List(l.length);
@@ -425,7 +425,7 @@ class TFLiteModel {
   }
 
   Future<dynamic> _getModelInfo(String key) async {
-    Map<dynamic, dynamic> m = await FlutterVision._channel.invokeMethod('tfliteGetModelInfo', {'index': index});
+    Map<dynamic, dynamic> m = await FlutterVision.channel.invokeMethod('tfliteGetModelInfo', {'index': index});
 
     return m[key];
   }
