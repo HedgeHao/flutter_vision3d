@@ -253,14 +253,20 @@ static void flutter_vision_plugin_handle_method_call(
 
     RealsenseCam *r = new RealsenseCam(serial);
 
+    auto result = fl_value_new_map();
     int ret = r->openDevice();
     if (ret == 0)
     {
       r->fv_init(self->texture_registrar, &self->models, self->flChannel);
       self->rsCams.push_back(r);
+
+      fl_value_set(result, fl_value_new_string("rgbTextureId"), fl_value_new_int(r->rgbTexture->texture_id));
+      fl_value_set(result, fl_value_new_string("depthTextureId"), fl_value_new_int(r->depthTexture->texture_id));
+      fl_value_set(result, fl_value_new_string("irTextureId"), fl_value_new_int(r->irTexture->texture_id));
     }
 
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(ret)));
+    fl_value_set(result, fl_value_new_string("ret"), fl_value_new_int(ret));
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
   }
   else if (strcmp(method, "rsConfigVideoStream") == 0)
   {

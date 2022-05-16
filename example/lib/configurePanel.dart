@@ -1,5 +1,7 @@
+import 'package:collection/src/iterable_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:flutter_vision/camera/realsense.dart';
 import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision_example/ui.dart';
@@ -292,21 +294,24 @@ class RsVideoConfigState extends State<RsVideoConfig> {
         children: [
           TextButton(
               onPressed: () async {
-                int result = await FlutterVision.rsOpenDevice(ViewModel.configuration.selectedRsDevice);
-                setState(() {
-                  isConnected = result >= 0;
-                });
+                RealsenseCamera? cam = ViewModel.configuration.rsCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedRsDevice);
+
+                if (cam == null) {
+                  cam = await RealsenseCamera.create(ViewModel.configuration.selectedRsDevice);
+                  if (cam == null) {
+                    print('Create Camera Failed');
+                    return;
+                  }
+                  ViewModel.configuration.rsCams.add(cam);
+                }
+
+                isConnected = await cam.isConnected();
+                setState(() {});
               },
               child: const Text('Connect')),
           TextButton(
               onPressed: () {
-                FlutterVision.closeDevice().then((value) {
-                  FlutterVision.deviceIsConnected().then((isValid) {
-                    setState(() {
-                      isConnected = isValid;
-                    });
-                  });
-                });
+                ViewModel.configuration.rsCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedRsDevice)?.close().then((value) => setState);
               },
               child: const Text('Disconnect')),
         ],
@@ -349,12 +354,12 @@ class RsVideoStreamingConfigState extends State<RsVideoStreamingConfig> {
       children: [
         TextButton(
             onPressed: () async {
-              await FlutterVision.rsConfigVideoStream(ViewModel.configuration.selectedRsDevice, 7, true);
+              ViewModel.configuration.rsCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedRsDevice)?.enableStream();
             },
             child: const Text('Start')),
         TextButton(
             onPressed: () async {
-              await FlutterVision.rsConfigVideoStream(ViewModel.configuration.selectedRsDevice, 7, false);
+              ViewModel.configuration.rsCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedRsDevice)?.disableStream();
             },
             child: const Text('Stop')),
         // const Text('PointCloud'),

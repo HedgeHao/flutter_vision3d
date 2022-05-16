@@ -413,10 +413,12 @@ class _MyAppState extends State<MyApp> {
                     child: const Text('Handler')),
                 TextButton(
                     onPressed: () async {
-                      if (configuration.selectedRsDevice.isEmpty) return;
-                      rgbTextureId = await FlutterVision.rsGetTextureId(configuration.selectedRsDevice, 1);
-                      depthTextureId = await FlutterVision.rsGetTextureId(configuration.selectedRsDevice, 2);
-                      irTextureId = await FlutterVision.rsGetTextureId(configuration.selectedRsDevice, 4);
+                      if (configuration.rsCams.isEmpty) return;
+                      rgbTextureId = configuration.rsCams[0].rgbTextureId;
+                      depthTextureId = configuration.rsCams[0].depthTextureId;
+                      irTextureId = configuration.rsCams[0].irTextureId;
+
+                      print('$rgbTextureId, $depthTextureId, $irTextureId');
 
                       FvPipeline rgbPipeline = FvPipeline(200);
                       await rgbPipeline.clear();

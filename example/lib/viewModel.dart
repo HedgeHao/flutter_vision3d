@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter_vision/camera/realsense.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 
 ConfigurationViewModel configuration = ConfigurationViewModel()..init();
@@ -15,6 +16,7 @@ class VideoModeData {
 }
 
 class ConfigurationViewModel {
+  List<RealsenseCamera> rsCams = [];
   OpenNi2Device? selectedDevice;
   String selectedRsDevice = '';
   int lastRequestTS = 0;
