@@ -16,6 +16,7 @@ class VideoModeData {
 
 class ConfigurationViewModel {
   OpenNi2Device? selectedDevice;
+  String selectedRsDevice = '';
   int lastRequestTS = 0;
   late File serial;
   bool pointCloud = false;

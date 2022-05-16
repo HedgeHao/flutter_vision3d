@@ -60,6 +60,36 @@ class FlutterVision {
     _channel.setMethodCallHandler(callback);
   }
 
+  /* ***** Realsense ***** */
+  static Future<List<String>> rsEnumerateDevices() async {
+    List<Object?> list = await _channel.invokeMethod('rsEnumerateDevices');
+
+    return list.map((e) => e.toString()).toList();
+  }
+
+  static Future<int> rsOpenDevice(String serial, {int? videoMode}) async {
+    int ret = await _channel.invokeMethod('rsOpenDevice', {'serial': serial, 'videoMode': videoMode ?? 7});
+
+    return ret;
+  }
+
+  static Future<void> rsCloseDevice() async {
+    await _channel.invokeMethod('rsCloseDevice');
+  }
+
+  static Future<bool> rsConfigVideoStream(String serial, int videoModeIndex, bool enable) async {
+    return await _channel.invokeMethod('rsConfigVideoStream', {'serial': serial, 'videoModeIndex': videoModeIndex, 'enable': enable});
+  }
+
+  static Future<bool> rsDeviceIsConnected() async {
+    return await _channel.invokeMethod('rsDeviceIsConnected');
+  }
+
+  static Future<int> rsGetTextureId(String serial, int videoModeIndex) async {
+    return await _channel.invokeMethod('rsGetTextureId', {'serial': serial, 'videoModeIndex': videoModeIndex});
+  }
+  /* ***** Realsense ***** */
+
   static Future<int> initialize() async {
     return await _channel.invokeMethod('ni2Initialize') ?? OpenNi2Status.STATUS_ERROR;
   }

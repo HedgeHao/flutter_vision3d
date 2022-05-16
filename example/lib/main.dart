@@ -10,6 +10,7 @@ import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision_example/configurePanel.dart';
 import 'package:flutter_vision_example/demo/LIPSFace.dart';
+import 'package:flutter_vision_example/viewModel.dart';
 
 const TEST_IMAGE = '/home/hedgehao/test/faces.jpg';
 const MODEL_FACE_DETECTOR = '/home/hedgehao/test/faceDetector.tflite';
@@ -330,7 +331,7 @@ class _MyAppState extends State<MyApp> {
 
                         LipsPipeline rgbPipeline = LipsPipeline(16);
                         await rgbPipeline.clear();
-                        await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
+                        await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
                         await rgbPipeline.show();
                         await rgbPipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
                         await rgbPipeline.cvtColor(OpenCV.COLOR_RGBA2RGB);
@@ -410,6 +411,21 @@ class _MyAppState extends State<MyApp> {
                       await pipeline.run();
                     },
                     child: const Text('Handler')),
+                TextButton(
+                    onPressed: () async {
+                      if (configuration.selectedRsDevice.isEmpty) return;
+                      rgbTextureId = await FlutterVision.rsGetTextureId(configuration.selectedRsDevice, 1);
+                      depthTextureId = await FlutterVision.rsGetTextureId(configuration.selectedRsDevice, 2);
+                      irTextureId = await FlutterVision.rsGetTextureId(configuration.selectedRsDevice, 4);
+
+                      LipsPipeline rgbPipeline = LipsPipeline(200);
+                      await rgbPipeline.clear();
+                      await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+                      await rgbPipeline.show();
+
+                      setState(() {});
+                    },
+                    child: const Text('RS')),
               ])
             ])),
           ],

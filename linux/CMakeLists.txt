@@ -41,6 +41,7 @@ target_link_libraries( ${PLUGIN_NAME} PRIVATE GLEW::GLEW)
 
 target_link_libraries( ${PLUGIN_NAME} PRIVATE tensorflowlite)
 target_link_libraries( ${PLUGIN_NAME} PRIVATE flutterVisionHandler)
+target_link_libraries( ${PLUGIN_NAME} PRIVATE realsense2)
 
 
 # List of absolute paths to libraries that should be bundled with the plugin

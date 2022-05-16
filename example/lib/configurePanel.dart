@@ -214,6 +214,168 @@ class Camera2dConfigure extends StatelessWidget {
   }
 }
 
+class RsDeviceDropdown extends StatefulWidget {
+  @override
+  RsDeviceDropdownState createState() => RsDeviceDropdownState();
+}
+
+class RsDeviceDropdownState extends State<RsDeviceDropdown> {
+  List<String> deviceList = <String>[];
+  int selected = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    List<DropdownMenuItem<int>>? items = [];
+    int index = 0;
+    for (var d in deviceList) {
+      items.add(DropdownMenuItem<int>(
+        child: Text(d),
+        value: index,
+      ));
+      index++;
+    }
+
+    return Padding(
+        padding: const EdgeInsets.only(left: 8),
+        child: Row(children: [
+          const Text('Device List:'),
+          const SizedBox(width: 10),
+          DropdownButton(
+              value: selected,
+              selectedItemBuilder: (context) {
+                return deviceList.map((e) => Center(child: Text(e))).toList();
+              },
+              items: items,
+              onChanged: (value) {
+                ViewModel.configuration.selectedRsDevice = deviceList[value as int];
+                setState(() {
+                  selected = value;
+                });
+              }),
+          TextButton(
+              onPressed: () async {
+                List<String> list = await FlutterVision.rsEnumerateDevices();
+                setState(() {
+                  deviceList = list;
+                });
+                if (list.isNotEmpty) {
+                  ViewModel.configuration.selectedRsDevice = deviceList[0];
+                }
+              },
+              child: const Text('Refresh'))
+        ]));
+  }
+}
+
+class RsVideoConfig extends StatefulWidget {
+  const RsVideoConfig({Key? key}) : super(key: key);
+
+  @override
+  RsVideoConfigState createState() => RsVideoConfigState();
+}
+
+class RsVideoConfigState extends State<RsVideoConfig> {
+  bool isConnected = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<Widget> widgets = [];
+
+    widgets.addAll([
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          TextButton(
+              onPressed: () async {
+                int result = await FlutterVision.rsOpenDevice(ViewModel.configuration.selectedRsDevice);
+                setState(() {
+                  isConnected = result >= 0;
+                });
+              },
+              child: const Text('Connect')),
+          TextButton(
+              onPressed: () {
+                FlutterVision.closeDevice().then((value) {
+                  FlutterVision.deviceIsConnected().then((isValid) {
+                    setState(() {
+                      isConnected = isValid;
+                    });
+                  });
+                });
+              },
+              child: const Text('Disconnect')),
+        ],
+      ),
+      Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: Row(
+            children: [
+              const Text('Status:'),
+              const SizedBox(width: 8),
+              Text(isConnected ? 'Connected' : 'Disconnected', style: TextStyle(color: isConnected ? Colors.green : Colors.red)),
+              IconButton(
+                  onPressed: () {
+                    FlutterVision.deviceIsConnected().then((isValid) {
+                      setState(() {
+                        isConnected = isValid;
+                      });
+                    });
+                  },
+                  splashRadius: 15,
+                  icon: const Icon(Icons.refresh))
+            ],
+          ))
+    ]);
+
+    return Column(children: widgets);
+  }
+}
+
+class RsVideoStreamingConfig extends StatefulWidget {
+  @override
+  RsVideoStreamingConfigState createState() => RsVideoStreamingConfigState();
+}
+
+class RsVideoStreamingConfigState extends State<RsVideoStreamingConfig> {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        TextButton(
+            onPressed: () async {
+              await FlutterVision.rsConfigVideoStream(ViewModel.configuration.selectedRsDevice, 7, true);
+            },
+            child: const Text('Start')),
+        TextButton(
+            onPressed: () async {
+              await FlutterVision.rsConfigVideoStream(ViewModel.configuration.selectedRsDevice, 7, false);
+            },
+            child: const Text('Stop')),
+        // const Text('PointCloud'),
+        // const SizedBox(width: 5),
+        // SizedBox(
+        //     height: 25,
+        //     width: 50,
+        //     child: FlutterSwitch(
+        //         value: ViewModel.configuration.pointCloud,
+        //         onToggle: (v) async {
+        //           await FlutterVision.enablePointCloud(v);
+
+        //           setState(() {
+        //             ViewModel.configuration.pointCloud = v;
+        //           });
+        //         }))
+      ],
+    );
+  }
+}
+
 class ConfigurePannel extends StatelessWidget {
   const ConfigurePannel({Key? key}) : super(key: key);
   final subTitleStyle = const TextStyle(fontSize: 18, fontWeight: FontWeight.w500);
@@ -232,16 +394,19 @@ class ConfigurePannel extends StatelessWidget {
                   await FlutterVision.initialize();
                 },
                 child: const Text('Ni2 Init')),
-            StaticUI.divider,
             Text('Device', style: subTitleStyle),
             DeviceDropdown(),
             const VideoConfig(),
-            StaticUI.divider,
             Text('Streaming', style: subTitleStyle),
             VideoStreamingConfig(),
             StaticUI.divider,
             Text('2D Camera', style: subTitleStyle),
             Camera2dConfigure(),
+            StaticUI.divider,
+            Text('Realsense', style: subTitleStyle),
+            RsDeviceDropdown(),
+            const RsVideoConfig(),
+            RsVideoStreamingConfig(),
           ],
         ));
   }
