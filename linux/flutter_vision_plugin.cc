@@ -9,7 +9,7 @@
 #include "include/flutter_vision/tflite.h"
 
 #include "include/flutter_vision/openni2_wrapper.hpp"
-#include "include/flutter_vision/uvc_texture.hpp"
+#include "include/flutter_vision/fv_texture.h"
 
 #include <cstring>
 #include <memory>
@@ -28,10 +28,10 @@ struct _FlutterVisionPlugin
   OpenNi2Wrapper *ni2;
 
   FlTextureRegistrar *texture_registrar;
-  RgbTexture *rgbTexture;
-  DepthTexture *depthTexture;
-  IrTexture *irTexture;
-  UvcTexture *uvcTexture;
+  FvTexture *rgbTexture;
+  FvTexture *depthTexture;
+  FvTexture *irTexture;
+  FvTexture *uvcTexture;
   OpenGLTexture *openglTexture;
 
   FlMethodChannel *flChannel;
@@ -64,15 +64,15 @@ static void flutter_vision_plugin_handle_method_call(
     int64_t result = 0;
     if (index == VideoIndex::RGB)
     {
-      result = RGB_TEXTURE_GET_CLASS(self->rgbTexture)->texture_id;
+      result = FV_TEXTURE(self->rgbTexture)->texture_id;
     }
     else if (index == VideoIndex::Depth)
     {
-      result = DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->texture_id;
+      result = FV_TEXTURE(self->depthTexture)->texture_id;
     }
     else if (index == VideoIndex::IR)
     {
-      result = IR_TEXTURE_GET_CLASS(self->irTexture)->texture_id;
+      result = FV_TEXTURE(self->irTexture)->texture_id;
     }
     else if (index == VideoIndex::POINTCLOUD)
     {
@@ -80,7 +80,7 @@ static void flutter_vision_plugin_handle_method_call(
     }
     else if (index == VideoIndex::Camera2D)
     {
-      result = UVC_TEXTURE_GET_CLASS(self->uvcTexture)->texture_id;
+      result = FV_TEXTURE(self->uvcTexture)->texture_id;
     }
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(result)));
@@ -149,15 +149,15 @@ static void flutter_vision_plugin_handle_method_call(
     long result = 0;
     if (index == VideoIndex::RGB)
     {
-      result = reinterpret_cast<long>(&RGB_TEXTURE_GET_CLASS(self->rgbTexture)->cvImage);
+      result = reinterpret_cast<long>(&FV_TEXTURE(self->rgbTexture)->cvImage);
     }
     else if (index == VideoIndex::Depth)
     {
-      result = reinterpret_cast<long>(&DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->cvImage);
+      result = reinterpret_cast<long>(&FV_TEXTURE(self->depthTexture)->cvImage);
     }
     else if (index == VideoIndex::IR)
     {
-      result = reinterpret_cast<long>(&IR_TEXTURE_GET_CLASS(self->irTexture)->cvImage);
+      result = reinterpret_cast<long>(&FV_TEXTURE(self->irTexture)->cvImage);
     }
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(result)));
@@ -173,28 +173,28 @@ static void flutter_vision_plugin_handle_method_call(
 
     if (index == VideoIndex::RGB)
     {
-      RgbTextureClass *c = RGB_TEXTURE_GET_CLASS(self->rgbTexture);
+      FvTexture *c = FV_TEXTURE(self->rgbTexture);
       c->video_width = width;
       c->video_height = height;
       c->buffer.resize(width * height * 4);
     }
     else if (index == VideoIndex::Depth)
     {
-      DepthTextureClass *c = DEPTH_TEXTURE_GET_CLASS(self->depthTexture);
+      FvTexture *c = FV_TEXTURE(self->depthTexture);
       c->video_width = width;
       c->video_height = height;
       c->buffer.resize(width * height * 4);
     }
     else if (index == VideoIndex::IR)
     {
-      IrTextureClass *c = IR_TEXTURE_GET_CLASS(self->irTexture);
+      FvTexture *c = FV_TEXTURE(self->irTexture);
       c->video_width = width;
       c->video_height = height;
       c->buffer.resize(width * height * 4);
     }
     else if (index == VideoIndex::Camera2D)
     {
-      UvcTextureClass *c = UVC_TEXTURE_GET_CLASS(self->uvcTexture);
+      FvTexture *c = FV_TEXTURE(self->uvcTexture);
       c->video_width = width;
       c->video_height = height;
       c->buffer.resize(width * height * 4);
@@ -270,19 +270,19 @@ static void flutter_vision_plugin_handle_method_call(
     Pipeline *pipeline;
     if (index == VideoIndex::RGB)
     {
-      RGB_TEXTURE_GET_CLASS(self->rgbTexture)->pipeline->add(funcIndex, params, len, insertAt, interval);
+      FV_TEXTURE(self->rgbTexture)->pipeline->add(funcIndex, params, len, insertAt, interval);
     }
     else if (index == VideoIndex::Depth)
     {
-      DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->pipeline->add(funcIndex, params, len, insertAt, interval);
+      FV_TEXTURE(self->depthTexture)->pipeline->add(funcIndex, params, len, insertAt, interval);
     }
     else if (index == VideoIndex::IR)
     {
-      IR_TEXTURE_GET_CLASS(self->irTexture)->pipeline->add(funcIndex, params, len, insertAt, interval);
+      FV_TEXTURE(self->irTexture)->pipeline->add(funcIndex, params, len, insertAt, interval);
     }
     else if (index == VideoIndex::Camera2D)
     {
-      UVC_TEXTURE_GET_CLASS(self->uvcTexture)->pipeline->add(funcIndex, params, len, insertAt, interval);
+      FV_TEXTURE(self->uvcTexture)->pipeline->add(funcIndex, params, len, insertAt, interval);
     }
     // else if (index == PIPELINE_INDEX_TFLITE)
     // {
@@ -310,7 +310,7 @@ static void flutter_vision_plugin_handle_method_call(
     const int index = fl_value_get_int(valueIndex) - 100;
 
     // TODO: normal pipline should have their own texture.
-    self->pipelines[index]->runOnce(*self->texture_registrar, *FL_TEXTURE(self->rgbTexture), RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_width, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_height, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->buffer, &self->models, self->flChannel);
+    self->pipelines[index]->runOnce(*self->texture_registrar, *FL_TEXTURE(self->rgbTexture), FV_TEXTURE(self->rgbTexture)->video_width, FV_TEXTURE(self->rgbTexture)->video_height, FV_TEXTURE(self->rgbTexture)->buffer, &self->models, self->flChannel);
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
@@ -320,19 +320,19 @@ static void flutter_vision_plugin_handle_method_call(
     const int index = fl_value_get_int(valueIndex);
     if (index == VideoIndex::RGB)
     {
-      RGB_TEXTURE_GET_CLASS(self->rgbTexture)->pipeline->clear();
+      FV_TEXTURE(self->rgbTexture)->pipeline->clear();
     }
     else if (index == VideoIndex::Depth)
     {
-      DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->pipeline->clear();
+      FV_TEXTURE(self->depthTexture)->pipeline->clear();
     }
     else if (index == VideoIndex::IR)
     {
-      IR_TEXTURE_GET_CLASS(self->irTexture)->pipeline->clear();
+      FV_TEXTURE(self->irTexture)->pipeline->clear();
     }
     else if (index == VideoIndex::Camera2D)
     {
-      UVC_TEXTURE_GET_CLASS(self->uvcTexture)->pipeline->clear();
+      FV_TEXTURE(self->uvcTexture)->pipeline->clear();
     }
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
@@ -489,19 +489,19 @@ static void flutter_vision_plugin_handle_method_call(
     cv::Mat frame;
     if (index == VideoIndex::RGB)
     {
-      RGB_TEXTURE_GET_CLASS(self->rgbTexture)->pipeline->screenshot(path, cvtCode);
+      FV_TEXTURE(self->rgbTexture)->pipeline->screenshot(path, cvtCode);
     }
     else if (index == VideoIndex::Depth)
     {
-      DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->pipeline->screenshot(path, cvtCode);
+      FV_TEXTURE(self->depthTexture)->pipeline->screenshot(path, cvtCode);
     }
     else if (index == VideoIndex::IR)
     {
-      IR_TEXTURE_GET_CLASS(self->irTexture)->pipeline->screenshot(path, cvtCode);
+      FV_TEXTURE(self->irTexture)->pipeline->screenshot(path, cvtCode);
     }
     else if (index == VideoIndex::Camera2D)
     {
-      UVC_TEXTURE_GET_CLASS(self->uvcTexture)->pipeline->screenshot(path, cvtCode);
+      FV_TEXTURE(self->uvcTexture)->pipeline->screenshot(path, cvtCode);
     }
     else
     {
@@ -517,12 +517,12 @@ static void flutter_vision_plugin_handle_method_call(
     cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
     cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
 
-    RGB_TEXTURE_GET_CLASS(self->rgbTexture)->pipeline->run(b, *self->texture_registrar, *FL_TEXTURE(self->rgbTexture), RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_width, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->video_height, RGB_TEXTURE_GET_CLASS(self->rgbTexture)->buffer, &self->models, self->flChannel);
-    DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->pipeline->run(g, *self->texture_registrar, *FL_TEXTURE(self->depthTexture), DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->video_width, DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->video_height, DEPTH_TEXTURE_GET_CLASS(self->depthTexture)->buffer, &self->models, self->flChannel);
-    IR_TEXTURE_GET_CLASS(self->irTexture)->pipeline->run(r, *self->texture_registrar, *FL_TEXTURE(self->irTexture), IR_TEXTURE_GET_CLASS(self->irTexture)->video_width, IR_TEXTURE_GET_CLASS(self->irTexture)->video_height, IR_TEXTURE_GET_CLASS(self->irTexture)->buffer, &self->models, self->flChannel);
-    UVC_TEXTURE_GET_CLASS(self->uvcTexture)->pipeline->run(b, *self->texture_registrar, *FL_TEXTURE(self->uvcTexture), IR_TEXTURE_GET_CLASS(self->uvcTexture)->video_width, IR_TEXTURE_GET_CLASS(self->uvcTexture)->video_height, IR_TEXTURE_GET_CLASS(self->uvcTexture)->buffer, &self->models, self->flChannel);
+    FV_TEXTURE(self->rgbTexture)->pipeline->run(b, *self->texture_registrar, *FL_TEXTURE(self->rgbTexture), FV_TEXTURE(self->rgbTexture)->video_width, FV_TEXTURE(self->rgbTexture)->video_height, FV_TEXTURE(self->rgbTexture)->buffer, &self->models, self->flChannel);
+    FV_TEXTURE(self->depthTexture)->pipeline->run(g, *self->texture_registrar, *FL_TEXTURE(self->depthTexture), FV_TEXTURE(self->depthTexture)->video_width, FV_TEXTURE(self->depthTexture)->video_height, FV_TEXTURE(self->depthTexture)->buffer, &self->models, self->flChannel);
+    FV_TEXTURE(self->irTexture)->pipeline->run(r, *self->texture_registrar, *FL_TEXTURE(self->irTexture), FV_TEXTURE(self->irTexture)->video_width, FV_TEXTURE(self->irTexture)->video_height, FV_TEXTURE(self->irTexture)->buffer, &self->models, self->flChannel);
+    FV_TEXTURE(self->uvcTexture)->pipeline->run(b, *self->texture_registrar, *FL_TEXTURE(self->uvcTexture), FV_TEXTURE(self->uvcTexture)->video_width, FV_TEXTURE(self->uvcTexture)->video_height, FV_TEXTURE(self->uvcTexture)->buffer, &self->models, self->flChannel);
 
-    fl_texture_registrar_mark_texture_frame_available(self->texture_registrar, FL_TEXTURE(self->rgbTexture));
+    // fl_texture_registrar_mark_texture_frame_available(self->texture_registrar, FL_TEXTURE(self->rgbTexture));
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
@@ -573,34 +573,34 @@ void flutter_vision_plugin_register_with_registrar(FlPluginRegistrar *registrar)
   plugin->ni2 = new OpenNi2Wrapper();
   plugin->texture_registrar = fl_plugin_registrar_get_texture_registrar(registrar);
 
-  plugin->uvcTexture = UVC_TEXTURE(g_object_new(uvc_texture_get_type(), nullptr));
-  FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(plugin->uvcTexture)->copy_pixels = uvc_texture_copy_pixels;
+  plugin->uvcTexture = FV_TEXTURE(g_object_new(fv_texture_get_type(), nullptr));
+  FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(plugin->uvcTexture)->copy_pixels = fv_texture_copy_pixels;
   fl_texture_registrar_register_texture(plugin->texture_registrar, FL_TEXTURE(plugin->uvcTexture));
-  UVC_TEXTURE_GET_CLASS(plugin->uvcTexture)->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(plugin->uvcTexture));
+  FV_TEXTURE(plugin->uvcTexture)->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(plugin->uvcTexture));
   fl_texture_registrar_mark_texture_frame_available(plugin->texture_registrar, FL_TEXTURE(plugin->uvcTexture));
-  UVC_TEXTURE_GET_CLASS(plugin->uvcTexture)->pipeline = new Pipeline(&UVC_TEXTURE_GET_CLASS(plugin->uvcTexture)->cvImage);
-  UVC_TEXTURE_GET_CLASS(plugin->uvcTexture)->models = &plugin->models;
+  FV_TEXTURE(plugin->uvcTexture)->pipeline = new Pipeline(&FV_TEXTURE(plugin->uvcTexture)->cvImage);
+  FV_TEXTURE(plugin->uvcTexture)->models = &plugin->models;
 
-  plugin->rgbTexture = RGB_TEXTURE(g_object_new(rgb_texture_get_type(), nullptr));
-  FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(plugin->rgbTexture)->copy_pixels = rgb_texture_copy_pixels;
+  plugin->rgbTexture = FV_TEXTURE(g_object_new(fv_texture_get_type(), nullptr));
+  FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(plugin->rgbTexture)->copy_pixels = fv_texture_copy_pixels;
   fl_texture_registrar_register_texture(plugin->texture_registrar, FL_TEXTURE(plugin->rgbTexture));
-  RGB_TEXTURE_GET_CLASS(plugin->rgbTexture)->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(plugin->rgbTexture));
+  FV_TEXTURE(plugin->rgbTexture)->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(plugin->rgbTexture));
   fl_texture_registrar_mark_texture_frame_available(plugin->texture_registrar, FL_TEXTURE(plugin->rgbTexture));
-  RGB_TEXTURE_GET_CLASS(plugin->rgbTexture)->pipeline = new Pipeline(&UVC_TEXTURE_GET_CLASS(plugin->rgbTexture)->cvImage);
+  FV_TEXTURE(plugin->rgbTexture)->pipeline = new Pipeline(&FV_TEXTURE(plugin->rgbTexture)->cvImage);
 
-  plugin->depthTexture = DEPTH_TEXTURE(g_object_new(depth_texture_get_type(), nullptr));
-  FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(plugin->depthTexture)->copy_pixels = depth_texture_copy_pixels;
+  plugin->depthTexture = FV_TEXTURE(g_object_new(fv_texture_get_type(), nullptr));
+  FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(plugin->depthTexture)->copy_pixels = fv_texture_copy_pixels;
   fl_texture_registrar_register_texture(plugin->texture_registrar, FL_TEXTURE(plugin->depthTexture));
-  DEPTH_TEXTURE_GET_CLASS(plugin->depthTexture)->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(plugin->depthTexture));
+  FV_TEXTURE(plugin->depthTexture)->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(plugin->depthTexture));
   fl_texture_registrar_mark_texture_frame_available(plugin->texture_registrar, FL_TEXTURE(plugin->depthTexture));
-  DEPTH_TEXTURE_GET_CLASS(plugin->depthTexture)->pipeline = new Pipeline(&UVC_TEXTURE_GET_CLASS(plugin->depthTexture)->cvImage);
+  FV_TEXTURE(plugin->depthTexture)->pipeline = new Pipeline(&FV_TEXTURE(plugin->depthTexture)->cvImage);
 
-  plugin->irTexture = IR_TEXTURE(g_object_new(ir_texture_get_type(), nullptr));
-  FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(plugin->irTexture)->copy_pixels = ir_texture_copy_pixels;
+  plugin->irTexture = FV_TEXTURE(g_object_new(fv_texture_get_type(), nullptr));
+  FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(plugin->irTexture)->copy_pixels = fv_texture_copy_pixels;
   fl_texture_registrar_register_texture(plugin->texture_registrar, FL_TEXTURE(plugin->irTexture));
-  IR_TEXTURE_GET_CLASS(plugin->irTexture)->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(plugin->irTexture));
+  FV_TEXTURE(plugin->irTexture)->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(plugin->irTexture));
   fl_texture_registrar_mark_texture_frame_available(plugin->texture_registrar, FL_TEXTURE(plugin->irTexture));
-  IR_TEXTURE_GET_CLASS(plugin->irTexture)->pipeline = new Pipeline(&UVC_TEXTURE_GET_CLASS(plugin->irTexture)->cvImage);
+  FV_TEXTURE(plugin->irTexture)->pipeline = new Pipeline(&FV_TEXTURE(plugin->irTexture)->cvImage);
 
   plugin->openglTexture = OPENGL_TEXTURE(g_object_new(opengl_texture_get_type(), nullptr));
   OPENGL_TEXTURE_GET_CLASS(plugin->openglTexture)->video_width = 1280;

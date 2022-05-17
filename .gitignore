@@ -32,3 +32,4 @@ build/
 linux/lib
 windows/bin
 handler/bin/*
+example/test.jpg

@@ -5,9 +5,7 @@
 #include <memory>
 #include <opencv2/core/core.hpp>
 
-#include "rgb_texture.hpp"
-#include "depth_texture.hpp"
-#include "ir_texture.hpp"
+#include "fv_texture.h"
 #include <thread>
 #include "opengl.h"
 #include "tflite.h"
@@ -67,7 +65,7 @@ public:
   bool videoStart;
   bool enablePointCloud = false;
 
-  void registerFlContext(FlTextureRegistrar *r, RgbTexture *rgb, DepthTexture *depth, IrTexture *ir, FlMethodChannel *channel, OpenGLFL *g, std::vector<TFLiteModel *> *m, TfPipeline *tp)
+  void registerFlContext(FlTextureRegistrar *r, FvTexture *rgb, FvTexture *depth, FvTexture *ir, FlMethodChannel *channel, OpenGLFL *g, std::vector<TFLiteModel *> *m, TfPipeline *tp)
   {
     registrar = r;
     rgbTexture = rgb;
@@ -294,9 +292,9 @@ public:
 
 private:
   FlTextureRegistrar *registrar;
-  RgbTexture *rgbTexture;
-  IrTexture *irTexture;
-  DepthTexture *depthTexture;
+  FvTexture *rgbTexture;
+  FvTexture *irTexture;
+  FvTexture *depthTexture;
   FlMethodChannel *flChannel;
   std::vector<TFLiteModel *> *models;
   TfPipeline *tfPipeline;
@@ -387,9 +385,9 @@ private:
     VideoFrameRef rgbFrame;
     VideoFrameRef depthFrame;
     VideoFrameRef irFrame;
-    RgbTextureClass *rgbCls = RGB_TEXTURE_GET_CLASS(rgbTexture);
-    DepthTextureClass *depthCls = DEPTH_TEXTURE_GET_CLASS(depthTexture);
-    IrTextureClass *irCls = IR_TEXTURE_GET_CLASS(irTexture);
+    FvTexture *rgbCls = FV_TEXTURE(rgbTexture);
+    FvTexture *depthCls = FV_TEXTURE(depthTexture);
+    FvTexture *irCls = FV_TEXTURE(irTexture);
     bool rgbNewFrame = false;
     bool depthNewFrame = false;
     bool irNewFrame = false;

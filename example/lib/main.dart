@@ -11,6 +11,10 @@ import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision_example/configurePanel.dart';
 import 'package:flutter_vision_example/demo/LIPSFace.dart';
 
+const TEST_IMAGE = '/home/hedgehao/test/faces.jpg';
+const MODEL_FACE_DETECTOR = '/home/hedgehao/test/faceDetector.tflite';
+const MODEL_EFFECIENT_NET = '/home/hedgehao/test/efficientNet.tflite';
+
 const texture_width = 240.0;
 const texture_height = 180.0;
 
@@ -215,7 +219,11 @@ class _MyAppState extends State<MyApp> {
                       onPointerUp: updateMouseClick,
                       onPointerMove: updateMousePosition,
                       onPointerSignal: updateMouseWheel,
-                      child: Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 540, height: 405, child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
+                      child: Container(
+                          decoration: BoxDecoration(border: Border.all(width: 1)),
+                          width: 540,
+                          height: 405,
+                          child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
               Text(debugText, style: const TextStyle(fontSize: 30)),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 TextButton(
@@ -231,12 +239,12 @@ class _MyAppState extends State<MyApp> {
                       LipsPipeline rgbPipeline = LipsPipeline(1);
                       await rgbPipeline.clear();
                       // await rgbPipeline.crop(80, 560, 0, 480);
-                      await rgbPipeline.cvtColor(0);
+                      await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
                       // await rgbPipeline.rotate(OpenCV.ROTATE_90_CLOCKWISE);
                       await rgbPipeline.show();
-                      await rgbPipeline.resize(28, 28);
-                      await rgbPipeline.cvtColor(7);
-                      await rgbPipeline.convertTo(3, 255.0 / 1024.0, shift: 0);
+                      // await rgbPipeline.resize(28, 28);
+                      // await rgbPipeline.cvtColor(7);
+                      // await rgbPipeline.convertTo(3, 255.0 / 1024.0, shift: 0);
 
                       LipsPipeline depthPipeline = LipsPipeline(2);
                       await depthPipeline.clear();
@@ -252,18 +260,14 @@ class _MyAppState extends State<MyApp> {
                       await irPipeline.cvtColor(9); // COLOR_GRAY2BGRA
                       await irPipeline.show();
 
-                      // LipsPipeline tfPipeline = LipsPipeline(8);
-                      // await tfPipeline.clear();
-                      // await tfPipeline.setInputTensorData(LipsPipeline.IR_FRAME, 0, LipsPipeline.DATATYPE_FLOAT);
-
                       LipsPipeline uvcPipeline = LipsPipeline(16);
                       await uvcPipeline.clear();
-                      await uvcPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
+                      await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
                       await uvcPipeline.show();
 
                       await FlutterVision.test();
 
-                      await FlutterVision.videoScreenshot(16, '/home/hedgehao/Desktop/test.jpg');
+                      await FlutterVision.videoScreenshot(16, 'test.jpg');
 
                       print('');
                     },
@@ -276,7 +280,7 @@ class _MyAppState extends State<MyApp> {
                     child: const Text('Replace pipeline')),
                 TextButton(
                   onPressed: () async {
-                    TFLiteModel model = await TFLiteModel.create('/home/hedgehao/test/cpp/tflite/models/efficientdet.tflite');
+                    TFLiteModel model = await TFLiteModel.create(MODEL_EFFECIENT_NET);
                     models.add(model);
 
                     LipsPipeline rgbPipeline = LipsPipeline(1);
@@ -321,7 +325,7 @@ class _MyAppState extends State<MyApp> {
                 TextButton(
                     onPressed: () async {
                       if (models.isEmpty) {
-                        TFLiteModel model = await TFLiteModel.create('D:/test/190625_faceDetector_t1.tflite');
+                        TFLiteModel model = await TFLiteModel.create(MODEL_FACE_DETECTOR);
                         models.add(model);
 
                         LipsPipeline rgbPipeline = LipsPipeline(16);
@@ -378,12 +382,12 @@ class _MyAppState extends State<MyApp> {
                     child: const Text('Render')),
                 TextButton(
                     onPressed: () async {
-                      TFLiteModel model = await TFLiteModel.create('D:/test/190625_faceDetector_t1.tflite');
+                      TFLiteModel model = await TFLiteModel.create(MODEL_FACE_DETECTOR);
                       models.add(model);
 
                       LipsPipeline pipeline = await LipsPipeline.create();
                       await pipeline.clear();
-                      await pipeline.imread("D:/test/faces.jpg");
+                      await pipeline.imread(TEST_IMAGE);
                       await pipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
                       await pipeline.show();
                       await pipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
@@ -399,7 +403,7 @@ class _MyAppState extends State<MyApp> {
                     onPressed: () async {
                       LipsPipeline pipeline = await LipsPipeline.create();
                       await pipeline.clear();
-                      await pipeline.imread("D:/test/faces.jpg");
+                      await pipeline.imread(TEST_IMAGE);
                       await pipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
                       await pipeline.customHandler(5);
                       await pipeline.show();
