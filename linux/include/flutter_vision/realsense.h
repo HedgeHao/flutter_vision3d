@@ -192,8 +192,8 @@ private:
 
         if (enablePointCloud)
         {
-          glfl->modelRsPointCloud->points = rsPointcloud.calculate(depthFrame);
           rsPointcloud.map_to(rgbFrame);
+          glfl->modelRsPointCloud->points = rsPointcloud.calculate(depthFrame);
           glfl->modelRsPointCloud->updateTexture(rgbFrame);
         }
       }
