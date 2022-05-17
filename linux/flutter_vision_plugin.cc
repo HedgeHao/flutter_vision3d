@@ -53,7 +53,6 @@ struct _FlutterVisionPlugin
   FlView *flView;
   OpenGLFL *glfl;
 
-  TfPipeline *tfPipeline;
   std::vector<TFLiteModel *> models{};
   std::vector<OpenCVCamera *> cameras{};
   std::vector<Pipeline *> pipelines{};
@@ -406,7 +405,6 @@ static void flutter_vision_plugin_handle_method_call(
     else if (index == VideoIndex::Camera2D)
     {
       FV_TEXTURE(self->uvcTexture)->pipeline->add(funcIndex, params, len, insertAt, interval);
-
     }
     else if (index == 200) // Realsense RGB Pipeline
     {
@@ -761,9 +759,6 @@ void flutter_vision_plugin_register_with_registrar(FlPluginRegistrar *registrar)
   // TODO: glfl and glTexture depend on each other
   plugin->glfl = new OpenGLFL(gtk_widget_get_parent_window(GTK_WIDGET(plugin->flView)), plugin->texture_registrar, plugin->openglTexture);
   OPENGL_TEXTURE_GET_CLASS(plugin->openglTexture)->buffer = plugin->glfl->pixelBuffer;
-
-  // plugin->tfPipeline = new TfPipeline();
-  // plugin->ni2->registerFlContext(plugin->texture_registrar, plugin->rgbTexture, plugin->depthTexture, plugin->irTexture, channel, plugin->glfl, &plugin->models, plugin->tfPipeline);
 
   g_object_unref(plugin);
 }

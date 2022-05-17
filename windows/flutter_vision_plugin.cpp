@@ -37,7 +37,6 @@ namespace
     OpenNi2Wrapper *ni2 = new OpenNi2Wrapper();
     OpenGLFL *glfl;
 
-    // TfPipeline *tfPipeline;
     std::vector<TFLiteModel *> models{};
     std::vector<OpenCVCamera *> cameras{};
     std::vector<Pipeline *> pipelines{};
@@ -325,7 +324,7 @@ namespace
 
       result->Success(flutter::EncodableValue(nullptr));
     }
-    else if(method_call.method_name().compare("enablePointCloud") == 0)
+    else if (method_call.method_name().compare("enablePointCloud") == 0)
     {
       bool enable = false;
       auto flEnable = arguments->find(flutter::EncodableValue("enable"));
@@ -402,20 +401,20 @@ namespace
       }
       else
       {
-        pipelines[index-100]->add(funcIndex, params, len, insertAt, interval);
+        pipelines[index - 100]->add(funcIndex, params, len, insertAt, interval);
       }
 
       result->Success(flutter::EncodableValue(nullptr));
-    } 
+    }
     else if (method_call.method_name().compare("pipelineCreate") == 0)
     {
       Pipeline *p = new Pipeline();
       pipelines.push_back(p);
 
       // TODO: Fix index
-      int index = pipelines.size()-1+100;
+      int index = pipelines.size() - 1 + 100;
       result->Success(flutter::EncodableValue(index));
-    } 
+    }
     else if (method_call.method_name().compare("pipelineRun") == 0)
     {
       int index = -1;
@@ -464,7 +463,7 @@ namespace
       }
       else
       {
-        pipelines[index-100]->clear();
+        pipelines[index - 100]->clear();
       }
 
       result->Success(flutter::EncodableValue(nullptr));
@@ -523,7 +522,7 @@ namespace
 
       float value = 0.0f;
       auto flValue = arguments->find(flutter::EncodableValue("value"));
-      if(flValue != arguments->end())
+      if (flValue != arguments->end())
       {
         value = std::get<double>(flValue->second);
       }
@@ -631,11 +630,11 @@ namespace
         outputSize *= size[i];
       float *data = new float[outputSize];
 
-
       models[0]->retrieveOutput<float>(index, outputSize, data);
 
       flutter::EncodableList fl = flutter::EncodableList();
-      for (int i = 0; i < outputSize; i++){
+      for (int i = 0; i < outputSize; i++)
+      {
         fl.push_back(*(data + i));
       }
 

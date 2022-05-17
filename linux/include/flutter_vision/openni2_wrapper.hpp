@@ -65,7 +65,7 @@ public:
   bool videoStart;
   bool enablePointCloud = false;
 
-  void registerFlContext(FlTextureRegistrar *r, FvTexture *rgb, FvTexture *depth, FvTexture *ir, FlMethodChannel *channel, OpenGLFL *g, std::vector<TFLiteModel *> *m, TfPipeline *tp)
+  void registerFlContext(FlTextureRegistrar *r, FvTexture *rgb, FvTexture *depth, FvTexture *ir, FlMethodChannel *channel, OpenGLFL *g, std::vector<TFLiteModel *> *m)
   {
     registrar = r;
     rgbTexture = rgb;
@@ -74,7 +74,6 @@ public:
     flChannel = channel;
     glfl = g;
     models = m;
-    tfPipeline = tp;
   };
 
   ~OpenNi2Wrapper() {}
@@ -297,7 +296,6 @@ private:
   FvTexture *depthTexture;
   FlMethodChannel *flChannel;
   std::vector<TFLiteModel *> *models;
-  TfPipeline *tfPipeline;
 
   bool niRgbAvailable = false;
   bool niDepthAvailable = false;
