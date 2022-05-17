@@ -22,6 +22,7 @@ class RealsenseCamera {
   late int rgbTextureId;
   late int depthTextureId;
   late int irTextureId;
+  late bool isPointCloudEnabled;
 
   RealsenseCamera(Map<String, dynamic> m) {
     serial = m['serial'] as String;
@@ -40,6 +41,14 @@ class RealsenseCamera {
 
   Future<bool> disableStream({int videoModeIndex = 7}) async {
     return await FlutterVision.channel.invokeMethod('rsConfigVideoStream', {'serial': serial, 'videoModeIndex': videoModeIndex, 'enable': false});
+  }
+
+  Future<void> enablePointCloud() async {
+    return await FlutterVision.channel.invokeMethod('rsEnablePointCloud', {'serial': serial, 'enable': true});
+  }
+
+  Future<void> disablePointCloud() async {
+    return await FlutterVision.channel.invokeMethod('rsEnablePointCloud', {'serial': serial, 'enable': false});
   }
 
   Future<bool> isConnected() async {

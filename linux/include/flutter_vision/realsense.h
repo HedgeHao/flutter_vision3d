@@ -6,6 +6,7 @@
 #include <vector>
 #include <thread>
 
+#include "opengl.h"
 #include "fv_texture.h"
 #include "pipeline/pipeline.h"
 
@@ -27,17 +28,20 @@ public:
   FvTexture *depthTexture;
   FvTexture *irTexture;
 
+  bool enablePointCloud = false;
+
   RealsenseCam(const char *s)
   {
     serial = std::string(s);
   }
 
-  void fv_init(FlTextureRegistrar *r, std::vector<TFLiteModel *> *m, FlMethodChannel *f)
+  void fv_init(FlTextureRegistrar *r, std::vector<TFLiteModel *> *m, FlMethodChannel *f, OpenGLFL *g)
   {
     flRegistrar = r;
     // TODO: check if this is duplicate from texture
     models = m;
     flChannel = f;
+    glfl = g;
 
     // Create texture
     rgbTexture = FV_TEXTURE(g_object_new(fv_texture_get_type(), nullptr));
@@ -148,11 +152,13 @@ private:
   bool videoStart = false;
   unsigned int timeout = 1500;
 
+  OpenGLFL *glfl;
   FlTextureRegistrar *flRegistrar;
   std::vector<TFLiteModel *> *models;
   FlMethodChannel *flChannel;
 
   bool isRgbEnable = false, isDepthEnable = false, isIrEnable = false;
+  rs2::pointcloud rsPointcloud;
 
   void _readVideoFeed()
   {
@@ -182,6 +188,13 @@ private:
         {
           irTexture->cvImage = frame_to_mat(irFrame);
           irTexture->pipeline->run(irTexture->cvImage, *flRegistrar, *FL_TEXTURE(irTexture), irTexture->video_width, irTexture->video_height, irTexture->buffer, models, flChannel);
+        }
+
+        if (enablePointCloud)
+        {
+          glfl->modelRsPointCloud->points = rsPointcloud.calculate(depthFrame);
+          rsPointcloud.map_to(rgbFrame);
+          glfl->modelRsPointCloud->updateTexture(rgbFrame);
         }
       }
       catch (const rs2::error &e)

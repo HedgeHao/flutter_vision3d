@@ -22,6 +22,7 @@ class ConfigurationViewModel {
   int lastRequestTS = 0;
   late File serial;
   bool pointCloud = false;
+  bool rsPointCloud = false;
 
   List<VideoModeData> videoModes = [
     VideoModeData('RGB', 1),

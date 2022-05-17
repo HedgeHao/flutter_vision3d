@@ -362,20 +362,22 @@ class RsVideoStreamingConfigState extends State<RsVideoStreamingConfig> {
               ViewModel.configuration.rsCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedRsDevice)?.disableStream();
             },
             child: const Text('Stop')),
-        // const Text('PointCloud'),
-        // const SizedBox(width: 5),
-        // SizedBox(
-        //     height: 25,
-        //     width: 50,
-        //     child: FlutterSwitch(
-        //         value: ViewModel.configuration.pointCloud,
-        //         onToggle: (v) async {
-        //           await FlutterVision.enablePointCloud(v);
+        const Text('PointCloud'),
+        const SizedBox(width: 5),
+        SizedBox(
+            height: 25,
+            width: 50,
+            child: FlutterSwitch(
+                value: ViewModel.configuration.rsPointCloud,
+                onToggle: (v) async {
+                  if (ViewModel.configuration.rsCams.isEmpty) return;
 
-        //           setState(() {
-        //             ViewModel.configuration.pointCloud = v;
-        //           });
-        //         }))
+                  v ? ViewModel.configuration.rsCams[0].enablePointCloud() : ViewModel.configuration.rsCams[0].disablePointCloud();
+
+                  setState(() {
+                    ViewModel.configuration.rsPointCloud = v;
+                  });
+                }))
       ],
     );
   }

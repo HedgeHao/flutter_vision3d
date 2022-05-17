@@ -257,7 +257,7 @@ static void flutter_vision_plugin_handle_method_call(
     int ret = r->openDevice();
     if (ret == 0)
     {
-      r->fv_init(self->texture_registrar, &self->models, self->flChannel);
+      r->fv_init(self->texture_registrar, &self->models, self->flChannel, self->glfl);
       self->rsCams.push_back(r);
 
       fl_value_set(result, fl_value_new_string("rgbTextureId"), fl_value_new_int(r->rgbTexture->texture_id));
@@ -308,6 +308,22 @@ static void flutter_vision_plugin_handle_method_call(
   {
     // TODO: implement
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+  }
+  else if (strcmp(method, "rsEnablePointCloud") == 0)
+  {
+    FlValue *valueSerial = fl_value_lookup_string(args, "serial");
+    const char *serial = fl_value_get_string(valueSerial);
+    FlValue *valueEnable = fl_value_lookup_string(args, "enable");
+    bool enable = fl_value_get_bool(valueEnable);
+
+    int ret = -1;
+    RealsenseCam *cam = findRsCam(serial, &self->rsCams);
+    if (cam != nullptr)
+    {
+      ret = cam->enablePointCloud = enable;
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
   else if (strcmp(method, "openglSetCamPosition") == 0)
   {
