@@ -5,7 +5,6 @@
 #include <sys/utsname.h>
 
 #include "include/flutter_vision/pipeline/pipeline.h"
-#include "include/flutter_vision/pipeline/tf_pipeline.h"
 #include "include/flutter_vision/tflite.h"
 
 #include "include/flutter_vision/realsense.h"
