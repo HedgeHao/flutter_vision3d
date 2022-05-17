@@ -385,6 +385,7 @@ private:
     VideoFrameRef rgbFrame;
     VideoFrameRef depthFrame;
     VideoFrameRef irFrame;
+
     bool rgbNewFrame = false;
     bool depthNewFrame = false;
     bool irNewFrame = false;

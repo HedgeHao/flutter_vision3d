@@ -406,6 +406,7 @@ static void flutter_vision_plugin_handle_method_call(
     else if (index == VideoIndex::Camera2D)
     {
       FV_TEXTURE(self->uvcTexture)->pipeline->add(funcIndex, params, len, insertAt, interval);
+
     }
     else if (index == 200) // Realsense RGB Pipeline
     {
