@@ -1,3 +1,5 @@
+#ifndef _DEF_OPENGL_TEXTURE_
+#define _DEF_OPENGL_TEXTURE_
 #include <flutter_linux/flutter_linux.h>
 #include <gtk/gtk.h>
 #include <vector>
@@ -46,3 +48,4 @@ static void opengl_texture_class_init(
 static void opengl_texture_init(OpenGLTexture *self)
 {
 }
+#endif

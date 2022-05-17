@@ -8,6 +8,7 @@
 #include "include/flutter_vision/pipeline/tf_pipeline.h"
 #include "include/flutter_vision/tflite.h"
 
+#include "include/flutter_vision/realsense.h"
 #include "include/flutter_vision/openni2_wrapper.hpp"
 #include "include/flutter_vision/fv_texture.h"
 
@@ -21,6 +22,20 @@
                               FlutterVisionPlugin))
 
 cv::Mat emptyMat = cv::Mat::zeros(3, 3, CV_64F);
+
+RealsenseCam *findRsCam(const char *serial, std::vector<RealsenseCam *> *cams)
+{
+  RealsenseCam *cam = nullptr;
+  for (auto c : *cams)
+  {
+    if (strcmp(c->serial.c_str(), serial) == 0)
+    {
+      return c;
+    }
+  }
+
+  return nullptr;
+}
 
 struct _FlutterVisionPlugin
 {
@@ -42,6 +57,7 @@ struct _FlutterVisionPlugin
   std::vector<TFLiteModel *> models{};
   std::vector<OpenCVCamera *> cameras{};
   std::vector<Pipeline *> pipelines{};
+  std::vector<RealsenseCam *> rsCams{};
 };
 
 G_DEFINE_TYPE(FlutterVisionPlugin, flutter_vision_plugin, g_object_get_type())
@@ -202,6 +218,113 @@ static void flutter_vision_plugin_handle_method_call(
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
+  else if (strcmp(method, "rsGetTextureId") == 0)
+  {
+    FlValue *valueSerial = fl_value_lookup_string(args, "serial");
+    const char *serial = fl_value_get_string(valueSerial);
+    FlValue *valueVideoIndex = fl_value_lookup_string(args, "videoModeIndex");
+    const int videoIndex = fl_value_get_int(valueVideoIndex);
+
+    int ret = -1;
+    RealsenseCam *cam = findRsCam(serial, &self->rsCams);
+    if (cam != nullptr)
+    {
+      ret = cam->getTextureId(videoIndex);
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(ret)));
+  }
+  else if (strcmp(method, "rsEnumerateDevices") == 0)
+  {
+    std::vector<std::string> serials = RealsenseHelper::enumerateDevices();
+
+    auto list = fl_value_new_list();
+    for (auto s : serials)
+    {
+      fl_value_append_take(list, fl_value_new_string(s.c_str()));
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(list));
+  }
+  else if (strcmp(method, "rsOpenDevice") == 0)
+  {
+    FlValue *valueSerial = fl_value_lookup_string(args, "serial");
+    const char *serial = fl_value_get_string(valueSerial);
+
+    RealsenseCam *r = new RealsenseCam(serial);
+
+    auto result = fl_value_new_map();
+    int ret = r->openDevice();
+    if (ret == 0)
+    {
+      r->fv_init(self->texture_registrar, &self->models, self->flChannel, self->glfl);
+      self->rsCams.push_back(r);
+
+      fl_value_set(result, fl_value_new_string("rgbTextureId"), fl_value_new_int(r->rgbTexture->texture_id));
+      fl_value_set(result, fl_value_new_string("depthTextureId"), fl_value_new_int(r->depthTexture->texture_id));
+      fl_value_set(result, fl_value_new_string("irTextureId"), fl_value_new_int(r->irTexture->texture_id));
+    }
+
+    fl_value_set(result, fl_value_new_string("ret"), fl_value_new_int(ret));
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+  }
+  else if (strcmp(method, "rsConfigVideoStream") == 0)
+  {
+    FlValue *valueSerial = fl_value_lookup_string(args, "serial");
+    const char *serial = fl_value_get_string(valueSerial);
+    FlValue *valueVideoIndex = fl_value_lookup_string(args, "videoModeIndex");
+    const int videoIndex = fl_value_get_int(valueVideoIndex);
+    FlValue *valueEnable = fl_value_lookup_string(args, "enable");
+    bool enable = fl_value_get_bool(valueEnable);
+
+    int ret = -1;
+    RealsenseCam *cam = findRsCam(serial, &self->rsCams);
+    if (cam != nullptr)
+    {
+      ret = cam->configVideoStream(videoIndex, enable);
+      if (enable)
+      {
+        cam->readVideoFeed();
+      }
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(ret == 0)));
+  }
+  else if (strcmp(method, "rsCloseDevice") == 0)
+  {
+    FlValue *valueSerial = fl_value_lookup_string(args, "serial");
+    const char *serial = fl_value_get_string(valueSerial);
+
+    int ret = -1;
+    RealsenseCam *cam = findRsCam(serial, &self->rsCams);
+    if (cam != nullptr)
+    {
+      ret = cam->closeDevice();
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+  }
+  else if (strcmp(method, "rsDeviceIsConnected") == 0)
+  {
+    // TODO: implement
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+  }
+  else if (strcmp(method, "rsEnablePointCloud") == 0)
+  {
+    FlValue *valueSerial = fl_value_lookup_string(args, "serial");
+    const char *serial = fl_value_get_string(valueSerial);
+    FlValue *valueEnable = fl_value_lookup_string(args, "enable");
+    bool enable = fl_value_get_bool(valueEnable);
+
+    int ret = -1;
+    RealsenseCam *cam = findRsCam(serial, &self->rsCams);
+    if (cam != nullptr)
+    {
+      ret = cam->enablePointCloud = enable;
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+  }
   else if (strcmp(method, "openglSetCamPosition") == 0)
   {
     const float x = fl_value_get_float(fl_value_lookup_string(args, "x"));
@@ -283,11 +406,20 @@ static void flutter_vision_plugin_handle_method_call(
     else if (index == VideoIndex::Camera2D)
     {
       FV_TEXTURE(self->uvcTexture)->pipeline->add(funcIndex, params, len, insertAt, interval);
+
     }
-    // else if (index == PIPELINE_INDEX_TFLITE)
-    // {
-    //   self->tfPipeline->add(funcIndex, params, len, insertAt);
-    // }
+    else if (index == 200) // Realsense RGB Pipeline
+    {
+      self->rsCams[0]->rgbTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
+    }
+    else if (index == 201) // Realsense RGB Pipeline
+    {
+      self->rsCams[0]->depthTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
+    }
+    else if (index == 202) // Realsense RGB Pipeline
+    {
+      self->rsCams[0]->irTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
+    }
     else
     {
       // TODO: fix index
@@ -334,6 +466,23 @@ static void flutter_vision_plugin_handle_method_call(
     {
       FV_TEXTURE(self->uvcTexture)->pipeline->clear();
     }
+    else if (index >= 100 && index < 200) // Normal Pipeline
+    {
+      self->pipelines[index - 100]->clear();
+    }
+    else if (index == 200) // Realsense RGB Pipeline
+    {
+      self->rsCams[0]->rgbTexture->pipeline->clear();
+    }
+    else if (index == 201) // Realsense RGB Pipeline
+    {
+      self->rsCams[0]->depthTexture->pipeline->clear();
+    }
+    else if (index == 202) // Realsense RGB Pipeline
+    {
+      self->rsCams[0]->irTexture->pipeline->clear();
+    }
+
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
   else if (strcmp(method, "tfliteCreateModel") == 0)
@@ -513,7 +662,7 @@ static void flutter_vision_plugin_handle_method_call(
   {
     // cv::Mat b(1280, 720, CV_8UC4, cv::Scalar(255, 0, 0, 255));
     cv::Mat b = cv::imread("/home/hedgehao/test/faces.jpg", cv::IMREAD_COLOR);
-    cv::cvtColor(b, b, cv::COLOR_BGR2RGB);
+    // cv::cvtColor(b, b, cv::COLOR_BGR2RGB);
     cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
     cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
 
