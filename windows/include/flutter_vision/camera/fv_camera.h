@@ -3,18 +3,18 @@
 #include <flutter/plugin_registrar_windows.h>
 #include <iostream>
 
-#include "pipeline/pipeline.h"
-#include "texture.h"
-#include "opengl/opengl.h"
+#include "../pipeline/pipeline.h"
+#include "../texture.h"
+#include "../opengl/opengl.h"
 
-// enum VideoIndex
-// {
-//   RGB = 0b1,
-//   Depth = 0b10,
-//   IR = 0b100,
-//   OPENGL = 0b1000,
-//   Camera2D = 0b10000,
-// };
+enum VideoIndex
+{
+  RGB = 0b1,
+  Depth = 0b10,
+  IR = 0b100,
+  OPENGL = 0b1000,
+  Camera2D = 0b10000,
+};
 
 class FvCamera {
 public:

@@ -7,10 +7,7 @@
 #include <thread>
 #include <memory>
 
-#include "camera.h"
-#include "opengl/opengl.h"
-#include "texture.h"
-#include "pipeline/pipeline.h"
+#include "fv_camera.h"
 
 enum RsVideoIndex
 {

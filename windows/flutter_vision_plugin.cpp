@@ -14,12 +14,11 @@
 
 #include "include/flutter_vision/pipeline/pipeline.h"
 #include "include/flutter_vision/texture.h"
-#include "include/flutter_vision/openni2_wrapper.hpp"
-#include "include/flutter_vision/realsense.h"
+#include "include/flutter_vision/camera/realsense.h"
+#include "include/flutter_vision/camera/openni2.h"
 
 #include "include/flutter_vision/opengl/opengl.h"
 
-#include "include/flutter_vision/openni2.h"
 
 #define PIPELINE_INDEX_TFLITE 8
 
@@ -37,7 +36,6 @@ namespace
   {
   public:
     flutter::MethodChannel<flutter::EncodableValue> *flChannel;
-    OpenNi2Wrapper *ni2 = new OpenNi2Wrapper();
     OpenGLFL *glfl;
 
     // TfPipeline *tfPipeline;
@@ -59,9 +57,6 @@ namespace
         const flutter::MethodCall<flutter::EncodableValue> &method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
     flutter::TextureRegistrar *textureRegistrar;
-    std::unique_ptr<FvTexture> rgbTexture;
-    std::unique_ptr<FvTexture> depthTexture;
-    std::unique_ptr<FvTexture> irTexture;
     std::unique_ptr<FvTexture> uvcTexture;
   };
 
@@ -83,7 +78,6 @@ namespace
           plugin_pointer->HandleMethodCall(call, std::move(result));
         });
 
-    plugin->ni2->registerFlContext(plugin->flChannel);
     plugin->glfl->init();
 
     registrar->AddPlugin(std::move(plugin));
@@ -92,17 +86,8 @@ namespace
   FlutterVisionPlugin::FlutterVisionPlugin(flutter::TextureRegistrar *texture_registrar)
   {
     textureRegistrar = texture_registrar;
-    rgbTexture = std::make_unique<FvTexture>(textureRegistrar);
-    depthTexture = std::make_unique<FvTexture>(textureRegistrar);
-    irTexture = std::make_unique<FvTexture>(textureRegistrar);
     uvcTexture = std::make_unique<FvTexture>(textureRegistrar);
     glfl = new OpenGLFL(textureRegistrar);
-
-    ni2->registerFlContext(textureRegistrar, rgbTexture.get(), depthTexture.get(), irTexture.get(), glfl, &models);
-
-    rgbTexture->stream = &ni2->vsColor;
-    depthTexture->stream = &ni2->vsDepth;
-    irTexture->stream = &ni2->vsIR;
   }
 
   FlutterVisionPlugin::~FlutterVisionPlugin() {}
@@ -127,40 +112,7 @@ namespace
   {
     const flutter::EncodableMap *arguments = std::get_if<flutter::EncodableMap>(method_call.arguments());
 
-    if (method_call.method_name().compare("ni2GetVideoTexture") == 0)
-    {
-      int index;
-      auto indexIt = arguments->find(flutter::EncodableValue("videoIndex"));
-      if (indexIt != arguments->end())
-      {
-        index = std::get<int>(indexIt->second);
-      }
-
-      int64_t ret = 0;
-      if (index == VideoIndex::RGB)
-      {
-        ret = rgbTexture->textureId;
-      }
-      else if (index == VideoIndex::Depth)
-      {
-        ret = depthTexture->textureId;
-      }
-      else if (index == VideoIndex::IR)
-      {
-        ret = irTexture->textureId;
-      }
-      else if (index == VideoIndex::Camera2D)
-      {
-        ret = uvcTexture->textureId;
-      }
-      else if (index == VideoIndex::OPENGL)
-      {
-        ret = glfl->openglTexture->textureId;
-      }
-
-      result->Success(flutter::EncodableValue(ret));
-    }
-    else if (method_call.method_name().compare("ni2Initialize") == 0)
+    if (method_call.method_name().compare("ni2Initialize") == 0)
     {
       int ret = OpenniCam::openniInit();
       result->Success(flutter::EncodableValue(ret));
@@ -255,7 +207,8 @@ namespace
     }
     else if (method_call.method_name().compare("fvCameraIsConnected") == 0)
     {
-      result->Success(flutter::EncodableValue(ni2->isConnected()));
+      // TODO: unimplement
+      result->Success(flutter::EncodableValue(true));
     }
     else if (method_call.method_name().compare("fvCameraConfigVideoStream") == 0)
     {
@@ -328,30 +281,14 @@ namespace
         height = std::get<int>(heightIt->second);
       }
 
-      // TODO: [Refactor] use Texture class
-      if (videoIndex == VideoIndex::RGB)
-      {
-        rgbTexture->videoWidth = width;
-        rgbTexture->videoHeight = height;
-        rgbTexture->buffer.resize(width * height * 4);
-      }
-      else if (videoIndex == VideoIndex::Depth)
-      {
-        depthTexture->videoWidth = width;
-        depthTexture->videoHeight = height;
-        depthTexture->buffer.resize(width * height * 4);
-      }
-      else if (videoIndex == VideoIndex::IR)
-      {
-        irTexture->videoWidth = width;
-        irTexture->videoHeight = height;
-        irTexture->buffer.resize(width * height * 4);
-      }
-      else if (videoIndex == VideoIndex::IR)
+     
+      if (videoIndex == VideoIndex::IR)
       {
         uvcTexture->videoWidth = width;
         uvcTexture->videoHeight = height;
         uvcTexture->buffer.resize(width * height * 4);
+      }else{
+        // TODO: set video size for camera
       }
 
       result->Success(flutter::EncodableValue(nullptr));
@@ -563,8 +500,8 @@ namespace
       std::cout << "PipelineRun:" << index << std::endl;
 
       // TODO: normal pipline should have their own texture.
-      pipelines[index]->runOnce(textureRegistrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer, &models, flChannel);
-      rgbTexture->setPixelBuffer();
+      // pipelines[index]->runOnce(textureRegistrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer, &models, flChannel);
+      // rgbTexture->setPixelBuffer();
 
       result->Success(flutter::EncodableValue(nullptr));
     }
@@ -826,21 +763,11 @@ namespace
 
       bool ret = false;
       cv::Mat frame;
-      if (index == VideoIndex::RGB)
-      {
-        rgbTexture->pipeline->screenshot(path.c_str(), cvtCode);
-      }
-      else if (index == VideoIndex::Depth)
-      {
-        depthTexture->pipeline->screenshot(path.c_str(), cvtCode);
-      }
-      else if (index == VideoIndex::IR)
-      {
-        irTexture->pipeline->screenshot(path.c_str(), cvtCode);
-      }
-      else if (index == VideoIndex::Camera2D)
+      if (index == VideoIndex::Camera2D)
       {
         uvcTexture->pipeline->screenshot(path.c_str(), cvtCode);
+      } else{
+        // TODO: Implement for FvCamera
       }
 
       result->Success(flutter::EncodableValue(ret));

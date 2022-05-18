@@ -5,10 +5,7 @@
 #include <OpenNI.h>
 #include <iostream>
 
-#include "camera.h"
-#include "opengl/opengl.h"
-#include "texture.h"
-#include "pipeline/pipeline.h"
+#include "fv_camera.h"
 
 using namespace openni;
 
