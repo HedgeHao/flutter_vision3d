@@ -1,6 +1,7 @@
 import 'package:flutter_vision/flutter_vision.dart';
 
 import '../flutter_vision.dart';
+import 'dummy.dart';
 import 'openni.dart';
 import 'realsense.dart';
 
@@ -17,20 +18,44 @@ class FvCamera {
     flResult['rgbTextureId'] = (result['rgbTextureId'] ?? 0) as int;
     flResult['depthTextureId'] = (result['depthTextureId'] ?? 0) as int;
     flResult['irTextureId'] = (result['irTextureId'] ?? 0) as int;
+    flResult['cameraType'] = type.index;
 
     if (flResult['ret'] == 0) {
       flResult['serial'] = serial;
-      return type == CameraType.OPENNI ? OpenniCamera(flResult) : RealsenseCamera(flResult);
+
+      if (type == CameraType.OPENNI) {
+        return OpenniCamera(flResult);
+      } else if (type == CameraType.REALSENSE) {
+        return RealsenseCamera(flResult);
+      } else if (type == CameraType.DUMMY) {
+        return DummyCamera(flResult);
+      }
     }
 
     return null;
   }
+
+  late final FvPipeline rgbPipeline;
+  late final FvPipeline depthPipeline;
+  late final FvPipeline irPipeline;
 
   late String serial;
   late int rgbTextureId;
   late int depthTextureId;
   late int irTextureId;
   late bool isPointCloudEnabled;
+
+  FvCamera(Map<String, dynamic> m) {
+    cameraType = CameraType.values[m['cameraType']];
+    serial = m['serial'] as String;
+    rgbTextureId = m['rgbTextureId'] as int;
+    depthTextureId = m['depthTextureId'] as int;
+    irTextureId = m['irTextureId'] as int;
+
+    rgbPipeline = new FvPipeline(serial, FvPipeline.RGB_FRAME);
+    depthPipeline = new FvPipeline(serial, FvPipeline.DEPTH_FRAME);
+    irPipeline = new FvPipeline(serial, FvPipeline.IR_FRAME);
+  }
 
   Future<void> close() async {
     return await FlutterVision.channel.invokeMethod('fvCameraClose', {'serial': serial, 'cameraType': cameraType.index});

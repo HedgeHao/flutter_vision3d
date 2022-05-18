@@ -6,7 +6,7 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:flutter_vision/constants.dart';
 
-enum CameraType { OPENNI, REALSENSE }
+enum CameraType { OPENNI, REALSENSE, DUMMY }
 
 class OpenNi2Status {
   // OpenNI2
@@ -182,31 +182,32 @@ const FUNC_CUSTOM_HANDLER = 13;
 
 // TODO: check method can be added to that pipeline
 class FvPipeline {
-  static const RGB_FRAME = 0;
-  static const DEPTH_FRAME = 1;
-  static const IR_FRAME = 2;
+  static const RGB_FRAME = 1;
+  static const DEPTH_FRAME = 2;
+  static const IR_FRAME = 4;
   static const UVC_FRAME = 3;
 
   static const DATATYPE_UINT8 = 0;
   static const DATATYPE_FLOAT = 1;
 
   int index;
+  String serial;
 
-  static Future<FvPipeline> create() async {
-    int pipelineIndex = await FlutterVision.channel.invokeMethod('pipelineCreate');
-    print('Create New Pipeline:$pipelineIndex');
+  // static Future<FvPipeline> create() async {
+  //   int pipelineIndex = await FlutterVision.channel.invokeMethod('pipelineCreate');
+  //   print('Create New Pipeline:$pipelineIndex');
 
-    return FvPipeline(pipelineIndex);
-  }
+  //   return FvPipeline(pipelineIndex);
+  // }
 
-  FvPipeline(this.index);
+  FvPipeline(this.serial, this.index);
 
   Future<void> run() async {
-    await FlutterVision.channel.invokeMethod('pipelineRun', {'index': index});
+    await FlutterVision.channel.invokeMethod('pipelineRun', {'index': index, 'serial': serial});
   }
 
   Future<void> clear() async {
-    await FlutterVision.channel.invokeMethod('pipelineClear', {'index': index});
+    await FlutterVision.channel.invokeMethod('pipelineClear', {'index': index, 'serial': serial});
   }
 
   Future<void> test(int t, {int? at, int? interval}) async {
@@ -217,6 +218,7 @@ class FvPipeline {
       'len': 1,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -228,6 +230,7 @@ class FvPipeline {
       'len': 1,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -239,6 +242,7 @@ class FvPipeline {
       'len': path.length + 1,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -250,6 +254,7 @@ class FvPipeline {
       'len': path.length + 1,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -261,6 +266,7 @@ class FvPipeline {
       'len': 0,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -278,6 +284,7 @@ class FvPipeline {
       'len': 9,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -289,6 +296,7 @@ class FvPipeline {
       'len': 1,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -300,6 +308,7 @@ class FvPipeline {
       'len': 5,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -311,6 +320,7 @@ class FvPipeline {
       'len': 8,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -327,6 +337,7 @@ class FvPipeline {
       'len': 23,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -338,6 +349,7 @@ class FvPipeline {
       'len': 1,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -349,6 +361,7 @@ class FvPipeline {
       'len': 3,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -360,6 +373,7 @@ class FvPipeline {
       'len': 1,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -371,6 +385,7 @@ class FvPipeline {
       'len': 2,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 }

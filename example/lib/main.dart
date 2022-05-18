@@ -6,15 +6,18 @@ import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_vision/camera/camera.dart';
+import 'package:flutter_vision/camera/openni.dart';
 import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision_example/configurePanel.dart';
 import 'package:flutter_vision_example/demo/LIPSFace.dart';
 import 'package:flutter_vision_example/viewModel.dart';
+import 'package:flutter_vision/camera/dummy.dart';
 
-const TEST_IMAGE = '/home/hedgehao/test/faces.jpg';
-const MODEL_FACE_DETECTOR = '/home/hedgehao/test/faceDetector.tflite';
-const MODEL_EFFECIENT_NET = '/home/hedgehao/test/efficientNet.tflite';
+const TEST_IMAGE = 'D:/test/faces.jpg';
+const MODEL_FACE_DETECTOR = 'D:/test/faceDetector.tflite';
+const MODEL_EFFECIENT_NET = 'D:/test/efficientNet.tflite';
 
 const texture_width = 240.0;
 const texture_height = 180.0;
@@ -122,18 +125,10 @@ class _MyAppState extends State<MyApp> {
   }
 
   registerTexture() async {
-    await FlutterVision.setVideoSize(1, 640, 480);
-    // await FlutterVision.setVideoSize(2, 80, 60);
-    // await FlutterVision.setVideoSize(4, 80, 60);
-
-    await FlutterVision.setVideoSize(2, 640, 480);
-    await FlutterVision.setVideoSize(4, 640, 480);
-
-    rgbTextureId = await FlutterVision.getVideoTextureId(1);
-    depthTextureId = await FlutterVision.getVideoTextureId(2);
-    irTextureId = await FlutterVision.getVideoTextureId(4);
-    openglTextureId = await FlutterVision.getVideoTextureId(8);
-    cameraTextureId = await FlutterVision.getVideoTextureId(16);
+    configuration.dummyCams.add((await FvCamera.create(DummyCamera.generateSerial(), CameraType.DUMMY) as DummyCamera?)!);
+    rgbTextureId = configuration.dummyCams[0].rgbTextureId;
+    depthTextureId = configuration.dummyCams[0].depthTextureId;
+    irTextureId = configuration.dummyCams[0].irTextureId;
 
     setState(() {});
 
@@ -191,7 +186,7 @@ class _MyAppState extends State<MyApp> {
                           height: texture_height,
                           child: Stack(children: [
                             Texture(textureId: rgbTextureId),
-                            // ...rects,
+                            ...rects,
                           ]),
                         ),
                   const SizedBox(width: 10),
@@ -207,7 +202,7 @@ class _MyAppState extends State<MyApp> {
                           height: 180,
                           child: Stack(children: [
                             Texture(textureId: cameraTextureId),
-                            ...rects,
+                            // ...rects,
                           ])),
                   const SizedBox(width: 10),
                 ],
@@ -232,34 +227,34 @@ class _MyAppState extends State<MyApp> {
 
                       // registerTexture();
 
-                      FvPipeline rgbPipeline = FvPipeline(1);
-                      await rgbPipeline.clear();
-                      // await rgbPipeline.crop(80, 560, 0, 480);
-                      await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
-                      // await rgbPipeline.rotate(OpenCV.ROTATE_90_CLOCKWISE);
-                      await rgbPipeline.show();
-                      // await rgbPipeline.resize(28, 28);
-                      // await rgbPipeline.cvtColor(7);
-                      // await rgbPipeline.convertTo(3, 255.0 / 1024.0, shift: 0);
+                      // FvPipeline rgbPipeline = FvPipeline(1);
+                      // await rgbPipeline.clear();
+                      // // await rgbPipeline.crop(80, 560, 0, 480);
+                      // await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
+                      // // await rgbPipeline.rotate(OpenCV.ROTATE_90_CLOCKWISE);
+                      // await rgbPipeline.show();
+                      // // await rgbPipeline.resize(28, 28);
+                      // // await rgbPipeline.cvtColor(7);
+                      // // await rgbPipeline.convertTo(3, 255.0 / 1024.0, shift: 0);
 
-                      FvPipeline depthPipeline = FvPipeline(2);
-                      await depthPipeline.clear();
-                      await depthPipeline.convertTo(0, 255.0 / 1024.0);
-                      // await depthPipeline.cvtColor(9); // COLOR_GRAY2BGRA
-                      await depthPipeline.applyColorMap(OpenCV.COLORMAP_JET);
-                      await depthPipeline.cvtColor(0); //COLOR_RGB2RGBA
-                      await depthPipeline.show();
+                      // FvPipeline depthPipeline = FvPipeline(2);
+                      // await depthPipeline.clear();
+                      // await depthPipeline.convertTo(0, 255.0 / 1024.0);
+                      // // await depthPipeline.cvtColor(9); // COLOR_GRAY2BGRA
+                      // await depthPipeline.applyColorMap(OpenCV.COLORMAP_JET);
+                      // await depthPipeline.cvtColor(0); //COLOR_RGB2RGBA
+                      // await depthPipeline.show();
 
-                      FvPipeline irPipeline = FvPipeline(4);
-                      await irPipeline.clear();
-                      await irPipeline.convertTo(0, 255.0 / 1024.0);
-                      await irPipeline.cvtColor(9); // COLOR_GRAY2BGRA
-                      await irPipeline.show();
+                      // FvPipeline irPipeline = FvPipeline(4);
+                      // await irPipeline.clear();
+                      // await irPipeline.convertTo(0, 255.0 / 1024.0);
+                      // await irPipeline.cvtColor(9); // COLOR_GRAY2BGRA
+                      // await irPipeline.show();
 
-                      FvPipeline uvcPipeline = FvPipeline(16);
-                      await uvcPipeline.clear();
-                      await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
-                      await uvcPipeline.show();
+                      // FvPipeline uvcPipeline = FvPipeline(16);
+                      // await uvcPipeline.clear();
+                      // await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
+                      // await uvcPipeline.show();
 
                       await FlutterVision.test();
 
@@ -270,8 +265,8 @@ class _MyAppState extends State<MyApp> {
                     child: const Text('Test')),
                 TextButton(
                     onPressed: () async {
-                      FvPipeline depthPipeline = FvPipeline(2);
-                      await depthPipeline.applyColorMap(Random().nextInt(10), at: 1);
+                      // FvPipeline depthPipeline = FvPipeline(2);
+                      // await depthPipeline.applyColorMap(Random().nextInt(10), at: 1);
                     },
                     child: const Text('Replace pipeline')),
                 TextButton(
@@ -279,16 +274,16 @@ class _MyAppState extends State<MyApp> {
                     TFLiteModel model = await TFLiteModel.create(MODEL_EFFECIENT_NET);
                     models.add(model);
 
-                    FvPipeline rgbPipeline = FvPipeline(1);
-                    await rgbPipeline.clear();
-                    await rgbPipeline.resize(320, 320, mode: OpenCV.INTER_CUBIC);
-                    await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
-                    // await rgbPipeline.crop(160, 480, 80, 400);
-                    await rgbPipeline.show();
-                    await rgbPipeline.cvtColor(OpenCV.CV_8UC1);
-                    await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2BGR);
-                    await rgbPipeline.setInputTensorData(model.index, 0, FvPipeline.DATATYPE_UINT8);
-                    await rgbPipeline.inference(model.index);
+                    // FvPipeline rgbPipeline = FvPipeline(1);
+                    // await rgbPipeline.clear();
+                    // await rgbPipeline.resize(320, 320, mode: OpenCV.INTER_CUBIC);
+                    // await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
+                    // // await rgbPipeline.crop(160, 480, 80, 400);
+                    // await rgbPipeline.show();
+                    // await rgbPipeline.cvtColor(OpenCV.CV_8UC1);
+                    // await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2BGR);
+                    // await rgbPipeline.setInputTensorData(model.index, 0, FvPipeline.DATATYPE_UINT8);
+                    // await rgbPipeline.inference(model.index);
 
                     await FlutterVision.test();
 
@@ -324,15 +319,15 @@ class _MyAppState extends State<MyApp> {
                         TFLiteModel model = await TFLiteModel.create(MODEL_FACE_DETECTOR);
                         models.add(model);
 
-                        FvPipeline rgbPipeline = FvPipeline(16);
-                        await rgbPipeline.clear();
-                        await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
-                        await rgbPipeline.show();
-                        await rgbPipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
-                        await rgbPipeline.cvtColor(OpenCV.COLOR_RGBA2RGB);
-                        await rgbPipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
-                        await rgbPipeline.setInputTensorData(models[0].index, 0, FvPipeline.DATATYPE_FLOAT);
-                        await rgbPipeline.inference(models[0].index, interval: 100);
+                        // FvPipeline rgbPipeline = FvPipeline(16);
+                        // await rgbPipeline.clear();
+                        // await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+                        // await rgbPipeline.show();
+                        // await rgbPipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
+                        // await rgbPipeline.cvtColor(OpenCV.COLOR_RGBA2RGB);
+                        // await rgbPipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
+                        // await rgbPipeline.setInputTensorData(models[0].index, 0, FvPipeline.DATATYPE_FLOAT);
+                        // await rgbPipeline.inference(models[0].index, interval: 100);
                       }
 
                       await FlutterVision.test();
@@ -381,7 +376,7 @@ class _MyAppState extends State<MyApp> {
                       TFLiteModel model = await TFLiteModel.create(MODEL_FACE_DETECTOR);
                       models.add(model);
 
-                      FvPipeline pipeline = await FvPipeline.create();
+                      FvPipeline pipeline = configuration.dummyCams[0].rgbPipeline;
                       await pipeline.clear();
                       await pipeline.imread(TEST_IMAGE);
                       await pipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
@@ -397,13 +392,13 @@ class _MyAppState extends State<MyApp> {
                     child: const Text('Pipeline')),
                 TextButton(
                     onPressed: () async {
-                      FvPipeline pipeline = await FvPipeline.create();
-                      await pipeline.clear();
-                      await pipeline.imread(TEST_IMAGE);
-                      await pipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
-                      await pipeline.customHandler(5);
-                      await pipeline.show();
-                      await pipeline.run();
+                      // FvPipeline pipeline = await FvPipeline.create();
+                      // await pipeline.clear();
+                      // await pipeline.imread(TEST_IMAGE);
+                      // await pipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+                      // await pipeline.customHandler(5);
+                      // await pipeline.show();
+                      // await pipeline.run();
                     },
                     child: const Text('Handler')),
                 TextButton(
@@ -415,10 +410,10 @@ class _MyAppState extends State<MyApp> {
 
                       print('$rgbTextureId, $depthTextureId, $irTextureId');
 
-                      FvPipeline rgbPipeline = FvPipeline(200);
-                      await rgbPipeline.clear();
-                      await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
-                      await rgbPipeline.show();
+                      // FvPipeline rgbPipeline = FvPipeline(200);
+                      // await rgbPipeline.clear();
+                      // await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+                      // await rgbPipeline.show();
 
                       setState(() {});
                     },
