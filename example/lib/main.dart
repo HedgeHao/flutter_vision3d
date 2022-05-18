@@ -267,54 +267,62 @@ class _MyAppState extends State<MyApp> {
                     child: const Text('NI')),
                 TextButton(
                     onPressed: () async {
-                      // FvPipeline depthPipeline = FvPipeline(2);
-                      // await depthPipeline.applyColorMap(Random().nextInt(10), at: 1);
+                      FvPipeline? depthPipeline;
+                      if (configuration.niCams.isNotEmpty) {
+                        depthPipeline = configuration.niCams.first.depthPipeline;
+                      } else if (configuration.rsCams.isNotEmpty) {
+                        depthPipeline = configuration.rsCams.first.depthPipeline;
+                      } else {
+                        return;
+                      }
+
+                      await depthPipeline.applyColorMap(Random().nextInt(10), at: 1);
                     },
                     child: const Text('Replace pipeline')),
-                TextButton(
-                  onPressed: () async {
-                    TFLiteModel model = await TFLiteModel.create(MODEL_EFFECIENT_NET);
-                    models.add(model);
+                // TextButton(
+                //   onPressed: () async {
+                //     TFLiteModel model = await TFLiteModel.create(MODEL_EFFECIENT_NET);
+                //     models.add(model);
 
-                    // FvPipeline rgbPipeline = FvPipeline(1);
-                    // await rgbPipeline.clear();
-                    // await rgbPipeline.resize(320, 320, mode: OpenCV.INTER_CUBIC);
-                    // await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
-                    // // await rgbPipeline.crop(160, 480, 80, 400);
-                    // await rgbPipeline.show();
-                    // await rgbPipeline.cvtColor(OpenCV.CV_8UC1);
-                    // await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2BGR);
-                    // await rgbPipeline.setInputTensorData(model.index, 0, FvPipeline.DATATYPE_UINT8);
-                    // await rgbPipeline.inference(model.index);
+                //     // FvPipeline rgbPipeline = FvPipeline(1);
+                //     // await rgbPipeline.clear();
+                //     // await rgbPipeline.resize(320, 320, mode: OpenCV.INTER_CUBIC);
+                //     // await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
+                //     // // await rgbPipeline.crop(160, 480, 80, 400);
+                //     // await rgbPipeline.show();
+                //     // await rgbPipeline.cvtColor(OpenCV.CV_8UC1);
+                //     // await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2BGR);
+                //     // await rgbPipeline.setInputTensorData(model.index, 0, FvPipeline.DATATYPE_UINT8);
+                //     // await rgbPipeline.inference(model.index);
 
-                    await FlutterVision.test();
+                //     await FlutterVision.test();
 
-                    Float32List outputBoxes = await model.getTensorOutput(0, [25, 4]);
-                    Float32List outputClass = await model.getTensorOutput(1, [25]);
-                    Float32List outputScore = await model.getTensorOutput(2, [25]);
+                //     Float32List outputBoxes = await model.getTensorOutput(0, [25, 4]);
+                //     Float32List outputClass = await model.getTensorOutput(1, [25]);
+                //     Float32List outputScore = await model.getTensorOutput(2, [25]);
 
-                    print('Class(raw):$outputClass');
-                    List<String> classes = outputClass.map((e) => e == 0 ? '' : COCO_CLASSES[e.toInt() - 1]).toList();
+                //     print('Class(raw):$outputClass');
+                //     List<String> classes = outputClass.map((e) => e == 0 ? '' : COCO_CLASSES[e.toInt() - 1]).toList();
 
-                    print('Class:$classes');
-                    print('Score:${outputScore.map((e) => e.toStringAsFixed(2)).toList()}');
-                    print('Boxes:${outputBoxes.map((e) => e.toStringAsFixed(2)).toList()}');
+                //     print('Class:$classes');
+                //     print('Score:${outputScore.map((e) => e.toStringAsFixed(2)).toList()}');
+                //     print('Boxes:${outputBoxes.map((e) => e.toStringAsFixed(2)).toList()}');
 
-                    List<PositionedRect> r = [];
-                    for (int i = 0; i < 5; i++) {
-                      double x = texture_width * outputBoxes[i * 4 + 1];
-                      double y = texture_height * outputBoxes[i * 4];
-                      double width = texture_width * outputBoxes[i * 4 + 3] - x;
-                      double height = texture_height * outputBoxes[i * 4 + 2] - y;
-                      r.add(PositionedRect(x, y, width, height, Colors.red));
-                    }
+                //     List<PositionedRect> r = [];
+                //     for (int i = 0; i < 5; i++) {
+                //       double x = texture_width * outputBoxes[i * 4 + 1];
+                //       double y = texture_height * outputBoxes[i * 4];
+                //       double width = texture_width * outputBoxes[i * 4 + 3] - x;
+                //       double height = texture_height * outputBoxes[i * 4 + 2] - y;
+                //       r.add(PositionedRect(x, y, width, height, Colors.red));
+                //     }
 
-                    setState(() {
-                      rects = r;
-                    });
-                  },
-                  child: const Text('EfficientNet'),
-                ),
+                //     setState(() {
+                //       rects = r;
+                //     });
+                //   },
+                //   child: const Text('EfficientNet'),
+                // ),
                 TextButton(
                     onPressed: () async {
                       if (models.isEmpty) {
@@ -394,13 +402,13 @@ class _MyAppState extends State<MyApp> {
                     child: const Text('Pipeline')),
                 TextButton(
                     onPressed: () async {
-                      // FvPipeline pipeline = await FvPipeline.create();
-                      // await pipeline.clear();
-                      // await pipeline.imread(TEST_IMAGE);
-                      // await pipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
-                      // await pipeline.customHandler(5);
-                      // await pipeline.show();
-                      // await pipeline.run();
+                      FvPipeline pipeline = configuration.dummyCams.first.rgbPipeline;
+                      await pipeline.clear();
+                      await pipeline.imread(TEST_IMAGE);
+                      await pipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+                      await pipeline.customHandler(5);
+                      await pipeline.show();
+                      await pipeline.run();
                     },
                     child: const Text('Handler')),
                 TextButton(
