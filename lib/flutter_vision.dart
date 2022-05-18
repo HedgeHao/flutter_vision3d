@@ -105,16 +105,16 @@ class FlutterVision {
     return await channel.invokeMethod('ni2ConfigVideoStream', {'videoMode': videoModeIndex, 'enable': enable});
   }
 
-  static Future<int> getVideoTextureId(int videoModeIndex) async {
-    return await channel.invokeMethod('ni2GetVideoTexture', {'videoIndex': videoModeIndex});
-  }
-
   static Future<int> getVideoFramePointer(int videoModeIndex) async {
     return await channel.invokeMethod('ni2GetFramePointer', {'videoIndex': videoModeIndex});
   }
 
   static Future<void> setVideoSize(int videoIndex, int width, int height) async {
     await channel.invokeMethod('ni2SetVideoSize', {'videoIndex': videoIndex, 'width': width, 'height': height});
+  }
+
+  static Future<int> getOpenglTextureId() async {
+    return await channel.invokeMethod('getOpenglTextureId');
   }
 
   static Future<void> openglSetCamPosition(double x, double y, double z) async {

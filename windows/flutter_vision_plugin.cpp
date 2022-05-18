@@ -280,6 +280,10 @@ namespace
 
       result->Success(list);
     }
+    else if(method_call.method_name().compare("getOpenglTextureId") == 0)
+    {
+      result->Success(flutter::EncodableValue(glfl->openglTexture->textureId));
+    }
     else if (method_call.method_name().compare("openglSetCamPosition") == 0)
     {
       double x, y, z;
@@ -755,14 +759,14 @@ namespace
       cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
       cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
 
-      cams[0]->rgbTexture->pipeline->run(b, textureRegistrar, cams[0]->rgbTexture->textureId, cams[0]->rgbTexture->videoWidth, cams[0]->rgbTexture->videoHeight, cams[0]->rgbTexture->buffer, &models, flChannel);
-      cams[0]->rgbTexture->setPixelBuffer();
-      cams[0]->irTexture->pipeline->run(g, textureRegistrar, cams[0]->irTexture->textureId, cams[0]->irTexture->videoWidth, cams[0]->irTexture->videoHeight, cams[0]->irTexture->buffer, &models, flChannel);
-      cams[0]->irTexture->setPixelBuffer();
-      cams[0]->depthTexture->pipeline->run(r, textureRegistrar, cams[0]->depthTexture->textureId, cams[0]->depthTexture->videoWidth, cams[0]->depthTexture->videoHeight, cams[0]->depthTexture->buffer, &models, flChannel);
-      cams[0]->depthTexture->setPixelBuffer();
-      uvcTexture->pipeline->run(b, textureRegistrar, uvcTexture->textureId, uvcTexture->videoWidth, uvcTexture->videoHeight, uvcTexture->buffer, &models, flChannel);
-      uvcTexture->setPixelBuffer();
+      cams[1]->rgbTexture->pipeline->run(b, textureRegistrar, cams[1]->rgbTexture->textureId, cams[1]->rgbTexture->videoWidth, cams[1]->rgbTexture->videoHeight, cams[1]->rgbTexture->buffer, &models, flChannel);
+      cams[1]->rgbTexture->setPixelBuffer();
+      cams[1]->irTexture->pipeline->run(g, textureRegistrar, cams[1]->irTexture->textureId, cams[1]->irTexture->videoWidth, cams[1]->irTexture->videoHeight, cams[1]->irTexture->buffer, &models, flChannel);
+      cams[1]->irTexture->setPixelBuffer();
+      cams[1]->depthTexture->pipeline->run(r, textureRegistrar, cams[1]->depthTexture->textureId, cams[1]->depthTexture->videoWidth, cams[1]->depthTexture->videoHeight, cams[1]->depthTexture->buffer, &models, flChannel);
+      cams[1]->depthTexture->setPixelBuffer();
+      // uvcTexture->pipeline->run(b, textureRegistrar, uvcTexture->textureId, uvcTexture->videoWidth, uvcTexture->videoHeight, uvcTexture->buffer, &models, flChannel);
+      // uvcTexture->setPixelBuffer();
 
       // rgbTexture->genPixels();
       // depthTexture->genPixels();
