@@ -1,11 +1,13 @@
 import 'package:collection/src/iterable_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:flutter_vision/camera/camera.dart';
 import 'package:flutter_vision/camera/openni.dart';
 import 'package:flutter_vision/camera/realsense.dart';
 import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision_example/ui.dart';
+
 import 'package:flutter_vision_example/viewModel.dart' as ViewModel;
 
 class VideoConfig extends StatefulWidget {
@@ -81,7 +83,7 @@ class VideoConfigState extends State<VideoConfig> {
                   OpenniCamera? cam = ViewModel.configuration.niCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedDevice!.uri!);
 
                   if (cam == null) {
-                    cam = await OpenniCamera.create(ViewModel.configuration.selectedDevice!.uri!);
+                    cam = await FvCamera.create(ViewModel.configuration.selectedDevice!.uri!, CameraType.OPENNI) as OpenniCamera?;
                     if (cam == null) {
                       print('Create Camera Failed');
                       return;
@@ -300,7 +302,7 @@ class RsVideoConfigState extends State<RsVideoConfig> {
                 RealsenseCamera? cam = ViewModel.configuration.rsCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedRsDevice);
 
                 if (cam == null) {
-                  cam = await RealsenseCamera.create(ViewModel.configuration.selectedRsDevice);
+                  cam = await FvCamera.create(ViewModel.configuration.selectedRsDevice, CameraType.REALSENSE) as RealsenseCamera?;
                   if (cam == null) {
                     print('Create Camera Failed');
                     return;

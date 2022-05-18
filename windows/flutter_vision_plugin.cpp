@@ -25,9 +25,14 @@
 
 cv::Mat emptyMat = cv::Mat::zeros(3, 3, CV_64F);
 
+enum CameraType
+{
+  OPENNI = 0,
+  REALSENSE = 1,
+};
+
 namespace
 {
-
   class FlutterVisionPlugin : public flutter::Plugin
   {
   public:
@@ -39,7 +44,7 @@ namespace
     std::vector<TFLiteModel *> models{};
     std::vector<OpenCVCamera *> cameras{};
     std::vector<Pipeline *> pipelines{};
-    std::vector<RealsenseCam *> rsCams{};
+    std::vector<FvCamera *> rsCams{};
     std::vector<FvCamera *> niCams{};
 
     static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);
@@ -189,12 +194,31 @@ namespace
         uri = std::get<std::string>(uriIt->second);
       }
 
+      int cameraType;
+      auto cameraTypeIt = arguments->find(flutter::EncodableValue("cameraType"));
+      if (cameraTypeIt != arguments->end())
+      {
+        cameraType = std::get<int>(cameraTypeIt->second);
+      }
+
       flutter::EncodableMap map = flutter::EncodableMap();
-      OpenniCam *cam = new OpenniCam(uri.c_str());
+
+      FvCamera *cam;
+      std::vector<FvCamera *>* cams;
+      if(cameraType == CameraType::OPENNI){
+        cam = new OpenniCam(uri.c_str());
+        cam->fvInit(textureRegistrar, &models, flChannel, glfl);
+        cams = &niCams;
+      } else if(cameraType == CameraType::REALSENSE){
+        cam = new RealsenseCam(uri.c_str());
+        cam->fvInit(textureRegistrar, &models, flChannel, glfl);
+        cam->camInit();
+        cams= &rsCams;
+      } 
+         
       int ret = cam->openDevice();
       if(ret == 0){
-        cam->fvInit(textureRegistrar, &models, flChannel, glfl);
-        niCams.push_back(cam);
+        cams->push_back(cam);
         map[flutter::EncodableValue("rgbTextureId")] = cam->rgbTexture->textureId;
         map[flutter::EncodableValue("depthTextureId")] = cam->depthTexture->textureId;
         map[flutter::EncodableValue("irTextureId")] = cam->irTexture->textureId;
@@ -203,7 +227,7 @@ namespace
       map[flutter::EncodableValue("ret")] = ret;
       result->Success(flutter::EncodableValue(map));
     }
-    else if (method_call.method_name().compare("cameraClose") == 0)
+    else if (method_call.method_name().compare("fvCameraClose") == 0)
     {
       std::string serial;
       auto serialIt = arguments->find(flutter::EncodableValue("serial"));
@@ -212,22 +236,41 @@ namespace
         serial = std::get<std::string>(serialIt->second);
       }
 
-      OpenniCam *cam = static_cast<OpenniCam*>(FvCamera::findCam(serial.c_str(), &niCams));
+      int cameraType;
+      auto cameraTypeIt = arguments->find(flutter::EncodableValue("cameraType"));
+      if (cameraTypeIt != arguments->end())
+      {
+        cameraType = std::get<int>(cameraTypeIt->second);
+      }
+
+      FvCamera *cam;
+      if(cameraType == CameraType::OPENNI){
+        cam = static_cast<OpenniCam*>(FvCamera::findCam(serial.c_str(), &niCams));
+      } else if(cameraType == CameraType::REALSENSE){
+        cam = static_cast<RealsenseCam*>(FvCamera::findCam(serial.c_str(), &rsCams));
+      }
       int ret =cam->closeDevice();
 
       result->Success(flutter::EncodableValue(nullptr));
     }
-    else if (method_call.method_name().compare("cameraIsConnected") == 0)
+    else if (method_call.method_name().compare("fvCameraIsConnected") == 0)
     {
       result->Success(flutter::EncodableValue(ni2->isConnected()));
     }
-    else if (method_call.method_name().compare("cameraConfigVideoStream") == 0)
+    else if (method_call.method_name().compare("fvCameraConfigVideoStream") == 0)
     {
       std::string serial;
       auto serialIt = arguments->find(flutter::EncodableValue("serial"));
       if (serialIt != arguments->end())
       {
         serial = std::get<std::string>(serialIt->second);
+      }
+
+      int cameraType;
+      auto cameraTypeIt = arguments->find(flutter::EncodableValue("cameraType"));
+      if (cameraTypeIt != arguments->end())
+      {
+        cameraType = std::get<int>(cameraTypeIt->second);
       }
 
       int videoModeIndex;
@@ -245,11 +288,20 @@ namespace
       }
 
       int ret = -1;
-      OpenniCam *cam = dynamic_cast<OpenniCam*>(FvCamera::findCam(serial.c_str(), &niCams));
-      cam->configVideoStream(videoModeIndex, &enable);
-      if (enable)
+      FvCamera *cam;
+      if(cameraType == CameraType::OPENNI){
+        cam = static_cast<OpenniCam*>(FvCamera::findCam(serial.c_str(), &niCams));
+      } else if(cameraType == CameraType::REALSENSE){
+        cam = static_cast<RealsenseCam*>(FvCamera::findCam(serial.c_str(), &rsCams));
+      }
+            
+      if(cam)
       {
-        cam->readVideoFeed();
+        cam->configVideoStream(videoModeIndex, &enable);
+        if (enable)
+        {
+          cam->readVideoFeed();
+        }
       }
       result->Success(flutter::EncodableValue(enable));
     }
@@ -303,30 +355,6 @@ namespace
       }
 
       result->Success(flutter::EncodableValue(nullptr));
-    }else if(method_call.method_name().compare("rsGetTextureId") == 0)
-    {
-      std::string serial;
-      auto serialIt = arguments->find(flutter::EncodableValue("serial"));
-      if (serialIt != arguments->end())
-      {
-        serial = std::get<std::string>(serialIt->second);
-      }
-
-      int videoModeIndex;
-      auto videoModeIndexIt = arguments->find(flutter::EncodableValue("videoModeIndex"));
-      if (videoModeIndexIt != arguments->end())
-      {
-        videoModeIndex = std::get<int>(videoModeIndexIt->second);
-      }
-
-      int ret = -1;
-      RealsenseCam *cam = findRsCam(serial.c_str(), &rsCams);
-      if (cam != nullptr)
-      {
-        ret = cam->getTextureId(videoModeIndex);
-      }
-
-      result->Success(flutter::EncodableValue(ret));
     }
     else if (method_call.method_name().compare("rsEnumerateDevices") == 0)
     {
@@ -339,115 +367,6 @@ namespace
       }
 
       result->Success(list);
-    }
-    else if (method_call.method_name().compare("rsOpenDevice") == 0)
-    {
-      std::string serial;
-      auto serialIt = arguments->find(flutter::EncodableValue("serial"));
-      if (serialIt != arguments->end())
-      {
-        serial = std::get<std::string>(serialIt->second);
-      }
-
-      RealsenseCam *r = new RealsenseCam(serial.c_str());
-
-      flutter::EncodableMap map = flutter::EncodableMap();
-      int ret = r->openDevice();
-      if (ret == 0)
-      {
-        r->fv_init(textureRegistrar, &models, flChannel, glfl);
-        rsCams.push_back(r);
-        map[flutter::EncodableValue("rgbTextureId")] = r->rgbTexture->textureId;
-        map[flutter::EncodableValue("depthTextureId")] = r->depthTexture->textureId;
-        map[flutter::EncodableValue("irTextureId")] = r->irTexture->textureId;
-      }
-
-      map[flutter::EncodableValue("ret")] = ret;
-      result->Success(flutter::EncodableValue(map));
-    }
-    else if (method_call.method_name().compare("rsConfigVideoStream") == 0)
-    {
-      std::string serial;
-      auto serialIt = arguments->find(flutter::EncodableValue("serial"));
-      if (serialIt != arguments->end())
-      {
-        serial = std::get<std::string>(serialIt->second);
-      }
-
-      int videoModeIndex;
-      auto videoModeIndexIt = arguments->find(flutter::EncodableValue("videoModeIndex"));
-      if (videoModeIndexIt != arguments->end())
-      {
-        videoModeIndex = std::get<int>(videoModeIndexIt->second);
-      }
-
-      bool enable = false;
-      auto flEnable = arguments->find(flutter::EncodableValue("enable"));
-      if (flEnable != arguments->end())
-      {
-        enable = std::get<bool>(flEnable->second);
-      }
-
-      int ret = -1;
-      RealsenseCam *cam = findRsCam(serial.c_str(), &rsCams);
-      if (cam != nullptr)
-      {
-        ret = cam->configVideoStream(videoModeIndex, enable);
-        if (enable)
-        {
-          cam->readVideoFeed();
-        }
-      }
-
-      result->Success(flutter::EncodableValue(ret == 0));
-    }
-    else if (method_call.method_name().compare("rsCloseDevice") == 0)
-    {
-      std::string serial;
-      auto serialIt = arguments->find(flutter::EncodableValue("serial"));
-      if (serialIt != arguments->end())
-      {
-        serial = std::get<std::string>(serialIt->second);
-      }
-
-      int ret = -1;
-      RealsenseCam *cam = findRsCam(serial.c_str(), &rsCams);
-      if (cam != nullptr)
-      {
-        ret = cam->closeDevice();
-      }
-
-      result->Success(flutter::EncodableValue(nullptr));
-    }
-    else if (method_call.method_name().compare("rsEnablePointCloud") == 0)
-    {
-      std::string serial;
-      auto serialIt = arguments->find(flutter::EncodableValue("serial"));
-      if (serialIt != arguments->end())
-      {
-        serial = std::get<std::string>(serialIt->second);
-      }
-
-      bool enable = false;
-      auto flEnable = arguments->find(flutter::EncodableValue("enable"));
-      if (flEnable != arguments->end())
-      {
-        enable = std::get<bool>(flEnable->second);
-      }
-
-      int ret = -1;
-      RealsenseCam *cam = findRsCam(serial.c_str(), &rsCams);
-      if (cam != nullptr)
-      {
-        ret = cam->enablePointCloud = enable;
-      }
-
-      result->Success(flutter::EncodableValue(nullptr));
-    }
-    else if (method_call.method_name().compare("rsDeviceIsConnected") == 0)
-    {
-      // TODO: implement
-      result->Success(flutter::EncodableValue(true));
     }
     else if (method_call.method_name().compare("openglSetCamPosition") == 0)
     {
@@ -502,7 +421,7 @@ namespace
 
       result->Success(flutter::EncodableValue(nullptr));
     }
-    else if(method_call.method_name().compare("cameraEnablePointCloud") == 0)
+    else if(method_call.method_name().compare("fvCameraEnablePointCloud") == 0)
     {
       std::string serial;
       auto serialIt = arguments->find(flutter::EncodableValue("serial"));
@@ -518,8 +437,21 @@ namespace
         enable = std::get<bool>(flEnable->second);
       }
 
+      int cameraType;
+      auto cameraTypeIt = arguments->find(flutter::EncodableValue("cameraType"));
+      if (cameraTypeIt != arguments->end())
+      {
+        cameraType = std::get<int>(cameraTypeIt->second);
+      }
+
       int ret = -1;
-      OpenniCam *cam = dynamic_cast<OpenniCam *>(FvCamera::findCam(serial.c_str(), &niCams));
+      FvCamera *cam;
+      if(cameraType == CameraType::OPENNI){
+        cam = static_cast<OpenniCam*>(FvCamera::findCam(serial.c_str(), &niCams));
+      } else if(cameraType == CameraType::REALSENSE){
+        cam = static_cast<RealsenseCam*>(FvCamera::findCam(serial.c_str(), &rsCams));
+      }
+
       if (cam != nullptr)
       {
         ret = cam->enablePointCloud = enable;

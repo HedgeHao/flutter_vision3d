@@ -37,6 +37,7 @@ public:
         serial = std::string(s);
     }
 
+
     static FvCamera *findCam(const char *serial, std::vector<FvCamera *>* cams)
     {
         FvCamera *cam = nullptr;
@@ -58,7 +59,6 @@ public:
         models = m;
         flChannel = f;
         glfl = g;
-        // glfl->modelRsPointCloud->rgbFrame = &rgbFrame;
 
         // Create texture
         rgbTexture = std::make_unique<FvTexture>(flRegistrar);

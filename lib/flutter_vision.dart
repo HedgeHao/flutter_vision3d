@@ -6,6 +6,8 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:flutter_vision/constants.dart';
 
+enum CameraType { OPENNI, REALSENSE }
+
 class OpenNi2Status {
   // OpenNI2
   static const int STATUS_OK = 0;
