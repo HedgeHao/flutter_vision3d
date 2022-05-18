@@ -1,9 +1,8 @@
 import 'package:flutter_vision/flutter_vision.dart';
-
-import '../flutter_vision.dart';
-import 'dummy.dart';
-import 'openni.dart';
-import 'realsense.dart';
+import 'package:flutter_vision/camera/uvc.dart';
+import 'package:flutter_vision/camera/dummy.dart';
+import 'package:flutter_vision/camera/openni.dart';
+import 'package:flutter_vision/camera/realsense.dart';
 
 class FvCamera {
   late final CameraType cameraType;
@@ -29,6 +28,8 @@ class FvCamera {
         return RealsenseCamera(flResult);
       } else if (type == CameraType.DUMMY) {
         return DummyCamera(flResult);
+      } else if (type == CameraType.UVC) {
+        return UvcCamera(flResult);
       }
     }
 

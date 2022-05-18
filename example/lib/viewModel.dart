@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter_vision/camera/uvc.dart';
 import 'package:flutter_vision/camera/dummy.dart';
 import 'package:flutter_vision/camera/openni.dart';
 import 'package:flutter_vision/camera/realsense.dart';
@@ -21,6 +22,7 @@ class ConfigurationViewModel {
   List<RealsenseCamera> rsCams = [];
   List<OpenniCamera> niCams = [];
   List<DummyCamera> dummyCams = [];
+  List<UvcCamera> uvcCams = [];
   OpenNi2Device? selectedDevice;
   String selectedRsDevice = '';
   int lastRequestTS = 0;
