@@ -220,20 +220,15 @@ class _MyAppState extends State<MyApp> {
                       onPointerUp: updateMouseClick,
                       onPointerMove: updateMousePosition,
                       onPointerSignal: updateMouseWheel,
-                      child: Container(
-                          decoration: BoxDecoration(border: Border.all(width: 1)),
-                          width: 540,
-                          height: 405,
-                          child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
+                      child: Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 540, height: 405, child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
               Text(debugText, style: const TextStyle(fontSize: 30)),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 TextButton(
                     onPressed: () async {
-                      // rgbTextureId = 0;
-                      // depthTextureId = 0;
-                      // irTextureId = 0;
-                      // openglTextureId = 0;
-                      // setState(() {});
+                      rgbTextureId = configuration.niCams[0].rgbTextureId;
+                      depthTextureId = configuration.niCams[0].depthTextureId;
+                      irTextureId = configuration.niCams[0].irTextureId;
+                      setState(() {});
 
                       // registerTexture();
 

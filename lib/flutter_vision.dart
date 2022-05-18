@@ -80,8 +80,8 @@ class FlutterVision {
     return deviceList;
   }
 
-  static Future<int> openDevice(OpenNi2Device device, {int? videoMode}) async {
-    int ret = await channel.invokeMethod('ni2OpenDevice', {'uri': device.uri, 'videoMode': videoMode ?? 7});
+  static Future<int> openDevice(OpenNi2Device device) async {
+    int ret = await channel.invokeMethod('ni2OpenDevice', {'uri': device.uri});
     // if (ret == 1) print('SN not valid');
 
     return ret;
