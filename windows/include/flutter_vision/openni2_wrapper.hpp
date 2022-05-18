@@ -63,7 +63,7 @@ public:
     flChannel = c;
   }
 
-  void registerFlContext(flutter::TextureRegistrar *re, RgbTexture *r, DepthTexture *d, IrTexture *i, OpenGLFL *g, std::vector<TFLiteModel *> *m)
+  void registerFlContext(flutter::TextureRegistrar *re, FvTexture *r, FvTexture *d, FvTexture *i, OpenGLFL *g, std::vector<TFLiteModel *> *m)
   {
     rgbTexture = r;
     depthTexture = d;
@@ -283,9 +283,9 @@ private:
   bool enableDepth = false;
   bool enableIr = false;
 
-  RgbTexture *rgbTexture;
-  DepthTexture *depthTexture;
-  IrTexture *irTexture;
+  FvTexture *rgbTexture;
+  FvTexture *depthTexture;
+  FvTexture *irTexture;
   flutter::TextureRegistrar *registrar;
 
   void colorMap(float dis, float *outputR, float *outputG, float *outputB)
