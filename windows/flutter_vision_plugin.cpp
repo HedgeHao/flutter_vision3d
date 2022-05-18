@@ -15,10 +15,6 @@
 #include "include/flutter_vision/pipeline/pipeline.h"
 #include "include/flutter_vision/pipeline/tf_pipeline.h"
 #include "include/flutter_vision/texture.h"
-#include "include/flutter_vision/rgb_texture.hpp"
-#include "include/flutter_vision/depth_texture.hpp"
-#include "include/flutter_vision/ir_texture.hpp"
-#include "include/flutter_vision/uvc_texture.hpp"
 #include "include/flutter_vision/openni2_wrapper.hpp"
 
 #include "include/flutter_vision/opengl/opengl.h"
@@ -54,10 +50,10 @@ namespace
         const flutter::MethodCall<flutter::EncodableValue> &method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
     flutter::TextureRegistrar *textureRegistrar;
-    std::unique_ptr<RgbTexture> rgbTexture;
-    std::unique_ptr<DepthTexture> depthTexture;
-    std::unique_ptr<IrTexture> irTexture;
-    std::unique_ptr<UvcTexture> uvcTexture;
+    std::unique_ptr<FvTexture> rgbTexture;
+    std::unique_ptr<FvTexture> depthTexture;
+    std::unique_ptr<FvTexture> irTexture;
+    std::unique_ptr<FvTexture> uvcTexture;
   };
 
   // static
@@ -87,10 +83,10 @@ namespace
   FlutterVisionPlugin::FlutterVisionPlugin(flutter::TextureRegistrar *texture_registrar)
   {
     textureRegistrar = texture_registrar;
-    rgbTexture = std::make_unique<RgbTexture>(textureRegistrar);
-    depthTexture = std::make_unique<DepthTexture>(textureRegistrar);
-    irTexture = std::make_unique<IrTexture>(textureRegistrar);
-    uvcTexture = std::make_unique<UvcTexture>(textureRegistrar);
+    rgbTexture = std::make_unique<FvTexture>(textureRegistrar);
+    depthTexture = std::make_unique<FvTexture>(textureRegistrar);
+    irTexture = std::make_unique<FvTexture>(textureRegistrar);
+    uvcTexture = std::make_unique<FvTexture>(textureRegistrar);
     glfl = new OpenGLFL(textureRegistrar);
 
     ni2->registerFlContext(textureRegistrar, rgbTexture.get(), depthTexture.get(), irTexture.get(), glfl, &models);
@@ -710,12 +706,12 @@ namespace
       cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
       cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
 
-      // rgbTexture->pipeline->run(b, textureRegistrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer, &models, flChannel);
-      // rgbTexture->setPixelBuffer();
-      // irTexture->pipeline->run(g, textureRegistrar, irTexture->textureId, irTexture->videoWidth, irTexture->videoHeight, irTexture->buffer, &models, flChannel);
-      // irTexture->setPixelBuffer();
-      // depthTexture->pipeline->run(r, textureRegistrar, depthTexture->textureId, depthTexture->videoWidth, depthTexture->videoHeight, depthTexture->buffer, &models, flChannel);
-      // depthTexture->setPixelBuffer();
+      rgbTexture->pipeline->run(b, textureRegistrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer, &models, flChannel);
+      rgbTexture->setPixelBuffer();
+      irTexture->pipeline->run(g, textureRegistrar, irTexture->textureId, irTexture->videoWidth, irTexture->videoHeight, irTexture->buffer, &models, flChannel);
+      irTexture->setPixelBuffer();
+      depthTexture->pipeline->run(r, textureRegistrar, depthTexture->textureId, depthTexture->videoWidth, depthTexture->videoHeight, depthTexture->buffer, &models, flChannel);
+      depthTexture->setPixelBuffer();
       uvcTexture->pipeline->run(b, textureRegistrar, uvcTexture->textureId, uvcTexture->videoWidth, uvcTexture->videoHeight, uvcTexture->buffer, &models, flChannel);
       uvcTexture->setPixelBuffer();
 

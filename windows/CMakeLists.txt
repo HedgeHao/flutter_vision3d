@@ -48,6 +48,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
 set(flutter_vision_bundled_libraries
   "${PROJECT_SOURCE_DIR}/bin/tensorflowlite.dll"
   "${PROJECT_SOURCE_DIR}/bin/glew32.dll"
+  "${PROJECT_SOURCE_DIR}/bin/realsense2.dll"
   "${PROJECT_SOURCE_DIR}/../handler/bin/flutterVisionHandler.dll"
   PARENT_SCOPE
 )
