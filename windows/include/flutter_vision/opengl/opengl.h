@@ -13,6 +13,7 @@
 
 #include "model_axis.h"
 #include "model_pointcloud.h"
+#include "model_rs_pointcloud.h"
 
 #include "shader.h"
 #include <memory>
@@ -24,6 +25,7 @@ public:
     std::vector<uint8_t> pixelBuffer{};
     ModelAxis *modelAxis;
     ModelPointCloud *modelPointCloud;
+    ModelRsPointCloud *modelRsPointCloud;
     std::unique_ptr<OpenGLTexture> openglTexture;
     bool isRendering = false;
 

@@ -11,11 +11,13 @@ class Shader
 public:
     unsigned int vertextFixColor;
     unsigned int vertextWithColor;
+    unsigned int textureShader;
 
     Shader()
     {
         createShaderProgram(&vertextFixColor, vertextFixColorVertexSource, vertextFixColorFragmentSource);
         createShaderProgram(&vertextWithColor, vertextWithColorVertexSource, vertextWithColorFragmentSource);
+        createShaderProgram(&textureShader, textureVertexSource, textureFragmentSource);
     }
 
 private:
@@ -58,6 +60,29 @@ private:
         "out vec4 FragColor;\n"
         "void main(){\n"
         "    FragColor = vec4(color, 1);\n"
+        "}\n";
+
+    const char *textureVertexSource =
+        "#version 330 core\n"
+        "layout (location = 0) in vec3 aPos;\n"
+        "layout (location = 2) in vec2 aTexCoord;\n"
+        "uniform mat4 model;\n"
+        "uniform mat4 view;\n"
+        "uniform mat4 proj;\n"
+        "out vec2 TexCoord;\n"
+        "void main()\n"
+        "{\n"
+        "    gl_Position = proj * view * model * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+        "    TexCoord = aTexCoord;\n"
+        "}\n";
+
+    const char *textureFragmentSource =
+        "#version 330 core\n"
+        "out vec4 FragColor;\n"
+        "in vec2 TexCoord;\n"
+        "uniform sampler2D ourTexture;\n"
+        "void main(){\n"
+        "    FragColor = texture(ourTexture, TexCoord);\n"
         "}\n";
 
     static void createShaderProgram(unsigned int *program, const char *vertextSource, const char *fragmentSource)

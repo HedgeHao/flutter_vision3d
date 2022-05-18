@@ -16,6 +16,7 @@
 #include "include/flutter_vision/pipeline/tf_pipeline.h"
 #include "include/flutter_vision/texture.h"
 #include "include/flutter_vision/openni2_wrapper.hpp"
+#include "include/flutter_vision/realsense.h"
 
 #include "include/flutter_vision/opengl/opengl.h"
 
@@ -37,6 +38,7 @@ namespace
     std::vector<TFLiteModel *> models{};
     std::vector<OpenCVCamera *> cameras{};
     std::vector<Pipeline *> pipelines{};
+    std::vector<RealsenseCam *> rsCams{};
 
     static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);
 
@@ -97,6 +99,20 @@ namespace
   }
 
   FlutterVisionPlugin::~FlutterVisionPlugin() {}
+
+  RealsenseCam *findRsCam(const char *serial, std::vector<RealsenseCam *> *cams)
+  {
+    RealsenseCam *cam = nullptr;
+    for (auto c : *cams)
+    {
+      if (strcmp(c->serial.c_str(), serial) == 0)
+      {
+        return c;
+      }
+    }
+
+    return nullptr;
+  }
 
   void FlutterVisionPlugin::HandleMethodCall(
       const flutter::MethodCall<flutter::EncodableValue> &method_call,
@@ -267,6 +283,151 @@ namespace
       }
 
       result->Success(flutter::EncodableValue(nullptr));
+    }else if(method_call.method_name().compare("rsGetTextureId") == 0)
+    {
+      std::string serial;
+      auto serialIt = arguments->find(flutter::EncodableValue("serial"));
+      if (serialIt != arguments->end())
+      {
+        serial = std::get<std::string>(serialIt->second);
+      }
+
+      int videoModeIndex;
+      auto videoModeIndexIt = arguments->find(flutter::EncodableValue("videoModeIndex"));
+      if (videoModeIndexIt != arguments->end())
+      {
+        videoModeIndex = std::get<int>(videoModeIndexIt->second);
+      }
+
+      int ret = -1;
+      RealsenseCam *cam = findRsCam(serial.c_str(), &rsCams);
+      if (cam != nullptr)
+      {
+        ret = cam->getTextureId(videoModeIndex);
+      }
+
+      result->Success(flutter::EncodableValue(ret));
+    }
+    else if (method_call.method_name().compare("rsEnumerateDevices") == 0)
+    {
+      std::vector<std::string> serials = RealsenseHelper::enumerateDevices();
+
+      flutter::EncodableList list = flutter::EncodableList();
+      for (auto s : serials)
+      {
+        list.push_back(s);
+      }
+
+      result->Success(list);
+    }
+    else if (method_call.method_name().compare("rsOpenDevice") == 0)
+    {
+      std::string serial;
+      auto serialIt = arguments->find(flutter::EncodableValue("serial"));
+      if (serialIt != arguments->end())
+      {
+        serial = std::get<std::string>(serialIt->second);
+      }
+
+      RealsenseCam *r = new RealsenseCam(serial.c_str());
+
+      flutter::EncodableMap map = flutter::EncodableMap();
+      int ret = r->openDevice();
+      if (ret == 0)
+      {
+        r->fv_init(textureRegistrar, &models, flChannel, glfl);
+        rsCams.push_back(r);
+        map[flutter::EncodableValue("rgbTextureId")] = r->rgbTexture->textureId;
+        map[flutter::EncodableValue("depthTextureId")] = r->depthTexture->textureId;
+        map[flutter::EncodableValue("irTextureId")] = r->irTexture->textureId;
+      }
+
+      map[flutter::EncodableValue("ret")] = ret;
+      result->Success(flutter::EncodableValue(map));
+    }
+    else if (method_call.method_name().compare("rsConfigVideoStream") == 0)
+    {
+      std::string serial;
+      auto serialIt = arguments->find(flutter::EncodableValue("serial"));
+      if (serialIt != arguments->end())
+      {
+        serial = std::get<std::string>(serialIt->second);
+      }
+
+      int videoModeIndex;
+      auto videoModeIndexIt = arguments->find(flutter::EncodableValue("videoModeIndex"));
+      if (videoModeIndexIt != arguments->end())
+      {
+        videoModeIndex = std::get<int>(videoModeIndexIt->second);
+      }
+
+      bool enable = false;
+      auto flEnable = arguments->find(flutter::EncodableValue("enable"));
+      if (flEnable != arguments->end())
+      {
+        enable = std::get<bool>(flEnable->second);
+      }
+
+      int ret = -1;
+      RealsenseCam *cam = findRsCam(serial.c_str(), &rsCams);
+      if (cam != nullptr)
+      {
+        ret = cam->configVideoStream(videoModeIndex, enable);
+        if (enable)
+        {
+          cam->readVideoFeed();
+        }
+      }
+
+      result->Success(flutter::EncodableValue(ret == 0));
+    }
+    else if (method_call.method_name().compare("rsCloseDevice") == 0)
+    {
+      std::string serial;
+      auto serialIt = arguments->find(flutter::EncodableValue("serial"));
+      if (serialIt != arguments->end())
+      {
+        serial = std::get<std::string>(serialIt->second);
+      }
+
+      int ret = -1;
+      RealsenseCam *cam = findRsCam(serial.c_str(), &rsCams);
+      if (cam != nullptr)
+      {
+        ret = cam->closeDevice();
+      }
+
+      result->Success(flutter::EncodableValue(nullptr));
+    }
+    else if (method_call.method_name().compare("rsEnablePointCloud") == 0)
+    {
+      std::string serial;
+      auto serialIt = arguments->find(flutter::EncodableValue("serial"));
+      if (serialIt != arguments->end())
+      {
+        serial = std::get<std::string>(serialIt->second);
+      }
+
+      bool enable = false;
+      auto flEnable = arguments->find(flutter::EncodableValue("enable"));
+      if (flEnable != arguments->end())
+      {
+        enable = std::get<bool>(flEnable->second);
+      }
+
+      int ret = -1;
+      RealsenseCam *cam = findRsCam(serial.c_str(), &rsCams);
+      if (cam != nullptr)
+      {
+        ret = cam->enablePointCloud = enable;
+      }
+
+      result->Success(flutter::EncodableValue(nullptr));
+    }
+    else if (method_call.method_name().compare("rsDeviceIsConnected") == 0)
+    {
+      // TODO: implement
+      result->Success(flutter::EncodableValue(true));
     }
     else if (method_call.method_name().compare("openglSetCamPosition") == 0)
     {
@@ -396,6 +557,18 @@ namespace
       {
         uvcTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
       }
+      else if (index == 200) // Realsense RGB Pipeline
+      {
+        rsCams[0]->rgbTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
+      }
+      else if (index == 201) // Realsense RGB Pipeline
+      {
+        rsCams[0]->depthTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
+      }
+      else if (index == 202) // Realsense RGB Pipeline
+      {
+        rsCams[0]->irTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
+      }
       else
       {
         pipelines[index-100]->add(funcIndex, params, len, insertAt, interval);
@@ -455,12 +628,21 @@ namespace
       {
         uvcTexture->pipeline->clear();
       }
-      else if (index == PIPELINE_INDEX_TFLITE)
+      else if (index >= 100 && index < 200) // Normal Pipeline
       {
+        pipelines[index - 100]->clear();
       }
-      else
+      else if (index == 200) // Realsense RGB Pipeline
       {
-        pipelines[index-100]->clear();
+        rsCams[0]->rgbTexture->pipeline->clear();
+      }
+      else if (index == 201) // Realsense RGB Pipeline
+      {
+        rsCams[0]->depthTexture->pipeline->clear();
+      }
+      else if (index == 202) // Realsense RGB Pipeline
+      {
+        rsCams[0]->irTexture->pipeline->clear();
       }
 
       result->Success(flutter::EncodableValue(nullptr));

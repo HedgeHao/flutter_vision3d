@@ -35,6 +35,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
 
 find_package(OpenCV REQUIRED PATHS ${OpenCV_DIR})
 target_link_libraries(${PLUGIN_NAME} PRIVATE
+  "${PROJECT_SOURCE_DIR}/lib/realsense2.lib"
   "${PROJECT_SOURCE_DIR}/lib/tensorflowlite.dll.if.lib"
   "${PROJECT_SOURCE_DIR}/lib/glew32.lib"
   "${PROJECT_SOURCE_DIR}/lib/glfw3.lib"
