@@ -42,12 +42,14 @@ class VideoStreamingConfigState extends State<VideoStreamingConfig> {
             height: 25,
             width: 50,
             child: FlutterSwitch(
-                value: ViewModel.configuration.pointCloud,
+                value: ViewModel.configuration.niPointCloud,
                 onToggle: (v) async {
-                  await FlutterVision.enablePointCloud(v);
+                  if (ViewModel.configuration.niCams.isEmpty) return;
+
+                  v ? ViewModel.configuration.niCams[0].enablePointCloud() : ViewModel.configuration.niCams[0].disablePointCloud();
 
                   setState(() {
-                    ViewModel.configuration.pointCloud = v;
+                    ViewModel.configuration.niPointCloud = v;
                   });
                 }))
       ],

@@ -23,7 +23,7 @@ class ConfigurationViewModel {
   String selectedRsDevice = '';
   int lastRequestTS = 0;
   late File serial;
-  bool pointCloud = false;
+  bool niPointCloud = false;
   bool rsPointCloud = false;
 
   List<VideoModeData> videoModes = [
