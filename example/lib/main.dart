@@ -343,17 +343,17 @@ class _MyAppState extends State<MyApp> {
                       if (models.isEmpty) {
                         TFLiteModel model = await TFLiteModel.create(configuration.MODEL_FACE_DETECTOR);
                         models.add(model);
-
-                        FvPipeline rgbPipeline = configuration.uvcCams.first.rgbPipeline;
-                        await rgbPipeline.clear();
-                        await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
-                        await rgbPipeline.show();
-                        await rgbPipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
-                        await rgbPipeline.cvtColor(OpenCV.COLOR_RGBA2RGB);
-                        await rgbPipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
-                        await rgbPipeline.setInputTensorData(models[0].index, 0, FvPipeline.DATATYPE_FLOAT);
-                        await rgbPipeline.inference(models[0].index, interval: 100);
                       }
+
+                      FvPipeline rgbPipeline = configuration.uvcCams.first.rgbPipeline;
+                      await rgbPipeline.clear();
+                      await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+                      await rgbPipeline.show();
+                      await rgbPipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
+                      await rgbPipeline.cvtColor(OpenCV.COLOR_RGBA2RGB);
+                      await rgbPipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
+                      await rgbPipeline.setInputTensorData(models[0].index, 0, FvPipeline.DATATYPE_FLOAT);
+                      await rgbPipeline.inference(models[0].index, interval: 100);
                     },
                     child: const Text('SW200')),
                 TextButton(
@@ -395,6 +395,8 @@ class _MyAppState extends State<MyApp> {
                     child: const Text('Pipeline')),
                 TextButton(
                     onPressed: () async {
+                      if (configuration.dummyCams.isEmpty) return;
+
                       FvPipeline pipeline = configuration.dummyCams.first.rgbPipeline;
                       await pipeline.clear();
                       await pipeline.imread(configuration.TEST_IMAGE);

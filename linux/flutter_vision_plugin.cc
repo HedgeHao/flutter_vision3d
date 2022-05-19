@@ -57,10 +57,6 @@ struct _FlutterVisionPlugin
   GObject parent_instance;
 
   FlTextureRegistrar *texture_registrar;
-  FvTexture *rgbTexture;
-  FvTexture *depthTexture;
-  FvTexture *irTexture;
-  FvTexture *uvcTexture;
   OpenGLTexture *openglTexture;
 
   FlMethodChannel *flChannel;
@@ -84,36 +80,7 @@ static void flutter_vision_plugin_handle_method_call(
   const gchar *method = fl_method_call_get_name(method_call);
   FlValue *args = fl_method_call_get_args(method_call);
 
-  if (strcmp(method, "ni2GetVideoTexture") == 0)
-  {
-    FlValue *valueVideoIndex = fl_value_lookup_string(args, "videoIndex");
-    const int index = fl_value_get_int(valueVideoIndex);
-
-    int64_t result = 0;
-    if (index == VideoIndex::RGB)
-    {
-      result = FV_TEXTURE(self->rgbTexture)->textureId;
-    }
-    else if (index == VideoIndex::Depth)
-    {
-      result = FV_TEXTURE(self->depthTexture)->textureId;
-    }
-    else if (index == VideoIndex::IR)
-    {
-      result = FV_TEXTURE(self->irTexture)->textureId;
-    }
-    else if (index == VideoIndex::OPENGL)
-    {
-      result = OPENGL_TEXTURE_GET_CLASS(self->openglTexture)->texture_id;
-    }
-    else if (index == VideoIndex::Camera2D)
-    {
-      result = FV_TEXTURE(self->uvcTexture)->textureId;
-    }
-
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(result)));
-  }
-  else if (strcmp(method, "ni2Initialize") == 0)
+  if (strcmp(method, "ni2Initialize") == 0)
   {
     int ret = OpenniCam::openniInit();
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(ret)));
@@ -362,15 +329,15 @@ static void flutter_vision_plugin_handle_method_call(
     {
       if (index == VideoIndex::RGB)
       {
-        cam->rgbTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->rgbTexture), FV_TEXTURE(self->rgbTexture)->video_width, FV_TEXTURE(self->rgbTexture)->video_height, FV_TEXTURE(self->rgbTexture)->buffer, &self->models, self->flChannel);
+        cam->rgbTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->rgbTexture), cam->rgbTexture->video_width, cam->rgbTexture->video_height, cam->rgbTexture->buffer, &self->models, self->flChannel);
       }
       else if (index == VideoIndex::Depth)
       {
-        cam->depthTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->depthTexture), FV_TEXTURE(self->depthTexture)->video_width, FV_TEXTURE(self->depthTexture)->video_height, FV_TEXTURE(self->depthTexture)->buffer, &self->models, self->flChannel);
+        cam->depthTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->depthTexture), cam->depthTexture->video_width, cam->depthTexture->video_height, cam->depthTexture->buffer, &self->models, self->flChannel);
       }
       else if (index == VideoIndex::IR)
       {
-        cam->irTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->irTexture), FV_TEXTURE(self->irTexture)->video_width, FV_TEXTURE(self->irTexture)->video_height, FV_TEXTURE(self->irTexture)->buffer, &self->models, self->flChannel);
+        cam->irTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->irTexture), cam->irTexture->video_width, cam->irTexture->video_height, cam->irTexture->buffer, &self->models, self->flChannel);
       }
     }
 
@@ -500,9 +467,9 @@ static void flutter_vision_plugin_handle_method_call(
     cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
     cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
 
-    self->cams[1]->rgbTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->rgbTexture), FV_TEXTURE(self->rgbTexture)->video_width, FV_TEXTURE(self->rgbTexture)->video_height, FV_TEXTURE(self->rgbTexture)->buffer, &self->models, self->flChannel);
-    self->cams[1]->rgbTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->rgbTexture), FV_TEXTURE(self->rgbTexture)->video_width, FV_TEXTURE(self->rgbTexture)->video_height, FV_TEXTURE(self->rgbTexture)->buffer, &self->models, self->flChannel);
-    self->cams[1]->rgbTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->rgbTexture), FV_TEXTURE(self->rgbTexture)->video_width, FV_TEXTURE(self->rgbTexture)->video_height, FV_TEXTURE(self->rgbTexture)->buffer, &self->models, self->flChannel);
+    self->cams[1]->rgbTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->cams[1]->rgbTexture), self->cams[1]->rgbTexture->video_width, self->cams[1]->rgbTexture->video_height, self->cams[1]->rgbTexture->buffer, &self->models, self->flChannel);
+    self->cams[1]->depthTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->cams[1]->depthTexture), self->cams[1]->depthTexture->video_width, self->cams[1]->depthTexture->video_height, self->cams[1]->depthTexture->buffer, &self->models, self->flChannel);
+    self->cams[1]->irTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->cams[1]->irTexture), self->cams[1]->irTexture->video_width, self->cams[1]->irTexture->video_height, self->cams[1]->irTexture->buffer, &self->models, self->flChannel);
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
