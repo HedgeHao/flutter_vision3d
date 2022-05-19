@@ -88,8 +88,6 @@ public:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
         glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-        // cv::Mat g(100, 100, CV_8UC3, cv::Scalar(255, 255, 0));
-        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, g.cols, g.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, g.data);
     }
 
     void updateTexture(const rs2::video_frame &frame)
