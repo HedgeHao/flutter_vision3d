@@ -223,7 +223,7 @@ class Camera2dConfigure extends StatelessWidget {
             child: const Text('Stop')),
         TextButton(
             onPressed: () async {
-              await FlutterVision.videoScreenshot(16, 'test.png');
+              ViewModel.configuration.uvcCams.firstWhereOrNull((e) => e.serial == ctl.text)?.screenshot(VideoIndex.RGB, "test.jpg", cvtCode: OpenCV.COLOR_RGBA2BGR);
             },
             child: const Text('Shot')),
         const Spacer(),

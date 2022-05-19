@@ -421,7 +421,7 @@ namespace
       }
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams); 
-      if(cam)
+      if(cam != nullptr)
       {
         if (index == VideoIndex::RGB)
         {
@@ -645,8 +645,15 @@ namespace
       }
       result->Success(fl);
     }
-    else if (method_call.method_name().compare("screenshot") == 0)
+    else if (method_call.method_name().compare("fvCameraScreenshot") == 0)
     {
+      std::string serial;
+      auto serialIt = arguments->find(flutter::EncodableValue("serial"));
+      if (serialIt != arguments->end())
+      {
+        serial = std::get<std::string>(serialIt->second);
+      }
+
       int index = 0;
       auto flIndex = arguments->find(flutter::EncodableValue("index"));
       if (flIndex != arguments->end())
@@ -669,12 +676,21 @@ namespace
       }
 
       bool ret = false;
-      cv::Mat frame;
-      if (index == VideoIndex::Camera2D)
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      if(cam != nullptr)
       {
-        uvcTexture->pipeline->screenshot(path.c_str(), cvtCode);
-      } else{
-        // TODO: Implement for FvCamera
+        if(index == VideoIndex::RGB)
+        {
+          cam->rgbTexture->pipeline->screenshot(path.c_str(), cvtCode);
+        } else if(index == VideoIndex::Depth)
+        {
+          cam->depthTexture->pipeline->screenshot(path.c_str(), cvtCode);
+        } else if(index == VideoIndex::IR)
+        {
+          cam->irTexture->pipeline->screenshot(path.c_str(), cvtCode);
+        }
+
+        ret = true;
       }
 
       result->Success(flutter::EncodableValue(ret));

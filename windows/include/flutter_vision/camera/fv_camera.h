@@ -84,7 +84,6 @@ public:
         return -1;
     }
 
-
     virtual void camInit() = 0;
     virtual int openDevice() = 0;
     virtual int closeDevice() = 0;

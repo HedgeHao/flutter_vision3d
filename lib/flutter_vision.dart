@@ -8,6 +8,12 @@ import 'package:flutter_vision/constants.dart';
 
 enum CameraType { OPENNI, REALSENSE, DUMMY, UVC }
 
+class VideoIndex {
+  static const int RGB = 1;
+  static const int DEPTH = 2;
+  static const int IR = 4;
+}
+
 class OpenNi2Status {
   // OpenNI2
   static const int STATUS_OK = 0;
@@ -147,10 +153,6 @@ class FlutterVision {
 
   static Future<void> cameraConfig(int index, bool start) async {
     return await channel.invokeMethod('cameraConfig', {'index': index, 'start': start});
-  }
-
-  static Future<bool> videoScreenshot(int index, String path, {int? cvtCode}) async {
-    return await channel.invokeMethod('screenshot', {'index': index, 'path': path, 'cvtCode': cvtCode ?? -1});
   }
 
   static Future<void> enablePointCloud(bool enable) async {
