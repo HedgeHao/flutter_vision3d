@@ -4,6 +4,9 @@
 #include <GL/glew.h>
 #include <glm/ext.hpp>
 #include "shader.h"
+#include <librealsense2/rs.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
 #include <mutex>
 
@@ -43,22 +46,15 @@ class ModelRsPointCloud
 public:
     rs2::points points;
 
-    ModelRsPointCloud(unsigned int shader, unsigned int fbo, unsigned int w, unsigned int h)
+    ModelRsPointCloud(GdkGLContext *g, unsigned int shader, unsigned int fbo, unsigned int w, unsigned int h)
     {
+        gdkContext = g;
         shaderProgram = shader;
         FBO = fbo;
         width = w;
         height = h;
 
         vertices = new float[w * h * 3];
-        colors = new float[w * h * 3];
-        for (int i = 0; i < w * h * 3; i++)
-        {
-            if (i % 3 == 0)
-                colors[i] = 1.0f;
-            else
-                colors[i] = 0.0f;
-        }
         textureCoord = new float[w * h * 2];
         for (int y = 0; y < h; y++)
         {
@@ -80,11 +76,6 @@ public:
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
 
-        glGenBuffers(1, &VBO_COLOR);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO_COLOR);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_DYNAMIC_DRAW);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-
         glGenBuffers(1, &VBO_TEX);
         glBindBuffer(GL_ARRAY_BUFFER, VBO_TEX);
         glBufferData(GL_ARRAY_BUFFER, sizeof(textureCoord), textureCoord, GL_DYNAMIC_DRAW);
@@ -94,8 +85,8 @@ public:
         glBindTexture(GL_TEXTURE_2D, TEXTURE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
         glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     }
 
@@ -104,8 +95,9 @@ public:
         if (!frame)
             return;
 
+        gdk_gl_context_make_current(gdkContext);
         glBindTexture(GL_TEXTURE_2D, TEXTURE);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame.get_width(), frame.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, frame.get_data());
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frame.get_width(), frame.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, frame.get_data());
     }
 
     void render(Camera *cam)
@@ -164,17 +156,16 @@ public:
 
 private:
     float *vertices;
-    float *colors;
     float *textureCoord;
     unsigned int shaderProgram;
     unsigned int VAO;
     unsigned int VBO_VERTEX;
-    unsigned int VBO_COLOR;
     unsigned int VBO_TEX;
     unsigned int FBO;
     unsigned int TEXTURE;
     unsigned int width;
     unsigned int height;
+    GdkGLContext *gdkContext;
 };
 
 class ModelPointCloud
@@ -351,6 +342,7 @@ private:
 class OpenGLFL
 {
 public:
+    GdkGLContext *gdkContext;
     uint8_t *pixelBuffer;
     ModelAxis *modelAxis;
     ModelPointCloud *modelPointCloud;
@@ -375,7 +367,7 @@ public:
         modelAxis->init();
         modelPointCloud = new ModelPointCloud(shader->vertextWithColor, FBO, 1280, 720);
         modelPointCloud->init();
-        modelRsPointCloud = new ModelRsPointCloud(shader->textureShader, FBO, 1280, 720);
+        modelRsPointCloud = new ModelRsPointCloud(gdkContext, shader->textureShader, FBO, 1280, 720);
         modelRsPointCloud->init();
 
         pixelBuffer = new uint8_t[GL_WINDOW_WIDTH * GL_WINDOW_HEIGHT * GL_COLOR_CHANNEL];
@@ -388,7 +380,7 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
         glViewport(0, 0, GL_WINDOW_WIDTH, GL_WINDOW_HEIGHT);
-        glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         modelAxis->render(cam);
@@ -425,7 +417,6 @@ private:
     GdkWindow *gdkWindow;
     FlTextureRegistrar *registrar;
     OpenGLTexture *openglTexture;
-    GdkGLContext *gdkContext;
     Shader *shader;
     unsigned int FBO = 0;
     unsigned int texture = 0;
