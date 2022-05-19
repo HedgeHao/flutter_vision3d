@@ -160,6 +160,8 @@ class _MyAppState extends State<MyApp> {
       var result = call.arguments as Float32List;
       print(result);
     }
+
+    return;
   }
 
   @override
@@ -334,42 +336,24 @@ class _MyAppState extends State<MyApp> {
                 // ),
                 TextButton(
                     onPressed: () async {
+                      if (configuration.uvcCams.isEmpty) return;
+
+                      rgbTextureId = configuration.uvcCams.first.rgbTextureId;
+
                       if (models.isEmpty) {
                         TFLiteModel model = await TFLiteModel.create(MODEL_FACE_DETECTOR);
                         models.add(model);
 
-                        // FvPipeline rgbPipeline = FvPipeline(16);
-                        // await rgbPipeline.clear();
-                        // await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
-                        // await rgbPipeline.show();
-                        // await rgbPipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
-                        // await rgbPipeline.cvtColor(OpenCV.COLOR_RGBA2RGB);
-                        // await rgbPipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
-                        // await rgbPipeline.setInputTensorData(models[0].index, 0, FvPipeline.DATATYPE_FLOAT);
-                        // await rgbPipeline.inference(models[0].index, interval: 100);
+                        FvPipeline rgbPipeline = configuration.uvcCams.first.rgbPipeline;
+                        await rgbPipeline.clear();
+                        await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+                        await rgbPipeline.show();
+                        await rgbPipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
+                        await rgbPipeline.cvtColor(OpenCV.COLOR_RGBA2RGB);
+                        await rgbPipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
+                        await rgbPipeline.setInputTensorData(models[0].index, 0, FvPipeline.DATATYPE_FLOAT);
+                        await rgbPipeline.inference(models[0].index, interval: 100);
                       }
-
-                      await FlutterVision.test();
-
-                      Float32List output = await models[0].getTensorOutput(0, [28, 28, 5]);
-
-                      print('${output.length}, ${output.map((e) => e.toStringAsFixed(2)).toList().sublist(0, 10)}');
-                      List<FaceInfo> faces = processFaceDetectorOutputs(output, 240, 180);
-                      if (faces.isEmpty) return;
-
-                      print('Face raw:${faces.length}');
-                      faces = nms(faces, 0.3);
-                      print('Face:${faces.length}');
-                      List<PositionedRect> r = [];
-                      if (faces.isNotEmpty) {
-                        for (FaceInfo f in faces) {
-                          r.add(PositionedRect(f.x1, f.y1, f.x2 - f.x1, f.y2 - f.y1, Colors.red));
-                        }
-                      }
-
-                      setState(() {
-                        rects = r;
-                      });
                     },
                     child: const Text('SW200')),
                 TextButton(

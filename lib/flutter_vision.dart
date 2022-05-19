@@ -195,13 +195,6 @@ class FvPipeline {
   int index;
   String serial;
 
-  // static Future<FvPipeline> create() async {
-  //   int pipelineIndex = await FlutterVision.channel.invokeMethod('pipelineCreate');
-  //   print('Create New Pipeline:$pipelineIndex');
-
-  //   return FvPipeline(pipelineIndex);
-  // }
-
   FvPipeline(this.serial, this.index);
 
   Future<void> run() async {
