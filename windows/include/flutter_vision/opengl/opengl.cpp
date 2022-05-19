@@ -48,6 +48,8 @@ int OpenGLFL::init()
     modelAxis->init();
     modelPointCloud = new ModelPointCloud(shader->vertextWithColor, FBO, 1280, 720);
     modelPointCloud->init();
+    modelRsPointCloud = new ModelRsPointCloud(shader->textureShader, FBO, 1280, 720, window);
+    modelRsPointCloud->init();
 
     return 0;
 }
@@ -77,6 +79,7 @@ void OpenGLFL::render()
 
     modelAxis->render(cam);
     modelPointCloud->render(cam, false);
+    modelRsPointCloud->render(cam);
     glEnable(GL_DEPTH_TEST);
     glReadPixels(0, 0, GL_WINDOW_WIDTH, GL_WINDOW_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, pixelBuffer.data());
 

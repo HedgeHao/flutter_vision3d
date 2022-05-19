@@ -1,5 +1,8 @@
 import 'dart:io';
 
+import 'package:flutter_vision/camera/uvc.dart';
+import 'package:flutter_vision/camera/dummy.dart';
+import 'package:flutter_vision/camera/openni.dart';
 import 'package:flutter_vision/camera/realsense.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 
@@ -17,11 +20,14 @@ class VideoModeData {
 
 class ConfigurationViewModel {
   List<RealsenseCamera> rsCams = [];
+  List<OpenniCamera> niCams = [];
+  List<DummyCamera> dummyCams = [];
+  List<UvcCamera> uvcCams = [];
   OpenNi2Device? selectedDevice;
   String selectedRsDevice = '';
   int lastRequestTS = 0;
   late File serial;
-  bool pointCloud = false;
+  bool niPointCloud = false;
   bool rsPointCloud = false;
 
   List<VideoModeData> videoModes = [
