@@ -1,54 +1,38 @@
-#include <flutter_linux/flutter_linux.h>
-#include <flutter_linux/fl_value.h>
+#ifndef _DEF_OPENNI_CAM_
+#define _DEF_OPENNI_CAM_
 #include <openni2/OpenNI.h>
-#include <gtk/gtk.h>
-#include <memory>
-#include <opencv2/core/core.hpp>
 
-#include "fv_texture.h"
-#include <thread>
-#include "opengl.h"
-#include "tflite.h"
+#include "fv_camera.h"
 
 using namespace openni;
 
-enum VideoIndex
-{
-  RGB = 0b1,
-  Depth = 0b10,
-  IR = 0b100,
-  POINTCLOUD = 0b1000,
-  Camera2D = 0b10000,
-};
-
-class FlValueWrapper
+class OpenniCam : public FvCamera,
+                  public OpenNI::DeviceConnectedListener,
+                  public OpenNI::DeviceDisconnectedListener,
+                  public OpenNI::DeviceStateChangedListener
 {
 public:
-  FlValue *value;
-
-  FlValueWrapper(FlValue *v)
+  static int openniInit()
   {
-    value = v;
+    return static_cast<int>(OpenNI::initialize());
   }
 
-  ~FlValueWrapper(){
+  static void enumerateDevices(Array<DeviceInfo> *niDevices)
+  {
+    OpenNI::enumerateDevices(niDevices);
+    return;
+  }
 
-  };
-};
+  Device *device = new Device();
 
-class OpenNi2Wrapper : public OpenNI::DeviceConnectedListener,
-                       public OpenNI::DeviceDisconnectedListener,
-                       public OpenNI::DeviceStateChangedListener
-{
-public:
   virtual void onDeviceStateChanged(const DeviceInfo *pInfo, DeviceState state)
   {
-    printf("[LISTENER] Device \"%s\" error state changed to %d\n", pInfo->getUri(), state);
+    // printf("[LISTENER] Device \"%s\" error state changed to %d\n", pInfo->getUri(), state);
   }
 
   virtual void onDeviceConnected(const DeviceInfo *pInfo)
   {
-    printf("[LISTENER] Device \"%s\" connected\n", pInfo->getUri());
+    // printf("[LISTENER] Device \"%s\" connected\n", pInfo->getUri());
   }
 
   virtual void onDeviceDisconnected(const DeviceInfo *pInfo)
@@ -57,89 +41,44 @@ public:
     device = nullptr;
   }
 
-  OpenGLFL *glfl;
-  Device *device;
-  VideoStream vsDepth;
-  VideoStream vsColor;
-  VideoStream vsIR;
-  bool videoStart;
-  bool enablePointCloud = false;
+  OpenniCam(const char *s) : FvCamera(s){};
 
-  void registerFlContext(FlTextureRegistrar *r, FvTexture *rgb, FvTexture *depth, FvTexture *ir, FlMethodChannel *channel, OpenGLFL *g, std::vector<TFLiteModel *> *m)
-  {
-    registrar = r;
-    rgbTexture = rgb;
-    depthTexture = depth;
-    irTexture = ir;
-    flChannel = channel;
-    glfl = g;
-    models = m;
-  };
+  void camInit() {}
 
-  ~OpenNi2Wrapper() {}
-  OpenNi2Wrapper()
-  {
-    device = new Device();
-  }
-
-  void init(FlValueWrapper *ret)
-  {
-    ret->value = fl_value_new_int(OpenNI::initialize());
-    OpenNI::addDeviceDisconnectedListener(this);
-  }
-
-  void enumerateDevices(FlValue *flDeviceList)
-  {
-    Array<DeviceInfo> deviceList;
-    OpenNI::enumerateDevices(&deviceList);
-
-    for (int i = 0; i < deviceList.getSize(); i++)
-    {
-      DeviceInfo d = deviceList[i];
-      std::unique_ptr<FlValueWrapper> flDeviceMap = std::make_unique<FlValueWrapper>(fl_value_new_map());
-
-      fl_value_set((flDeviceMap.get())->value, fl_value_new_string("name"), fl_value_new_string(d.getName()));
-      fl_value_set((flDeviceMap.get())->value, fl_value_new_string("uri"), fl_value_new_string(d.getUri()));
-      fl_value_set((flDeviceMap.get())->value, fl_value_new_string("productId"), fl_value_new_int(d.getUsbProductId()));
-      fl_value_set((flDeviceMap.get())->value, fl_value_new_string("vendorId"), fl_value_new_int(d.getUsbVendorId()));
-      fl_value_set((flDeviceMap.get())->value, fl_value_new_string("vendor"), fl_value_new_string(d.getVendor()));
-      fl_value_append_take(flDeviceList, (flDeviceMap.get())->value);
-    }
-  }
-
-  void openDevice(FlValueWrapper *ret, const char *uri, int videoMode)
+  int openDevice()
   {
     if (this->device->isValid())
     {
-      ret->value = fl_value_new_int(0);
-      return;
+      return 0;
     }
 
-    Status s = this->device->open(uri);
+    Status s = this->device->open(serial.c_str());
     if (s == STATUS_OK)
     {
       bool isValid = this->device->isValid();
-      ret->value = fl_value_new_int(isValid ? 0 : -1);
 
       if (isValid)
       {
-        // Read camera SN
+        // Get camera SN
         // int size = 32;
-        // char sn[size];
+        // char sn[32];
         // this->device->getProperty(openni::DEVICE_PROPERTY_SERIAL_NUMBER, sn, &size);
 
-        createVideoStream(videoMode); // create all video stream
+        std::cout << "Valid" << std::endl;
+        createVideoStream();
       }
+
+      return isValid ? 0 : -1;
     }
-    else
-      ret->value = fl_value_new_int(-2);
+
+    return -2;
   }
 
-  void closeDevice()
+  int closeDevice()
   {
     if (device == nullptr)
     {
-      return;
+      return -1;
     }
 
     if (vsColor.isValid())
@@ -157,65 +96,29 @@ public:
       vsIR.stop();
       vsIR.destroy();
     }
+
     this->device->close();
+    return 0;
   }
 
-  void isConnected(FlValueWrapper *ret)
-  {
-    ret->value = fl_value_new_bool(this->device->isValid());
-  }
-
-  void getEnabledVideoModes(FlValueWrapper *ret)
-  {
-    int enableVideoMode = 0;
-    if (niRgbAvailable)
-      enableVideoMode += VideoIndex::RGB;
-    if (niDepthAvailable)
-      enableVideoMode += VideoIndex::Depth;
-    if (niIrAvailable)
-      enableVideoMode += VideoIndex::IR;
-    ret->value = fl_value_new_int(enableVideoMode);
-  }
-
-  void createVideoStream(int videoMode)
+  int isConnected()
   {
     if (device == nullptr)
     {
-      return;
+      return false;
     }
 
-    vsColor.destroy();
-    vsDepth.destroy();
-    vsIR.destroy();
-
-    if ((videoMode & VideoIndex::RGB) > 0 && vsColor.create(*device, SENSOR_COLOR) == STATUS_OK)
-    {
-      vsColor.setMirroringEnabled(false);
-      niRgbAvailable = true;
-    }
-    if ((videoMode & VideoIndex::Depth) > 0 && vsDepth.create(*device, SENSOR_DEPTH) == STATUS_OK)
-    {
-      vsDepth.setMirroringEnabled(false);
-      niDepthAvailable = true;
-    }
-    if ((videoMode & VideoIndex::IR) > 0 && vsIR.create(*device, SENSOR_IR) == STATUS_OK)
-    {
-      vsIR.setMirroringEnabled(false);
-      niIrAvailable = true;
-    }
+    return this->device->isValid();
   }
 
-  void configVideoStream(FlValueWrapper *ret, int &index, bool *enable)
+  int configVideoStream(int streamIndex, bool *enable)
   {
     if (device == nullptr)
-    {
-      ret->value = fl_value_new_bool(false);
-      return;
-    }
+      return -1;
 
     int isValid = 0;
 
-    if (((index & VideoIndex::RGB) > 0) && niRgbAvailable)
+    if (((streamIndex & VideoIndex::RGB) > 0) && niRgbAvailable)
     {
       if (*enable)
       {
@@ -231,7 +134,7 @@ public:
       }
     }
 
-    if (((index & VideoIndex::Depth) > 0) && niDepthAvailable)
+    if (((streamIndex & VideoIndex::Depth) > 0) && niDepthAvailable)
     {
       if (*enable)
       {
@@ -247,7 +150,7 @@ public:
       }
     }
 
-    if (((index & VideoIndex::IR) > 0) && niIrAvailable)
+    if (((streamIndex & VideoIndex::IR) > 0) && niIrAvailable)
     {
       if (*enable)
       {
@@ -274,35 +177,53 @@ public:
       *enable = false;
     }
 
-    ret->value = fl_value_new_bool(isValid);
+    return 0;
   }
 
   void readVideoFeed()
   {
-    if (device == nullptr)
-    {
-      return;
-    }
-
     videoStart = true;
-    std::thread t(&OpenNi2Wrapper::_readVideoFeed, this);
+    std::thread t(&OpenniCam::_readVideoFeed, this);
     t.detach();
   }
 
-private:
-  FlTextureRegistrar *registrar;
-  FvTexture *rgbTexture;
-  FvTexture *irTexture;
-  FvTexture *depthTexture;
-  FlMethodChannel *flChannel;
-  std::vector<TFLiteModel *> *models;
+  void configure(int prop, float value) {}
 
+private:
+  VideoStream vsDepth;
+  VideoStream vsColor;
+  VideoStream vsIR;
   bool niRgbAvailable = false;
   bool niDepthAvailable = false;
   bool niIrAvailable = false;
   bool enableRgb = false;
   bool enableDepth = false;
   bool enableIr = false;
+
+  void createVideoStream(int videoMode = 7) // create all video stream by default
+  {
+    if (device == nullptr)
+    {
+      return;
+    }
+
+    vsColor.destroy();
+    vsDepth.destroy();
+    vsIR.destroy();
+
+    if ((videoMode & VideoIndex::RGB) > 0 && vsColor.create(*device, SENSOR_COLOR) == STATUS_OK)
+    {
+      niRgbAvailable = true;
+    }
+    if ((videoMode & VideoIndex::Depth) > 0 && vsDepth.create(*device, SENSOR_DEPTH) == STATUS_OK)
+    {
+      niDepthAvailable = true;
+    }
+    if ((videoMode & VideoIndex::IR) > 0 && vsIR.create(*device, SENSOR_IR) == STATUS_OK)
+    {
+      niIrAvailable = true;
+    }
+  }
 
   void colorMap(float dis, float *outputR, float *outputG, float *outputB)
   {
@@ -402,27 +323,27 @@ private:
         if (vsColor.readFrame(&rgbFrame) == STATUS_OK)
         {
           rgbTexture->cvImage = cv::Mat(rgbFrame.getHeight(), rgbFrame.getWidth(), CV_8UC3, (void *)rgbFrame.getData());
-          rgbTexture->pipeline->run(rgbTexture->cvImage, *registrar, *FL_TEXTURE(rgbTexture), rgbTexture->video_width, rgbTexture->video_height, rgbTexture->buffer, models, flChannel);
+          rgbTexture->pipeline->run(rgbTexture->cvImage, *flRegistrar, *FL_TEXTURE(rgbTexture), rgbTexture->video_width, rgbTexture->video_height, rgbTexture->buffer, models, flChannel);
           rgbNewFrame = true;
         }
       }
 
-      if (niDepthAvailable && enableIr && vsDepth.isValid())
+      if (niDepthAvailable && enableDepth && vsDepth.isValid())
       {
         if (vsDepth.readFrame(&depthFrame) == STATUS_OK)
         {
           depthTexture->cvImage = cv::Mat(depthFrame.getHeight(), depthFrame.getWidth(), CV_16UC1, (void *)depthFrame.getData());
-          depthTexture->pipeline->run(depthTexture->cvImage, *registrar, *FL_TEXTURE(depthTexture), depthTexture->video_width, depthTexture->video_height, depthTexture->buffer, models, flChannel);
+          depthTexture->pipeline->run(depthTexture->cvImage, *flRegistrar, *FL_TEXTURE(depthTexture), depthTexture->video_width, depthTexture->video_height, depthTexture->buffer, models, flChannel);
           depthNewFrame = true;
         }
       }
 
-      if (niIrAvailable && enableDepth && vsDepth.isValid())
+      if (niIrAvailable && enableIr && vsDepth.isValid())
       {
         if (vsIR.readFrame(&irFrame) == STATUS_OK)
         {
           irTexture->cvImage = cv::Mat(irFrame.getHeight(), irFrame.getWidth(), CV_16UC1, (void *)irFrame.getData());
-          irTexture->pipeline->run(irTexture->cvImage, *registrar, *FL_TEXTURE(irTexture), irTexture->video_width, irTexture->video_height, irTexture->buffer, models, flChannel);
+          irTexture->pipeline->run(irTexture->cvImage, *flRegistrar, *FL_TEXTURE(irTexture), irTexture->video_width, irTexture->video_height, irTexture->buffer, models, flChannel);
           irNewFrame = true;
         }
       }
@@ -434,9 +355,6 @@ private:
 
       fl_method_channel_invoke_method(flChannel, "onNiFrame", nullptr, nullptr, nullptr, NULL);
     }
-
-    rgbTexture->pipeline->reset();
-    depthTexture->pipeline->reset();
-    irTexture->pipeline->reset();
   }
 };
+#endif

@@ -7,17 +7,13 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vision/camera/camera.dart';
+import 'package:flutter_vision/camera/dummy.dart';
 import 'package:flutter_vision/camera/openni.dart';
 import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision_example/configurePanel.dart';
 import 'package:flutter_vision_example/demo/LIPSFace.dart';
 import 'package:flutter_vision_example/viewModel.dart';
-import 'package:flutter_vision/camera/dummy.dart';
-
-const TEST_IMAGE = 'D:/test/faces.jpg';
-const MODEL_FACE_DETECTOR = 'D:/test/faceDetector.tflite';
-const MODEL_EFFECIENT_NET = 'D:/test/efficientNet.tflite';
 
 const texture_width = 240.0;
 const texture_height = 180.0;
@@ -218,7 +214,11 @@ class _MyAppState extends State<MyApp> {
                       onPointerUp: updateMouseClick,
                       onPointerMove: updateMousePosition,
                       onPointerSignal: updateMouseWheel,
-                      child: Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 540, height: 405, child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
+                      child: Container(
+                          decoration: BoxDecoration(border: Border.all(width: 1)),
+                          width: 540,
+                          height: 405,
+                          child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
               Text(debugText, style: const TextStyle(fontSize: 30)),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 TextButton(
@@ -341,7 +341,7 @@ class _MyAppState extends State<MyApp> {
                       rgbTextureId = configuration.uvcCams.first.rgbTextureId;
 
                       if (models.isEmpty) {
-                        TFLiteModel model = await TFLiteModel.create(MODEL_FACE_DETECTOR);
+                        TFLiteModel model = await TFLiteModel.create(configuration.MODEL_FACE_DETECTOR);
                         models.add(model);
 
                         FvPipeline rgbPipeline = configuration.uvcCams.first.rgbPipeline;
@@ -376,12 +376,12 @@ class _MyAppState extends State<MyApp> {
                     child: const Text('Render')),
                 TextButton(
                     onPressed: () async {
-                      TFLiteModel model = await TFLiteModel.create(MODEL_FACE_DETECTOR);
+                      TFLiteModel model = await TFLiteModel.create(configuration.MODEL_FACE_DETECTOR);
                       models.add(model);
 
                       FvPipeline pipeline = configuration.dummyCams[0].rgbPipeline;
                       await pipeline.clear();
-                      await pipeline.imread(TEST_IMAGE);
+                      await pipeline.imread(configuration.TEST_IMAGE);
                       await pipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
                       await pipeline.show();
                       await pipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
@@ -397,7 +397,7 @@ class _MyAppState extends State<MyApp> {
                     onPressed: () async {
                       FvPipeline pipeline = configuration.dummyCams.first.rgbPipeline;
                       await pipeline.clear();
-                      await pipeline.imread(TEST_IMAGE);
+                      await pipeline.imread(configuration.TEST_IMAGE);
                       await pipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
                       await pipeline.customHandler(5);
                       await pipeline.show();

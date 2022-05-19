@@ -22,7 +22,7 @@ struct FvTextureClass
 struct FvTexture
 {
   FlPixelBufferTexture flPixelBufferTexture;
-  int64_t texture_id = 0;
+  int64_t textureId = 0;
   std::vector<uint8_t> buffer{};
   int32_t video_width = 0;
   int32_t video_height = 0;
