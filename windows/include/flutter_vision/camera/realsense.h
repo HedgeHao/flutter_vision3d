@@ -7,9 +7,7 @@
 #include <thread>
 #include <memory>
 
-#include "opengl/opengl.h"
-#include "texture.h"
-#include "pipeline/pipeline.h"
+#include "fv_camera.h"
 
 enum RsVideoIndex
 {
@@ -18,55 +16,16 @@ enum RsVideoIndex
   RS_IR = 0b001,
 };
 
-class RealsenseCam
+class RealsenseCam : public FvCamera
 {
 public:
   rs2::context ctx;
   rs2::pipeline *pipeline;
-  std::string serial;
 
-  std::unique_ptr<FvTexture> rgbTexture;
-  std::unique_ptr<FvTexture> depthTexture;
-  std::unique_ptr<FvTexture> irTexture;
+  RealsenseCam(const char *s): FvCamera(s){}
 
-  bool enablePointCloud = false;
-
-  RealsenseCam(const char *s)
-  {
-    serial = std::string(s);
-  }
-
-  void fv_init(flutter::TextureRegistrar *r, std::vector<TFLiteModel *> *m,flutter::MethodChannel<flutter::EncodableValue> *f, OpenGLFL *g)
-  {
-    flRegistrar = r;
-    // TODO: check if this is duplicate from texture
-    models = m;
-    flChannel = f;
-    glfl = g;
-    glfl->modelRsPointCloud->rgbFrame = &rgbFrame;
-
-    // Create texture
-    rgbTexture = std::make_unique<FvTexture>(flRegistrar);
-    depthTexture = std::make_unique<FvTexture>(flRegistrar);
-    irTexture = std::make_unique<FvTexture>(flRegistrar);
-  }
-
-  int64_t getTextureId(int index)
-  {
-    if (index == RsVideoIndex::RS_RGB)
-    {
-      return rgbTexture->textureId;
-    }
-    else if (index == RsVideoIndex::RS_Depth)
-    {
-      return depthTexture->textureId;
-    }
-    else if (index == RsVideoIndex::RS_IR)
-    {
-      return irTexture->textureId;
-    }
-
-    return -1;
+  void camInit(){
+     glfl->modelRsPointCloud->rgbFrame = &rgbFrame;
   }
 
   int openDevice()
@@ -89,7 +48,7 @@ public:
     return 0;
   }
 
-  int configVideoStream(int streamIndex, bool enable)
+  int configVideoStream(int streamIndex, bool *enable)
   {
     if ((streamIndex & RsVideoIndex::RS_RGB) > 0)
     {
@@ -109,7 +68,7 @@ public:
       isIrEnable = enable;
     }
 
-    if (enable)
+    if (*enable)
     {
       pipeline->start();
     }
@@ -129,19 +88,13 @@ public:
     t.detach();
   }
 
+  void configure(int prop, float value){}
+  
 private:
   rs2::config cfg;
-  bool videoStart = false;
   unsigned int timeout = 1500;
-
-  OpenGLFL *glfl;
-  flutter::TextureRegistrar *flRegistrar;
-  std::vector<TFLiteModel *> *models;
-  flutter::MethodChannel<flutter::EncodableValue> *flChannel;
-
   bool isRgbEnable = false, isDepthEnable = false, isIrEnable = false;
   rs2::pointcloud rsPointcloud;
-
   rs2::frame rgbFrame;
 
   void _readVideoFeed()

@@ -25,7 +25,7 @@ public:
   std::vector<TensorOutput> outputTensors{};
 
   TFLiteModel(const char *modelPath) {
-    model = tflite::FlatBufferModel::BuildFromFile("D:\\test\\190625_faceDetector_t1.tflite");
+    model = tflite::FlatBufferModel::BuildFromFile(modelPath);
     if (!model) {
       error = "Failed to load model";
       std::cout << "error:" << error << std::endl;

@@ -1,10 +1,14 @@
 import 'package:collection/src/iterable_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:flutter_vision/camera/camera.dart';
+import 'package:flutter_vision/camera/openni.dart';
 import 'package:flutter_vision/camera/realsense.dart';
+import 'package:flutter_vision/camera/uvc.dart';
 import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision_example/ui.dart';
+
 import 'package:flutter_vision_example/viewModel.dart' as ViewModel;
 
 class VideoConfig extends StatefulWidget {
@@ -27,13 +31,12 @@ class VideoStreamingConfigState extends State<VideoStreamingConfig> {
       children: [
         TextButton(
             onPressed: () async {
-              ViewModel.configuration.lastRequestTS = DateTime.now().millisecondsSinceEpoch + 8000; // Prevent first wrong recognition
-              await FlutterVision.configVideoStream(7, true);
+              ViewModel.configuration.niCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedDevice!.uri!)?.enableStream();
             },
             child: const Text('Start')),
         TextButton(
             onPressed: () async {
-              await FlutterVision.configVideoStream(7, false);
+              ViewModel.configuration.niCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedDevice!.uri!)?.disableStream();
             },
             child: const Text('Stop')),
         const Text('PointCloud'),
@@ -42,12 +45,14 @@ class VideoStreamingConfigState extends State<VideoStreamingConfig> {
             height: 25,
             width: 50,
             child: FlutterSwitch(
-                value: ViewModel.configuration.pointCloud,
+                value: ViewModel.configuration.niPointCloud,
                 onToggle: (v) async {
-                  await FlutterVision.enablePointCloud(v);
+                  if (ViewModel.configuration.niCams.isEmpty) return;
+
+                  v ? ViewModel.configuration.niCams[0].enablePointCloud() : ViewModel.configuration.niCams[0].disablePointCloud();
 
                   setState(() {
-                    ViewModel.configuration.pointCloud = v;
+                    ViewModel.configuration.niPointCloud = v;
                   });
                 }))
       ],
@@ -76,24 +81,25 @@ class VideoConfigState extends State<VideoConfig> {
           TextButton(
               onPressed: () async {
                 if (ViewModel.configuration.selectedDevice != null) {
-                  int result = await FlutterVision.openDevice(ViewModel.configuration.selectedDevice!);
-                  int enabledVideoMode = await FlutterVision.getEnabledVideoModes();
-                  setState(() {
-                    isConnected = result >= 0;
-                    ViewModel.configuration.setVideoModesInitialized(enabledVideoMode);
-                  });
+                  OpenniCamera? cam = ViewModel.configuration.niCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedDevice!.uri!);
+
+                  if (cam == null) {
+                    cam = await FvCamera.create(ViewModel.configuration.selectedDevice!.uri!, CameraType.OPENNI) as OpenniCamera?;
+                    if (cam == null) {
+                      print('Create Camera Failed');
+                      return;
+                    }
+                    ViewModel.configuration.niCams.add(cam);
+                  }
+
+                  isConnected = await cam.isConnected();
+                  setState(() {});
                 }
               },
               child: const Text('Connect')),
           TextButton(
               onPressed: () {
-                FlutterVision.closeDevice().then((value) {
-                  FlutterVision.deviceIsConnected().then((isValid) {
-                    setState(() {
-                      isConnected = isValid;
-                    });
-                  });
-                });
+                ViewModel.configuration.niCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedDevice!.uri!)?.close().then((value) => setState);
               },
               child: const Text('Disconnect')),
         ],
@@ -188,26 +194,36 @@ class Camera2dConfigure extends StatelessWidget {
         TextButton(
             onPressed: () async {
               int index = int.parse(ctl.text);
-              await FlutterVision.cameraOpen(int.parse(ctl.text));
-              await FlutterVision.uvcConfig(index, OpenCV.CAP_PROP_MODE, 1);
-              await FlutterVision.uvcConfig(index, OpenCV.CAP_PROP_FPS, 30.0);
-              await FlutterVision.uvcConfig(index, OpenCV.CAP_PROP_FRAME_WIDTH, 640);
-              await FlutterVision.uvcConfig(index, OpenCV.CAP_PROP_FRAME_HEIGHT, 480);
+              UvcCamera? cam = ViewModel.configuration.uvcCams.firstWhereOrNull((e) => e.serial == ctl.text);
+
+              if (cam == null) {
+                cam = await FvCamera.create(ctl.text, CameraType.UVC) as UvcCamera?;
+                if (cam == null) {
+                  print('Create Camera Failed');
+                  return;
+                }
+                ViewModel.configuration.uvcCams.add(cam);
+              }
+
+              await cam.configure(OpenCV.CAP_PROP_MODE, 1);
+              await cam.configure(OpenCV.CAP_PROP_FPS, 30.0);
+              await cam.configure(OpenCV.CAP_PROP_FRAME_WIDTH, 640);
+              await cam.configure(OpenCV.CAP_PROP_FRAME_HEIGHT, 480);
             },
             child: const Text('Open')),
         TextButton(
             onPressed: () async {
-              await FlutterVision.cameraConfig(int.parse(ctl.text), true);
+              ViewModel.configuration.uvcCams.firstWhereOrNull((e) => e.serial == ctl.text)?.enableStream();
             },
             child: const Text('Start')),
         TextButton(
             onPressed: () async {
-              await FlutterVision.cameraConfig(int.parse(ctl.text), false);
+              ViewModel.configuration.uvcCams.firstWhereOrNull((e) => e.serial == ctl.text)?.disableStream();
             },
             child: const Text('Stop')),
         TextButton(
             onPressed: () async {
-              await FlutterVision.videoScreenshot(16, 'test.png');
+              ViewModel.configuration.uvcCams.firstWhereOrNull((e) => e.serial == ctl.text)?.screenshot(VideoIndex.RGB, "test.jpg", cvtCode: OpenCV.COLOR_RGBA2BGR);
             },
             child: const Text('Shot')),
         const Spacer(),
@@ -297,7 +313,7 @@ class RsVideoConfigState extends State<RsVideoConfig> {
                 RealsenseCamera? cam = ViewModel.configuration.rsCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedRsDevice);
 
                 if (cam == null) {
-                  cam = await RealsenseCamera.create(ViewModel.configuration.selectedRsDevice);
+                  cam = await FvCamera.create(ViewModel.configuration.selectedRsDevice, CameraType.REALSENSE) as RealsenseCamera?;
                   if (cam == null) {
                     print('Create Camera Failed');
                     return;

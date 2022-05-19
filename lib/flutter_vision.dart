@@ -6,6 +6,14 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:flutter_vision/constants.dart';
 
+enum CameraType { OPENNI, REALSENSE, DUMMY, UVC }
+
+class VideoIndex {
+  static const int RGB = 1;
+  static const int DEPTH = 2;
+  static const int IR = 4;
+}
+
 class OpenNi2Status {
   // OpenNI2
   static const int STATUS_OK = 0;
@@ -80,8 +88,8 @@ class FlutterVision {
     return deviceList;
   }
 
-  static Future<int> openDevice(OpenNi2Device device, {int? videoMode}) async {
-    int ret = await channel.invokeMethod('ni2OpenDevice', {'uri': device.uri, 'videoMode': videoMode ?? 7});
+  static Future<int> openDevice(OpenNi2Device device) async {
+    int ret = await channel.invokeMethod('ni2OpenDevice', {'uri': device.uri});
     // if (ret == 1) print('SN not valid');
 
     return ret;
@@ -103,16 +111,16 @@ class FlutterVision {
     return await channel.invokeMethod('ni2ConfigVideoStream', {'videoMode': videoModeIndex, 'enable': enable});
   }
 
-  static Future<int> getVideoTextureId(int videoModeIndex) async {
-    return await channel.invokeMethod('ni2GetVideoTexture', {'videoIndex': videoModeIndex});
-  }
-
   static Future<int> getVideoFramePointer(int videoModeIndex) async {
     return await channel.invokeMethod('ni2GetFramePointer', {'videoIndex': videoModeIndex});
   }
 
   static Future<void> setVideoSize(int videoIndex, int width, int height) async {
     await channel.invokeMethod('ni2SetVideoSize', {'videoIndex': videoIndex, 'width': width, 'height': height});
+  }
+
+  static Future<int> getOpenglTextureId() async {
+    return await channel.invokeMethod('getOpenglTextureId');
   }
 
   static Future<void> openglSetCamPosition(double x, double y, double z) async {
@@ -147,10 +155,6 @@ class FlutterVision {
     return await channel.invokeMethod('cameraConfig', {'index': index, 'start': start});
   }
 
-  static Future<bool> videoScreenshot(int index, String path, {int? cvtCode}) async {
-    return await channel.invokeMethod('screenshot', {'index': index, 'path': path, 'cvtCode': cvtCode ?? -1});
-  }
-
   static Future<void> enablePointCloud(bool enable) async {
     return await channel.invokeMethod('enablePointCloud', {'enable': enable});
   }
@@ -180,31 +184,25 @@ const FUNC_CUSTOM_HANDLER = 13;
 
 // TODO: check method can be added to that pipeline
 class FvPipeline {
-  static const RGB_FRAME = 0;
-  static const DEPTH_FRAME = 1;
-  static const IR_FRAME = 2;
+  static const RGB_FRAME = 1;
+  static const DEPTH_FRAME = 2;
+  static const IR_FRAME = 4;
   static const UVC_FRAME = 3;
 
   static const DATATYPE_UINT8 = 0;
   static const DATATYPE_FLOAT = 1;
 
   int index;
+  String serial;
 
-  static Future<FvPipeline> create() async {
-    int pipelineIndex = await FlutterVision.channel.invokeMethod('pipelineCreate');
-    print('Create New Pipeline:$pipelineIndex');
-
-    return FvPipeline(pipelineIndex);
-  }
-
-  FvPipeline(this.index);
+  FvPipeline(this.serial, this.index);
 
   Future<void> run() async {
-    await FlutterVision.channel.invokeMethod('pipelineRun', {'index': index});
+    await FlutterVision.channel.invokeMethod('pipelineRun', {'index': index, 'serial': serial});
   }
 
   Future<void> clear() async {
-    await FlutterVision.channel.invokeMethod('pipelineClear', {'index': index});
+    await FlutterVision.channel.invokeMethod('pipelineClear', {'index': index, 'serial': serial});
   }
 
   Future<void> test(int t, {int? at, int? interval}) async {
@@ -215,6 +213,7 @@ class FvPipeline {
       'len': 1,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -226,6 +225,7 @@ class FvPipeline {
       'len': 1,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -237,6 +237,7 @@ class FvPipeline {
       'len': path.length + 1,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -248,6 +249,7 @@ class FvPipeline {
       'len': path.length + 1,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -259,6 +261,7 @@ class FvPipeline {
       'len': 0,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -276,6 +279,7 @@ class FvPipeline {
       'len': 9,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -287,6 +291,7 @@ class FvPipeline {
       'len': 1,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -298,6 +303,7 @@ class FvPipeline {
       'len': 5,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -309,6 +315,7 @@ class FvPipeline {
       'len': 8,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -325,6 +332,7 @@ class FvPipeline {
       'len': 23,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -336,6 +344,7 @@ class FvPipeline {
       'len': 1,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -347,6 +356,7 @@ class FvPipeline {
       'len': 3,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -358,6 +368,7 @@ class FvPipeline {
       'len': 1,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 
@@ -369,6 +380,7 @@ class FvPipeline {
       'len': 2,
       'at': at ?? -1,
       'interval': interval ?? 0,
+      'serial': serial,
     });
   }
 }
