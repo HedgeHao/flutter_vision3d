@@ -4,6 +4,7 @@ import 'package:flutter_switch/flutter_switch.dart';
 import 'package:flutter_vision/camera/camera.dart';
 import 'package:flutter_vision/camera/openni.dart';
 import 'package:flutter_vision/camera/realsense.dart';
+import 'package:flutter_vision/camera/uvc.dart';
 import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision_example/ui.dart';
@@ -193,21 +194,31 @@ class Camera2dConfigure extends StatelessWidget {
         TextButton(
             onPressed: () async {
               int index = int.parse(ctl.text);
-              await FlutterVision.cameraOpen(int.parse(ctl.text));
-              await FlutterVision.uvcConfig(index, OpenCV.CAP_PROP_MODE, 1);
-              await FlutterVision.uvcConfig(index, OpenCV.CAP_PROP_FPS, 30.0);
-              await FlutterVision.uvcConfig(index, OpenCV.CAP_PROP_FRAME_WIDTH, 640);
-              await FlutterVision.uvcConfig(index, OpenCV.CAP_PROP_FRAME_HEIGHT, 480);
+              UvcCamera? cam = ViewModel.configuration.uvcCams.firstWhereOrNull((e) => e.serial == ctl.text);
+
+              if (cam == null) {
+                cam = await FvCamera.create(ctl.text, CameraType.UVC) as UvcCamera?;
+                if (cam == null) {
+                  print('Create Camera Failed');
+                  return;
+                }
+                ViewModel.configuration.uvcCams.add(cam);
+              }
+
+              await cam.configure(OpenCV.CAP_PROP_MODE, 1);
+              await cam.configure(OpenCV.CAP_PROP_FPS, 30.0);
+              await cam.configure(OpenCV.CAP_PROP_FRAME_WIDTH, 640);
+              await cam.configure(OpenCV.CAP_PROP_FRAME_HEIGHT, 480);
             },
             child: const Text('Open')),
         TextButton(
             onPressed: () async {
-              await FlutterVision.cameraConfig(int.parse(ctl.text), true);
+              ViewModel.configuration.uvcCams.firstWhereOrNull((e) => e.serial == ctl.text)?.enableStream();
             },
             child: const Text('Start')),
         TextButton(
             onPressed: () async {
-              await FlutterVision.cameraConfig(int.parse(ctl.text), false);
+              ViewModel.configuration.uvcCams.firstWhereOrNull((e) => e.serial == ctl.text)?.disableStream();
             },
             child: const Text('Stop')),
         TextButton(

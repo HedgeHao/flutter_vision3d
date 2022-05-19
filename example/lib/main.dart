@@ -253,11 +253,6 @@ class _MyAppState extends State<MyApp> {
                       await irPipeline.cvtColor(9); // COLOR_GRAY2BGRA
                       await irPipeline.show();
 
-                      // FvPipeline uvcPipeline = FvPipeline(16);
-                      // await uvcPipeline.clear();
-                      // await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
-                      // await uvcPipeline.show();
-
                       await FlutterVision.test();
 
                       // await FlutterVision.videoScreenshot(16, 'test.jpg');
@@ -265,6 +260,20 @@ class _MyAppState extends State<MyApp> {
                       print('');
                     },
                     child: const Text('NI')),
+                TextButton(
+                    onPressed: () async {
+                      if (configuration.uvcCams.isEmpty) return;
+
+                      cameraTextureId = configuration.uvcCams.first.rgbTextureId;
+
+                      FvPipeline uvcPipeline = configuration.uvcCams.first.rgbPipeline;
+                      await uvcPipeline.clear();
+                      await uvcPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+                      await uvcPipeline.show();
+
+                      setState(() {});
+                    },
+                    child: const Text('UVC')),
                 TextButton(
                     onPressed: () async {
                       FvPipeline? depthPipeline;

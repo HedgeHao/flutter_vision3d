@@ -26,6 +26,8 @@ public:
     int configVideoStream(int streamIndex, bool *enable){return 0;}
 
     void readVideoFeed(){}
+
+    void configure(int prop, float value){}
     
 private:
     void _readVideoFeed(){}

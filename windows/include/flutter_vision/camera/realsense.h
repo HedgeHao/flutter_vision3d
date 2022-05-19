@@ -88,6 +88,8 @@ public:
     t.detach();
   }
 
+  void configure(int prop, float value){}
+  
 private:
   rs2::config cfg;
   unsigned int timeout = 1500;

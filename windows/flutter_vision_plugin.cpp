@@ -17,6 +17,7 @@
 #include "include/flutter_vision/camera/realsense.h"
 #include "include/flutter_vision/camera/openni2.h"
 #include "include/flutter_vision/camera/dummy.h"
+#include "include/flutter_vision/camera/uvc.h"
 
 #include "include/flutter_vision/opengl/opengl.h"
 
@@ -30,6 +31,7 @@ enum CameraType
   OPENNI = 0,
   REALSENSE = 1,
   DUMMY = 2,
+  UVC = 3,
 };
 
 namespace
@@ -149,10 +151,12 @@ namespace
         cam = new RealsenseCam(uri.c_str());
       } else if(cameraType == CameraType::DUMMY){
         cam = new DummyCam(uri.c_str());
+      } else if(cameraType == CameraType::UVC){
+        cam = new UvcCam(uri.c_str());
       }
 
       int ret = -1;
-      if(cam){
+      if(cam != nullptr){
         cam->fvInit(textureRegistrar, &models, flChannel, glfl);
         cam->camInit();
          
@@ -528,49 +532,13 @@ namespace
 
       result->Success(flutter::EncodableValue(nullptr));
     }
-    else if (method_call.method_name().compare("cameraOpen") == 0)
+    else if (method_call.method_name().compare("fvCameraConfig") == 0)
     {
-      int index = 0;
-      auto flIndex = arguments->find(flutter::EncodableValue("index"));
-      if (flIndex != arguments->end())
+      std::string serial;
+      auto serialIt = arguments->find(flutter::EncodableValue("serial"));
+      if (serialIt != arguments->end())
       {
-        index = std::get<int>(flIndex->second);
-      }
-
-      bool newCam = true;
-      bool ret = false;
-      for (int i = 0; i < cameras.size(); i++)
-      {
-        if (cameras[i]->capIndex == index)
-        {
-          newCam = false;
-          if (!cameras[i]->cap->isOpened())
-          {
-            cameras[i]->cap->open(index);
-          }
-
-          ret = true;
-          break;
-        }
-      }
-
-      if (newCam)
-      {
-        OpenCVCamera *c = new OpenCVCamera(index, uvcTexture.get(), textureRegistrar, &models, flChannel);
-        c->open();
-        cameras.push_back(c);
-        ret = c->cap->isOpened();
-      }
-
-      result->Success(flutter::EncodableValue(ret));
-    }
-    else if (method_call.method_name().compare("uvcConfig") == 0)
-    {
-      int index = 0;
-      auto flIndex = arguments->find(flutter::EncodableValue("index"));
-      if (flIndex != arguments->end())
-      {
-        index = std::get<int>(flIndex->second);
+        serial = std::get<std::string>(serialIt->second);
       }
 
       int prop = 0;
@@ -587,54 +555,14 @@ namespace
         value = std::get<double>(flValue->second);
       }
 
-      bool ret = false;
-      for (int i = 0; i < cameras.size(); i++)
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      int ret = -1;
+      if(cam)
       {
-        if (cameras[i]->capIndex == index)
-        {
-          cameras[i]->config(prop, value);
-          ret = true;
-          break;
-        }
+        cam->configure(prop, value);
       }
 
-      result->Success(flutter::EncodableValue(ret));
-    }
-    else if (method_call.method_name().compare("cameraConfig") == 0)
-    {
-      int index = 0;
-      auto flIndex = arguments->find(flutter::EncodableValue("index"));
-      if (flIndex != arguments->end())
-      {
-        index = std::get<int>(flIndex->second);
-      }
-
-      bool start = false;
-      auto flStart = arguments->find(flutter::EncodableValue("start"));
-      if (flStart != arguments->end())
-      {
-        start = std::get<bool>(flStart->second);
-      }
-
-      bool ret = false;
-      for (int i = 0; i < cameras.size(); i++)
-      {
-        if (cameras[i]->capIndex == index)
-        {
-          if (start)
-          {
-            cameras[i]->start();
-          }
-          else
-          {
-            cameras[i]->stop();
-          }
-
-          ret = true;
-          break;
-        }
-      }
-      result->Success(flutter::EncodableValue(ret));
+      result->Success(flutter::EncodableValue(ret == 0));
     }
     else if (method_call.method_name().compare("tfliteCreateModel") == 0)
     {

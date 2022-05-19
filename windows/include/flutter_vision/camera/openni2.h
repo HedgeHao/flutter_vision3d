@@ -190,6 +190,9 @@ public:
         std::thread t(&OpenniCam::_readVideoFeed, this);
         t.detach();
     }
+
+    void configure(int prop, float value){}
+    
 private:
     VideoStream vsDepth;
     VideoStream vsColor;
