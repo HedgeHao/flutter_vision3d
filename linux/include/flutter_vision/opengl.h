@@ -44,6 +44,7 @@ public:
 class ModelRsPointCloud
 {
 public:
+    rs2::frame *rgbFrame;
     rs2::points points;
 
     ModelRsPointCloud(GdkGLContext *g, unsigned int shader, unsigned int fbo, unsigned int w, unsigned int h)
@@ -90,12 +91,13 @@ public:
         glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     }
 
-    void updateTexture(const rs2::video_frame &frame)
+    void updateTexture()
     {
-        if (!frame)
+        if (!rgbFrame)
             return;
 
-        gdk_gl_context_make_current(gdkContext);
+        // gdk_gl_context_make_current(gdkContext);
+        auto frame = rgbFrame->as<rs2::video_frame>();
         glBindTexture(GL_TEXTURE_2D, TEXTURE);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frame.get_width(), frame.get_height(), 0, GL_RGB, GL_UNSIGNED_BYTE, frame.get_data());
     }
@@ -104,6 +106,9 @@ public:
     {
         if (!points || points.get_data_size() == 0)
             return;
+
+        // [HedgeHao]: context switching may cause exception. Update texture when rendering.
+        updateTexture();
 
         glUseProgram(shaderProgram);
 

@@ -6,9 +6,7 @@
 #include <vector>
 #include <thread>
 
-#include "opengl.h"
-#include "fv_texture.h"
-#include "pipeline/pipeline.h"
+#include "fv_camera.h"
 
 enum RsVideoIndex
 {
@@ -17,74 +15,17 @@ enum RsVideoIndex
   RS_IR = 0b001,
 };
 
-class RealsenseCam
+class RealsenseCam : public FvCamera
 {
 public:
   rs2::context ctx;
   rs2::pipeline *pipeline;
-  std::string serial;
 
-  FvTexture *rgbTexture;
-  FvTexture *depthTexture;
-  FvTexture *irTexture;
+  RealsenseCam(const char *s) : FvCamera(s) {}
 
-  bool enablePointCloud = false;
-
-  RealsenseCam(const char *s)
+  void camInit()
   {
-    serial = std::string(s);
-  }
-
-  void fv_init(FlTextureRegistrar *r, std::vector<TFLiteModel *> *m, FlMethodChannel *f, OpenGLFL *g)
-  {
-    flRegistrar = r;
-    // TODO: check if this is duplicate from texture
-    models = m;
-    flChannel = f;
-    glfl = g;
-
-    // Create texture
-    rgbTexture = FV_TEXTURE(g_object_new(fv_texture_get_type(), nullptr));
-    FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(rgbTexture)->copy_pixels = fv_texture_copy_pixels;
-    fl_texture_registrar_register_texture(flRegistrar, FL_TEXTURE(rgbTexture));
-    rgbTexture->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(rgbTexture));
-    fl_texture_registrar_mark_texture_frame_available(flRegistrar, FL_TEXTURE(rgbTexture));
-    depthTexture = FV_TEXTURE(g_object_new(fv_texture_get_type(), nullptr));
-    FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(depthTexture)->copy_pixels = fv_texture_copy_pixels;
-    fl_texture_registrar_register_texture(flRegistrar, FL_TEXTURE(depthTexture));
-    depthTexture->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(depthTexture));
-    fl_texture_registrar_mark_texture_frame_available(flRegistrar, FL_TEXTURE(depthTexture));
-    irTexture = FV_TEXTURE(g_object_new(fv_texture_get_type(), nullptr));
-    FL_PIXEL_BUFFER_TEXTURE_GET_CLASS(irTexture)->copy_pixels = fv_texture_copy_pixels;
-    fl_texture_registrar_register_texture(flRegistrar, FL_TEXTURE(irTexture));
-    irTexture->texture_id = reinterpret_cast<int64_t>(FL_TEXTURE(irTexture));
-    fl_texture_registrar_mark_texture_frame_available(flRegistrar, FL_TEXTURE(irTexture));
-
-    // Create Pipeline
-    FV_TEXTURE(rgbTexture)->pipeline = new Pipeline(&FV_TEXTURE(rgbTexture)->cvImage);
-    FV_TEXTURE(rgbTexture)->models = models;
-    FV_TEXTURE(depthTexture)->pipeline = new Pipeline(&FV_TEXTURE(depthTexture)->cvImage);
-    FV_TEXTURE(depthTexture)->models = models;
-    FV_TEXTURE(irTexture)->pipeline = new Pipeline(&FV_TEXTURE(irTexture)->cvImage);
-    FV_TEXTURE(irTexture)->models = models;
-  }
-
-  int64_t getTextureId(int index)
-  {
-    if (index == RsVideoIndex::RS_RGB)
-    {
-      return rgbTexture->texture_id;
-    }
-    else if (index == RsVideoIndex::RS_Depth)
-    {
-      return depthTexture->texture_id;
-    }
-    else if (index == RsVideoIndex::RS_IR)
-    {
-      return irTexture->texture_id;
-    }
-
-    return -1;
+    glfl->modelRsPointCloud->rgbFrame = &rgbFrame;
   }
 
   int openDevice()
@@ -107,7 +48,7 @@ public:
     return 0;
   }
 
-  int configVideoStream(int streamIndex, bool enable)
+  int configVideoStream(int streamIndex, bool *enable)
   {
     if ((streamIndex & RsVideoIndex::RS_RGB) > 0)
     {
@@ -127,7 +68,7 @@ public:
       isIrEnable = enable;
     }
 
-    if (enable)
+    if (*enable)
     {
       pipeline->start();
     }
@@ -147,18 +88,14 @@ public:
     t.detach();
   }
 
+  void configure(int prop, float value) {}
+
 private:
   rs2::config cfg;
-  bool videoStart = false;
   unsigned int timeout = 1500;
-
-  OpenGLFL *glfl;
-  FlTextureRegistrar *flRegistrar;
-  std::vector<TFLiteModel *> *models;
-  FlMethodChannel *flChannel;
-
   bool isRgbEnable = false, isDepthEnable = false, isIrEnable = false;
   rs2::pointcloud rsPointcloud;
+  rs2::frame rgbFrame;
 
   void _readVideoFeed()
   {
@@ -168,7 +105,7 @@ private:
       {
         rs2::frameset frames = pipeline->wait_for_frames(timeout);
 
-        auto rgbFrame = frames.get_color_frame();
+        rgbFrame = frames.get_color_frame();
         auto depthFrame = frames.get_depth_frame();
         auto irFrame = frames.get_infrared_frame();
 
@@ -192,9 +129,8 @@ private:
 
         if (enablePointCloud)
         {
-          rsPointcloud.map_to(rgbFrame);
           glfl->modelRsPointCloud->points = rsPointcloud.calculate(depthFrame);
-          glfl->modelRsPointCloud->updateTexture(rgbFrame);
+          rsPointcloud.map_to(rgbFrame);
         }
       }
       catch (const rs2::error &e)

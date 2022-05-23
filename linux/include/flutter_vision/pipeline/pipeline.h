@@ -74,7 +74,7 @@ void PipelineFuncOpencvImread(cv::Mat &img, std::vector<uint8_t> params, FlTextu
 
 void PipelineFuncShow(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
-    // printf("PipelineFuncShow\n");
+    // printf("PipelineFuncShow: %d, %d\n", img.cols, img.rows);
     texture_width = img.cols;
     texture_height = img.rows;
     pixelBuf.clear();
@@ -263,6 +263,7 @@ public:
                 }
             }
 
+            // printf("[Run] %s\n", funcs[i].name);
             funcs[i].func(img, funcs[i].params, registrar, texture, texture_width, texture_height, pixelBuf, models, flChannel);
 
             if (funcs[i].interval > 0)
