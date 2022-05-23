@@ -64,7 +64,6 @@ public:
         // char sn[32];
         // this->device->getProperty(openni::DEVICE_PROPERTY_SERIAL_NUMBER, sn, &size);
 
-        std::cout << "Valid" << std::endl;
         createVideoStream();
       }
 

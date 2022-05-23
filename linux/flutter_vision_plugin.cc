@@ -467,9 +467,9 @@ static void flutter_vision_plugin_handle_method_call(
     cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
     cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
 
-    self->cams[1]->rgbTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->cams[1]->rgbTexture), self->cams[1]->rgbTexture->video_width, self->cams[1]->rgbTexture->video_height, self->cams[1]->rgbTexture->buffer, &self->models, self->flChannel);
-    self->cams[1]->depthTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->cams[1]->depthTexture), self->cams[1]->depthTexture->video_width, self->cams[1]->depthTexture->video_height, self->cams[1]->depthTexture->buffer, &self->models, self->flChannel);
-    self->cams[1]->irTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->cams[1]->irTexture), self->cams[1]->irTexture->video_width, self->cams[1]->irTexture->video_height, self->cams[1]->irTexture->buffer, &self->models, self->flChannel);
+    // self->cams[1]->rgbTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->cams[1]->rgbTexture), self->cams[1]->rgbTexture->video_width, self->cams[1]->rgbTexture->video_height, self->cams[1]->rgbTexture->buffer, &self->models, self->flChannel);
+    // self->cams[1]->depthTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->cams[1]->depthTexture), self->cams[1]->depthTexture->video_width, self->cams[1]->depthTexture->video_height, self->cams[1]->depthTexture->buffer, &self->models, self->flChannel);
+    // self->cams[1]->irTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->cams[1]->irTexture), self->cams[1]->irTexture->video_width, self->cams[1]->irTexture->video_height, self->cams[1]->irTexture->buffer, &self->models, self->flChannel);
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }

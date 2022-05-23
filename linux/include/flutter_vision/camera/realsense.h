@@ -25,6 +25,7 @@ public:
 
   void camInit()
   {
+    glfl->modelRsPointCloud->rgbFrame = &rgbFrame;
   }
 
   int openDevice()
@@ -130,7 +131,6 @@ private:
         {
           glfl->modelRsPointCloud->points = rsPointcloud.calculate(depthFrame);
           rsPointcloud.map_to(rgbFrame);
-          glfl->modelRsPointCloud->updateTexture(rgbFrame);
         }
       }
       catch (const rs2::error &e)
