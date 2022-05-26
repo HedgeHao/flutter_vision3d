@@ -64,6 +64,8 @@ class _MyAppState extends State<MyApp> {
 
   List<PositionedRect> rects = [];
 
+  bool openglIsRendering = false;
+
   int ts = 0;
 
   void updateMouseClick(PointerEvent details) {
@@ -109,7 +111,7 @@ class _MyAppState extends State<MyApp> {
 
   void openglRender() {
     FlutterVision.openglRender().then((value) => {
-          if (FlutterVision.openglIsRendering) {Future.delayed(const Duration(milliseconds: 1), openglRender)}
+          if (openglIsRendering) {Future.delayed(const Duration(milliseconds: 1), openglRender)}
         });
   }
 
@@ -214,11 +216,7 @@ class _MyAppState extends State<MyApp> {
                       onPointerUp: updateMouseClick,
                       onPointerMove: updateMousePosition,
                       onPointerSignal: updateMouseWheel,
-                      child: Container(
-                          decoration: BoxDecoration(border: Border.all(width: 1)),
-                          width: 540,
-                          height: 405,
-                          child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
+                      child: Container(decoration: BoxDecoration(border: Border.all(width: 1)), width: 540, height: 405, child: Transform.rotate(angle: 180 * pi / 180, child: Texture(textureId: openglTextureId)))),
               Text(debugText, style: const TextStyle(fontSize: 30)),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 TextButton(
@@ -366,11 +364,11 @@ class _MyAppState extends State<MyApp> {
                     child: const Text('Reset')),
                 TextButton(
                     onPressed: () {
-                      if (!FlutterVision.openglIsRendering) {
-                        FlutterVision.openglIsRendering = true;
+                      if (!openglIsRendering) {
+                        openglIsRendering = true;
                         openglRender();
                       } else {
-                        FlutterVision.openglIsRendering = false;
+                        openglIsRendering = false;
                       }
                     },
                     child: const Text('Render')),

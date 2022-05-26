@@ -31,12 +31,12 @@ class VideoStreamingConfigState extends State<VideoStreamingConfig> {
       children: [
         TextButton(
             onPressed: () async {
-              ViewModel.configuration.niCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedDevice!.uri!)?.enableStream();
+              ViewModel.configuration.niCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedDevice!.uri)?.enableStream();
             },
             child: const Text('Start')),
         TextButton(
             onPressed: () async {
-              ViewModel.configuration.niCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedDevice!.uri!)?.disableStream();
+              ViewModel.configuration.niCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedDevice!.uri)?.disableStream();
             },
             child: const Text('Stop')),
         const Text('PointCloud'),
@@ -81,10 +81,10 @@ class VideoConfigState extends State<VideoConfig> {
           TextButton(
               onPressed: () async {
                 if (ViewModel.configuration.selectedDevice != null) {
-                  OpenniCamera? cam = ViewModel.configuration.niCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedDevice!.uri!);
+                  OpenniCamera? cam = ViewModel.configuration.niCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedDevice!.uri);
 
                   if (cam == null) {
-                    cam = await FvCamera.create(ViewModel.configuration.selectedDevice!.uri!, CameraType.OPENNI) as OpenniCamera?;
+                    cam = await FvCamera.create(ViewModel.configuration.selectedDevice!.uri, CameraType.OPENNI) as OpenniCamera?;
                     if (cam == null) {
                       print('Create Camera Failed');
                       return;
@@ -99,7 +99,7 @@ class VideoConfigState extends State<VideoConfig> {
               child: const Text('Connect')),
           TextButton(
               onPressed: () {
-                ViewModel.configuration.niCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedDevice!.uri!)?.close().then((value) => setState);
+                ViewModel.configuration.niCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedDevice!.uri)?.close().then((value) => setState);
               },
               child: const Text('Disconnect')),
         ],
@@ -112,11 +112,17 @@ class VideoConfigState extends State<VideoConfig> {
               const SizedBox(width: 8),
               Text(isConnected ? 'Connected' : 'Disconnected', style: TextStyle(color: isConnected ? Colors.green : Colors.red)),
               IconButton(
-                  onPressed: () {
-                    FlutterVision.deviceIsConnected().then((isValid) {
-                      setState(() {
-                        isConnected = isValid;
-                      });
+                  onPressed: () async {
+                    OpenniCamera? cam = ViewModel.configuration.niCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedDevice!.uri);
+
+                    if (cam == null) {
+                      isConnected = false;
+                    } else {
+                      isConnected = await cam.isConnected();
+                    }
+
+                    setState(() {
+                      isConnected = isConnected;
                     });
                   },
                   splashRadius: 15,
@@ -340,11 +346,17 @@ class RsVideoConfigState extends State<RsVideoConfig> {
               const SizedBox(width: 8),
               Text(isConnected ? 'Connected' : 'Disconnected', style: TextStyle(color: isConnected ? Colors.green : Colors.red)),
               IconButton(
-                  onPressed: () {
-                    FlutterVision.deviceIsConnected().then((isValid) {
-                      setState(() {
-                        isConnected = isValid;
-                      });
+                  onPressed: () async {
+                    RealsenseCamera? cam = ViewModel.configuration.rsCams.firstWhereOrNull((e) => e.serial == ViewModel.configuration.selectedRsDevice);
+
+                    if (cam == null) {
+                      isConnected = false;
+                    } else {
+                      isConnected = await cam.isConnected();
+                    }
+
+                    setState(() {
+                      isConnected = isConnected;
                     });
                   },
                   splashRadius: 15,
@@ -414,7 +426,7 @@ class ConfigurePannel extends StatelessWidget {
             Text('OpenNI2', style: subTitleStyle),
             TextButton(
                 onPressed: () async {
-                  await FlutterVision.initialize();
+                  await FlutterVision.niInitialize();
                 },
                 child: const Text('Ni2 Init')),
             Text('Device', style: subTitleStyle),
