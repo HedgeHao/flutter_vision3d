@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_vision/camera/camera.dart';
 import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
+import 'package:flutter_vision_example/coco_names.dart';
 
 const frameWidth = 800.0;
 const frameHeight = 600.0;
