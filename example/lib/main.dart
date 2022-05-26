@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:desktop_window/desktop_window.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -47,6 +48,12 @@ class MyAppState extends State<MyApp> {
   TFLiteModel? model;
   List<PositionedRect> rects = [];
   String displayText = '';
+
+  @override
+  void initState() {
+    FlutterVision.listen(fvCallback);
+    super.initState();
+  }
 
   /* OpenGL Texture Gesture*/
   bool mouseDown = false;
@@ -128,16 +135,22 @@ class MyAppState extends State<MyApp> {
     });
   }
 
-  Future<dynamic> update(MethodCall call) async {
+  Future<dynamic> fvCallback(MethodCall call) async {
     if (call.method == 'onInference') {
       Float32List outputBoxes = await model!.getTensorOutput(0, [25, 4]);
       Float32List outputClass = await model!.getTensorOutput(1, [25]);
       Float32List outputScore = await model!.getTensorOutput(2, [25]);
 
-      print('Class:${COCO_CLASSES[outputClass[0].toInt()]}, Score: ${outputScore[0]}');
+      if (outputScore[0] < 0.55) {
+        setState(() {
+          rects.clear();
+          displayText = '';
+        });
+        return;
+      }
 
       List<PositionedRect> r = [];
-      for (int i = 0; i < 3; i++) {
+      for (int i = 0; i < 1; i++) {
         double x = frameWidth * outputBoxes[i * 4 + 1];
         double y = frameHeight * outputBoxes[i * 4];
         double width = frameWidth * outputBoxes[i * 4 + 3] - x;
@@ -147,7 +160,7 @@ class MyAppState extends State<MyApp> {
 
       setState(() {
         rects = r;
-        displayText = '${COCO_CLASSES[outputClass[0].toInt() - 1]} ${outputScore[0]}';
+        displayText = '${COCO_CLASSES[outputClass[0].toInt()]} ${outputScore[0]}';
       });
     }
   }
@@ -234,7 +247,14 @@ class MyAppState extends State<MyApp> {
               onPointerUp: updateMouseClick,
               onPointerMove: updateMousePosition,
               onPointerSignal: updateMouseWheel,
-              child: SizedBox(width: frameWidth, height: frameHeight, child: Texture(textureId: textureId))),
+              child: SizedBox(
+                  width: frameWidth,
+                  height: frameHeight,
+                  child: Stack(children: [
+                    Texture(textureId: textureId),
+                    ...rects,
+                    Text(displayText, style: const TextStyle(color: Colors.red, fontSize: 24)),
+                  ]))),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -267,17 +287,24 @@ class MyAppState extends State<MyApp> {
               TextButton(
                   onPressed: () async {
                     if (cam == null) return;
-                    model ??= await TFLiteModel.create("");
+
+                    FilePickerResult? result = await FilePicker.platform.pickFiles();
+                    if (result == null) return;
+
+                    model ??= await TFLiteModel.create(result.files.first.path);
 
                     FvPipeline rgbPipeline = cam!.rgbPipeline;
                     await rgbPipeline.clear();
-                    await rgbPipeline.resize(320, 320, mode: OpenCV.INTER_CUBIC);
-                    await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
+                    await rgbPipeline.crop(100, 600, 100, 600);
+                    await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
                     await rgbPipeline.show();
-                    await rgbPipeline.cvtColor(OpenCV.CV_8UC1);
-                    await rgbPipeline.cvtColor(OpenCV.COLOR_RGB2BGR);
+                    await rgbPipeline.resize(320, 320, mode: OpenCV.INTER_CUBIC);
+                    await rgbPipeline.cvtColor(OpenCV.COLOR_RGBA2BGR);
                     await rgbPipeline.setInputTensorData(model!.index, 0, FvPipeline.DATATYPE_UINT8);
                     await rgbPipeline.inference(model!.index);
+
+                    textureId = cam!.rgbTextureId;
+                    setState(() {});
                   },
                   child: const Text('ObjectDetector AI Model')),
               TextButton(
