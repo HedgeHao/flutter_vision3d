@@ -206,6 +206,7 @@ class MyAppState extends State<MyApp> {
                     onPressed: () {
                       if (cam == null) return;
 
+                      // TODO: Crash
                       cam!.close();
                     },
                     child: const Text('Disconnect')),
@@ -338,17 +339,15 @@ class OpenniCameraConfig extends StatelessWidget {
       children: [
         TextButton(
             onPressed: () async {
-              // TODO: Change name to niInitialize
-              await FlutterVision.initialize();
+              await FlutterVision.niInitialize();
             },
             child: const Text('Init')),
         TextButton(
             onPressed: () async {
-              //TODO: Change name to niEnumberateDevices
               List<OpenNi2Device> list = await FlutterVision.enumerateDevices();
               if (list.isEmpty) return;
 
-              mSerial = list[0].uri!;
+              mSerial = list[0].uri;
               ctl.text = mSerial;
             },
             child: const Text('Find Device')),
@@ -368,7 +367,6 @@ class RealsenseCameraConfig extends StatelessWidget {
       children: [
         TextButton(
             onPressed: () async {
-              //TODO: Change name to niEnumberateDevices
               List<String> list = await FlutterVision.rsEnumerateDevices();
               if (list.isEmpty) return;
 

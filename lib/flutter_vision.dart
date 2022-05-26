@@ -27,25 +27,25 @@ class OpenNi2Status {
 }
 
 class OpenNi2Device {
-  String? name;
-  String? vendor;
-  int? productId;
-  int? vendorId;
-  String? uri;
+  late String name;
+  late String vendor;
+  late int productId;
+  late int vendorId;
+  late String uri;
 
-  OpenNi2Device({
+  OpenNi2Device(
     this.name,
     this.vendor,
     this.productId,
     this.vendorId,
     this.uri,
-  });
+  );
   OpenNi2Device.fromJson(Map<dynamic, dynamic> json) {
-    name = json['name']?.toString();
-    vendor = json['vendor']?.toString();
-    productId = json['productId']?.toInt();
-    vendorId = json['vendorId']?.toInt();
-    uri = json['uri']?.toString();
+    name = json['name'].toString();
+    vendor = json['vendor'].toString();
+    productId = json['productId'].toInt();
+    vendorId = json['vendorId'].toInt();
+    uri = json['uri'].toString();
   }
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
@@ -58,11 +58,8 @@ class OpenNi2Device {
   }
 }
 
-enum OPENNI_DEVICE_STATUS { INVALID, VALID }
-
 class FlutterVision {
   static const MethodChannel channel = MethodChannel('flutter_vision');
-  static bool openglIsRendering = false;
 
   static listen(Future<dynamic> Function(MethodCall) callback) {
     channel.setMethodCallHandler(callback);
@@ -74,7 +71,7 @@ class FlutterVision {
     return list.map((e) => e.toString()).toList();
   }
 
-  static Future<int> initialize() async {
+  static Future<int> niInitialize() async {
     return await channel.invokeMethod('ni2Initialize') ?? OpenNi2Status.STATUS_ERROR;
   }
 
@@ -90,33 +87,8 @@ class FlutterVision {
 
   static Future<int> openDevice(OpenNi2Device device) async {
     int ret = await channel.invokeMethod('ni2OpenDevice', {'uri': device.uri});
-    // if (ret == 1) print('SN not valid');
 
     return ret;
-  }
-
-  static Future<void> closeDevice() async {
-    await channel.invokeMethod('ni2CloseDevice');
-  }
-
-  static Future<bool> deviceIsConnected() async {
-    return await channel.invokeMethod('ni2DeviceIsConnected');
-  }
-
-  static Future<int> getEnabledVideoModes() async {
-    return await channel.invokeMethod('ni2GetEnabledVideoModes');
-  }
-
-  static Future<bool> configVideoStream(int videoModeIndex, bool enable) async {
-    return await channel.invokeMethod('ni2ConfigVideoStream', {'videoMode': videoModeIndex, 'enable': enable});
-  }
-
-  static Future<int> getVideoFramePointer(int videoModeIndex) async {
-    return await channel.invokeMethod('ni2GetFramePointer', {'videoIndex': videoModeIndex});
-  }
-
-  static Future<void> setVideoSize(int videoIndex, int width, int height) async {
-    await channel.invokeMethod('ni2SetVideoSize', {'videoIndex': videoIndex, 'width': width, 'height': height});
   }
 
   static Future<int> getOpenglTextureId() async {
@@ -145,18 +117,6 @@ class FlutterVision {
 
   static Future<void> cameraOpen(int index) async {
     return await channel.invokeMethod('cameraOpen', {'index': index});
-  }
-
-  static Future<bool> uvcConfig(int index, int prop, double value) async {
-    return await channel.invokeMethod('uvcConfig', {'index': index, 'prop': prop, 'value': value});
-  }
-
-  static Future<void> cameraConfig(int index, bool start) async {
-    return await channel.invokeMethod('cameraConfig', {'index': index, 'start': start});
-  }
-
-  static Future<void> enablePointCloud(bool enable) async {
-    return await channel.invokeMethod('enablePointCloud', {'enable': enable});
   }
 
   static Future<void> test() async {
@@ -425,10 +385,4 @@ class TFLiteModel {
   get error async {
     return await _getModelInfo('error') as String;
   }
-}
-
-class OpenNiVideoMode {
-  static const COLOR = 1;
-  static const DEPTH = 2;
-  static const IR = 4;
 }
