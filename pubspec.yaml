@@ -26,3 +26,6 @@ flutter:
         pluginClass: FlutterVisionPlugin
       windows:
         pluginClass: FlutterVisionPlugin
+
+scripts:
+  dependencies-linux: echo "Hello"
