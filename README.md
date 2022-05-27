@@ -3,6 +3,7 @@
 A framework for 2D & 3D image processing with AI (Tensorflow Lite)
 
 
+---
 ## Prerequisite
 ### Linux
 
@@ -11,6 +12,7 @@ A framework for 2D & 3D image processing with AI (Tensorflow Lite)
 ### Windows
 * Install `OpenCV`, `GLEW`,  and `GLFW`
 
+---
 ## Create and Connect to Camera
 * UVC Camera
 ```dart
@@ -32,18 +34,19 @@ RealsenseCamera? cam = await FvCamera.create(ctl.text, CameraType.REALSENSE) as 
 DummyCamera? cam = await FvCamera.create(ctl.text, CameraType.DUMMY) as DummyCamera?;
 ```
 
+---
 ## Enable/Disable camera video stream
 ```dart
-await cam.enableStream()
-await cam.disableStream()
+await cam.enableStream();
+await cam.disableStream();
 ```
-
+---
 ## Bind texture widget
 ```dart
-Texture(textureId: cam.rgbTextureId)
+Texture(textureId: cam.rgbTextureId);
 ```
-
-## Pipeline example
+---
+## Pipeline
 * Display UVC video stream
 ```dart
 FvPipeline uvcPipeline = cam.rgbPipeline;
@@ -62,5 +65,75 @@ await depthPipeline.show();
 
 * Object detection with Efficient Net (Tensorflow Lite)
 ```dart
-// TBD
+// Create Tensorflow Lite Model
+TFLiteModel model = await TFLiteModel.create('/path/to/model.tflite');
+
+// Use pipeline to set input for model
+FvPipeline rgbPipeline = cam!.rgbPipeline;
+await rgbPipeline.setInputTensorData(model!.index, 0, FvPipeline.DATATYPE_UINT8);
+await rgbPipeline.inference(model!.index);
+
+// Set the callback function. Called when inference is done.
+FlutterVision.listen((MethodCall call) async {
+    if (call.method == 'onInference') {
+        ...
+    }
+});
+```
+---
+## APIs
+```dart
+// Enumberation
+enum CameraType { OPENNI, REALSENSE, DUMMY, UVC }
+
+
+// FlutterVision Functions
+class FvCamera {
+    static Future<FvCamera?> create(String serial, CameraType type)
+    Future<void> close()
+    Future<bool> enableStream()
+    Future<bool> disableStream()
+    Future<void> enablePointCloud()
+    Future<void> disablePointCloud()
+    Future<bool> isConnected()
+    Future<void> configure(int prop, double value)
+    Future<bool> screenshot(int index, String path, {int? cvtCode})
+}
+
+class OpenniCamera extends FvCamera {}
+class RealsenseCamera extends FvCamera {}
+class UvcCamera extends FvCamera {}
+
+class FlutterVision {
+    static listen(Future<dynamic> Function(MethodCall) callback)
+    static Future<int> niInitialize()
+    static Future<List<OpenNi2Device>> enumerateDevices()
+    static Future<List<String>> rsEnumerateDevices()
+
+    static Future<int> getOpenglTextureId()
+    static Future<void> openglRender()
+}
+
+class FvPipeline {
+    Future<void> clear()
+    Future<void> cvtColor(int mode, {int? at, int? interval})
+    Future<void> imwrite(String path, {int? at, int? interval})
+    Future<void> imread(String path, {int? at, int? interval})
+    Future<void> show({int? at, int? interval})
+    Future<void> convertTo(int mode, double scale, {int? at, double? shift, int? interval})
+    Future<void> applyColorMap(int colorMap, {int? at, int? interval})
+    Future<void> resize(int width, int height, {int? at, int? mode, int? interval})
+    Future<void> crop(int xStart, int xEnd, int yStart, int yEnd, {int? at, int? interval})
+    Future<void> rotate(int rotateCode, {int? at, int? interval})
+    Future<void> cvRectangle(double x1, double y1, double x2, double y2, int r, int g, int b, {int? at, int? thickness, int? lineType, int? shift, int? alpha, int? interval})
+    Future<void> setInputTensorData(int modelIndex, int tensorIndex, int dataType, {int? at, int? interval})
+    Future<void> inference(int modelIndex, {int? at, int? interval})
+    Future<void> customHandler(int size, {int? at, int? interval})
+}
+
+class TFLiteModel{
+    static Future<TFLiteModel> create(modelPath)
+
+    Future<Float32List> getTensorOutput(int tensorIndex, List<int> size)
+}
 ```

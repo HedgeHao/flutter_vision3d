@@ -119,20 +119,20 @@ class MyAppState extends State<MyApp> {
           if (openglIsRendering) {Future.delayed(const Duration(milliseconds: 1), openglRender)}
         });
   }
-/* OpenGL Texture Gesture */
+  /* OpenGL Texture Gesture */
 
   void chooseCamera(int? index) {
     if (index == null) return;
 
     setState(() {
       cameraType = index;
-      if (index == CameraType.UVC.index)
+      if (index == CameraType.UVC.index) {
         camConfigWidget = UvcCameraConfig();
-      else if (index == CameraType.OPENNI.index)
+      } else if (index == CameraType.OPENNI.index) {
         camConfigWidget = OpenniCameraConfig();
-      else if (index == CameraType.REALSENSE.index)
+      } else if (index == CameraType.REALSENSE.index) {
         camConfigWidget = RealsenseCameraConfig();
-      else {}
+      }
     });
   }
 
