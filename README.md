@@ -137,3 +137,17 @@ class TFLiteModel{
     Future<Float32List> getTensorOutput(int tensorIndex, List<int> size)
 }
 ```
+
+## Supported 3D Camera
+| Camera                | Supported | Tested | Product Link |
+| --------------------- | --------- | ------ | ------------ |
+| Intel Realsense D415  |     ✅    |   ✅   |  [Link](https://www.intelrealsense.com/depth-camera-d415/) |
+| Intel Realsense D435  |     ✅    |   ✅   |  [Link](https://www.intelrealsense.com/depth-camera-d435/) |
+| Intel Realsense D435i |     ✅    |        |  [Link](https://www.intelrealsense.com/depth-camera-d435i/) |
+| Intel Realsense D455  |     ✅    |        |  [Link](https://www.intelrealsense.com/depth-camera-d455/) |
+| Intel Realsense T265  |     ✅    |        |  [Link](https://www.intelrealsense.com/tracking-camera-t265/) |
+| Intel Realsense L515  |     ✅    |        |  [Link](https://www.intelrealsense.com/lidar-camera-l515/) |
+| LIPSedge AE400        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae400) |
+| LIPSedge DL           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-dl-series) |
+| LIPSedge M3           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-m3-series) |
+| LIPSedge L Series     |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-l-series) |
