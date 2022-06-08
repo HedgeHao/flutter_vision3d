@@ -21,6 +21,7 @@
 #define FL_ARG_FLOAT(args, name) fl_value_get_float(fl_value_lookup_string(args, name))
 #define FL_ARG_BOOL(args, name) fl_value_get_bool(fl_value_lookup_string(args, name))
 #define FL_ARG_INT32_LIST(args, name) fl_value_get_int32_list(fl_value_lookup_string(args, name))
+#define FL_ARG_FLOAT_LIST(args, name) fl_value_get_float_list(fl_value_lookup_string(args, name))
 
 #define PIPELINE_INDEX_TFLITE 8
 
@@ -371,13 +372,16 @@ static void flutter_vision_plugin_handle_method_call(
   {
     const char *serial = FL_ARG_STRING(args, "serial");
     const int prop = FL_ARG_INT(args, "prop");
-    const float value = FL_ARG_FLOAT(args, "value");
+    FlValue *flValue = fl_value_lookup_string(args, "value");
+    const float *value = fl_value_get_float32_list(flValue);
+    const int len = fl_value_get_length(flValue);
 
     FvCamera *cam = FvCamera::findCam(serial, &self->cams);
     int ret = -1;
     if (cam)
     {
-      cam->configure(prop, value);
+      std::vector<float> values(value, value + len);
+      cam->configure(prop, values);
     }
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(ret == 0)));
   }

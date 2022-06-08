@@ -211,10 +211,10 @@ class Camera2dConfigure extends StatelessWidget {
                 ViewModel.configuration.uvcCams.add(cam);
               }
 
-              await cam.configure(OpenCV.CAP_PROP_MODE, 1);
-              await cam.configure(OpenCV.CAP_PROP_FPS, 30.0);
-              await cam.configure(OpenCV.CAP_PROP_FRAME_WIDTH, 640);
-              await cam.configure(OpenCV.CAP_PROP_FRAME_HEIGHT, 480);
+              await cam.configure(OpenCV.CAP_PROP_MODE, [1]);
+              await cam.configure(OpenCV.CAP_PROP_FPS, [30.0]);
+              await cam.configure(OpenCV.CAP_PROP_FRAME_WIDTH, [640]);
+              await cam.configure(OpenCV.CAP_PROP_FRAME_HEIGHT, [480]);
             },
             child: const Text('Open')),
         TextButton(
@@ -325,6 +325,7 @@ class RsVideoConfigState extends State<RsVideoConfig> {
                     return;
                   }
                   ViewModel.configuration.rsCams.add(cam);
+                  cam.configure(RealsenseConfiguration.THRESHOLD_FILTER.index, [0.1, 0.5]);
                 }
 
                 isConnected = await cam.isConnected();

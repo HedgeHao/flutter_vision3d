@@ -418,6 +418,13 @@ class _MyAppState extends State<MyApp> {
                       await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
                       await rgbPipeline.show();
 
+                      FvPipeline depthPipeline = configuration.rsCams[0].depthPipeline;
+                      await depthPipeline.clear();
+                      await depthPipeline.convertTo(0, 255.0 / 1024.0);
+                      await depthPipeline.applyColorMap(OpenCV.COLORMAP_JET);
+                      await depthPipeline.cvtColor(0); //COLOR_RGB2RGBA
+                      await depthPipeline.show();
+
                       setState(() {});
                     },
                     child: const Text('RS')),
