@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision/camera/uvc.dart';
 import 'package:flutter_vision/camera/dummy.dart';
@@ -82,8 +84,8 @@ class FvCamera {
     return true;
   }
 
-  Future<void> configure(int prop, double value) async {
-    return await FlutterVision.channel.invokeMethod('fvCameraConfig', {'prop': prop, 'value': value, 'serial': serial});
+  Future<void> configure(int prop, List<double> value) async {
+    return await FlutterVision.channel.invokeMethod('fvCameraConfig', {'prop': prop, 'value': Float32List.fromList(value), 'serial': serial});
   }
 
   Future<bool> screenshot(int index, String path, {int? cvtCode}) async {

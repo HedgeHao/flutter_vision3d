@@ -15,6 +15,25 @@ enum RsVideoIndex
   RS_IR = 0b001,
 };
 
+enum RsConfiguration
+{
+  THRESHOLD_FILTER = 0,
+};
+
+enum RsFilterType
+{
+  THRESHOLD = 0
+};
+
+class RsFilter
+{
+public:
+  RsFilterType type;
+  rs2::filter *filter;
+
+  RsFilter(RsFilterType t, rs2::filter *f) : type(t), filter(f) {}
+};
+
 class RealsenseCam : public FvCamera
 {
 public:
@@ -88,7 +107,24 @@ public:
     t.detach();
   }
 
-  void configure(int prop, float value) {}
+  void configure(int prop, std::vector<float> &value)
+  {
+    if (prop == RsConfiguration::THRESHOLD_FILTER)
+    {
+      for (RsFilter f : filters)
+      {
+        if (f.type == RsFilterType::THRESHOLD)
+        {
+          f.filter->as<rs2::threshold_filter>().set_option(rs2_option::RS2_OPTION_MIN_DISTANCE, value[0]);
+          f.filter->as<rs2::threshold_filter>().set_option(rs2_option::RS2_OPTION_MAX_DISTANCE, value[1]);
+          return;
+        }
+      }
+
+      RsFilter f(RsFilterType::THRESHOLD, new rs2::threshold_filter(value[0], value[1]));
+      filters.push_back(f);
+    }
+  }
 
 private:
   rs2::config cfg;
@@ -96,6 +132,7 @@ private:
   bool isRgbEnable = false, isDepthEnable = false, isIrEnable = false;
   rs2::pointcloud rsPointcloud;
   rs2::frame rgbFrame;
+  std::vector<RsFilter> filters{};
 
   void _readVideoFeed()
   {
@@ -104,6 +141,14 @@ private:
       try
       {
         rs2::frameset frames = pipeline->wait_for_frames(timeout);
+        if (filters.size() > 0)
+        {
+          for (RsFilter f : filters)
+          {
+
+            frames = f.filter->as<rs2::threshold_filter>().process(frames);
+          }
+        }
 
         rgbFrame = frames.get_color_frame();
         auto depthFrame = frames.get_depth_frame();
