@@ -102,6 +102,39 @@ class RealsenseView extends GetView<RealsenseController> {
                     const Text(': Display original color frame')
                   ])
                 ]),
+                const Divider(),
+                const Align(alignment: Alignment.center, child: Text('Configuration')),
+                const Text('Range Filter(m)'),
+                Row(
+                  children: [
+                    const Text('Min:'),
+                    GetBuilder<RealsenseController>(
+                        id: RealsenseController.BUILDER_SLIDER,
+                        builder: (controller) => Slider(
+                              min: 0.0,
+                              max: 4.0,
+                              divisions: 40,
+                              value: controller.rangeFilterValueMin,
+                              onChanged: controller.cam == null ? null : (double value) => controller.minRange = value,
+                            )),
+                    GetBuilder<RealsenseController>(id: RealsenseController.BUILDER_SLIDER, builder: (controller) => Text(controller.rangeFilterValueMin.toStringAsFixed(1))),
+                  ],
+                ),
+                Row(
+                  children: [
+                    const Text('Max:'),
+                    GetBuilder<RealsenseController>(
+                        id: RealsenseController.BUILDER_SLIDER,
+                        builder: (controller) => Slider(
+                              min: 0.0,
+                              max: 4.0,
+                              divisions: 40,
+                              value: controller.rangeFilterValueMax,
+                              onChanged: controller.cam == null ? null : (double value) => controller.maxRange = value,
+                            )),
+                    GetBuilder<RealsenseController>(id: RealsenseController.BUILDER_SLIDER, builder: (controller) => Text(controller.rangeFilterValueMax.toStringAsFixed(1))),
+                  ],
+                ),
               ],
             )),
         Expanded(
@@ -117,10 +150,10 @@ class RealsenseView extends GetView<RealsenseController> {
                   child: GetBuilder<RealsenseController>(
                     id: RealsenseController.BUILDER_TEXTURE,
                     builder: (controller) {
-                      return controller.cams.isEmpty
+                      return controller.cam == null
                           ? const SizedBox()
                           : Texture(
-                              textureId: controller.cams.first.rgbTextureId,
+                              textureId: controller.cam!.rgbTextureId,
                             );
                     },
                   )),
@@ -132,10 +165,10 @@ class RealsenseView extends GetView<RealsenseController> {
                   child: GetBuilder<RealsenseController>(
                     id: RealsenseController.BUILDER_TEXTURE,
                     builder: (controller) {
-                      return controller.cams.isEmpty
+                      return controller.cam == null
                           ? const SizedBox()
                           : Texture(
-                              textureId: controller.cams.first.depthTextureId,
+                              textureId: controller.cam!.depthTextureId,
                             );
                     },
                   )),
@@ -147,10 +180,10 @@ class RealsenseView extends GetView<RealsenseController> {
                   child: GetBuilder<RealsenseController>(
                     id: RealsenseController.BUILDER_TEXTURE,
                     builder: (controller) {
-                      return controller.cams.isEmpty
+                      return controller.cam == null
                           ? const SizedBox()
                           : Texture(
-                              textureId: controller.cams.first.irTextureId,
+                              textureId: controller.cam!.irTextureId,
                             );
                     },
                   ))
