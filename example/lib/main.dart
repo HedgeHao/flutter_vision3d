@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_vision_example/efficient_net/efficient_net.binding.dart';
+import 'package:flutter_vision_example/efficient_net/efficient_net.view.dart';
 import 'package:flutter_vision_example/faceRecognizer/fr.binding.dart';
 import 'package:flutter_vision_example/faceRecognizer/fr.view.dart';
 import 'package:flutter_vision_example/realsense/realsense.binding.dart';
@@ -45,6 +47,7 @@ class AppPages {
         GetPage(name: AppRoutes.uvc, page: () => const UvcView(), binding: UvcBinding()),
         GetPage(name: AppRoutes.realsense, page: () => const RealsenseView(), binding: RealsenseBinding()),
         GetPage(name: AppRoutes.fr, page: () => const FaceRecognizerView(), binding: FaceRecognizerBinding()),
+        GetPage(name: AppRoutes.efficientNet, page: () => const EfficientNetView(), binding: EfficientNetBinding()),
       ],
     ),
   ];
@@ -84,6 +87,11 @@ class HomeView extends StatelessWidget {
             title: const Text('Facial Recognition'),
             subtitle: const Text('Facial Recognition with LIPSFace AI Model'),
             onTap: () => Get.toNamed('/home/fr'),
+          ),
+          ListTile(
+            title: const Text('Object Detection'),
+            subtitle: const Text('Object Detection with Efficient Net Model'),
+            onTap: () => Get.toNamed('/home/efficient_net'),
           ),
         ],
       ),
