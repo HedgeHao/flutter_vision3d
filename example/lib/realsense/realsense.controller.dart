@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_vision/camera/camera.dart';
 import 'package:flutter_vision/camera/realsense.dart';
@@ -10,12 +12,15 @@ class RealsenseController extends GetxController {
 
   static const BUILDER_DEVICE_LIST = 'BUILDER_DEVICE_LIST';
   static const BUILDER_TEXTURE = 'BUILDER_TEXTURE';
+  static const BUILDER_TEXTURE_OPENGL = 'BUILDER_TEXTURE_OPENGL';
   static const BUILDER_SLIDER = 'BUILDER_SLIDER';
 
   RealsenseCamera? cam;
   int rgbTextureId = 0;
   int depthTextureId = 0;
   int irTextureId = 0;
+  int openglTextureId = 0;
+  bool pointCloud = false;
   List<DropdownMenuItem<int>> items = [];
   double rangeFilterValueMin = 0.1;
   set minRange(double v) {
@@ -73,17 +78,21 @@ class RealsenseController extends GetxController {
     await cam!.disableStream();
   }
 
-  void pipelineDisplay() async {
+  void pipelineRGB() async {
     FvPipeline uvcPipeline = cam!.rgbPipeline;
     await uvcPipeline.clear();
     await uvcPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
     await uvcPipeline.show();
 
+    update([BUILDER_TEXTURE]);
+  }
+
+  void pipelineDepth() async {
     FvPipeline depthPipeline = cam!.depthPipeline;
     await depthPipeline.clear();
     await depthPipeline.convertTo(0, 255.0 / 1024.0);
-    await depthPipeline.applyColorMap(OpenCV.COLORMAP_JET);
-    await depthPipeline.cvtColor(0); //COLOR_RGB2RGBA
+    await depthPipeline.applyColorMap(Random().nextInt(20));
+    await depthPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
     await depthPipeline.show();
 
     update([BUILDER_TEXTURE]);
@@ -101,5 +110,29 @@ class RealsenseController extends GetxController {
     }
 
     update([BUILDER_DEVICE_LIST]);
+  }
+
+  void openglRender() {
+    FlutterVision.openglRender().then((value) => {
+          if (pointCloud) {Future.delayed(const Duration(milliseconds: 1), openglRender)}
+        });
+  }
+
+  void enablePointCloud(bool value) async {
+    if (cam == null) {
+      pointCloud = false;
+    } else {
+      pointCloud = value;
+      if (pointCloud) {
+        cam!.enablePointCloud();
+        openglRender();
+      } else {
+        cam!.disablePointCloud();
+      }
+    }
+
+    openglTextureId = await FlutterVision.getOpenglTextureId();
+
+    update([BUILDER_TEXTURE_OPENGL]);
   }
 }

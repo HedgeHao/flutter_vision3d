@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_vision_example/realsense/realsense.controller.dart';
+import 'package:flutter_vision_example/widgets/pointcloud/pointcloud.view.dart';
 import 'package:get/get.dart';
 
 class RealsenseView extends GetView<RealsenseController> {
@@ -19,7 +20,7 @@ class RealsenseView extends GetView<RealsenseController> {
       ),
       body: Row(children: [
         SizedBox(
-            width: 300,
+            width: 400,
             height: size.height,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,10 +97,18 @@ class RealsenseView extends GetView<RealsenseController> {
                   Row(children: [
                     TextButton(
                         onPressed: () {
-                          controller.pipelineDisplay();
+                          controller.pipelineRGB();
                         },
-                        child: const Text('Display')),
-                    const Text(': Display original color frame')
+                        child: const Text('RGB Frame')),
+                    const Text(': Original color frame')
+                  ]),
+                  Row(children: [
+                    TextButton(
+                        onPressed: () {
+                          controller.pipelineDepth();
+                        },
+                        child: const Text('Depth Frame')),
+                    const Text(': Depth frame with random color map')
                   ])
                 ]),
                 const Divider(),
@@ -135,6 +144,17 @@ class RealsenseView extends GetView<RealsenseController> {
                     GetBuilder<RealsenseController>(id: RealsenseController.BUILDER_SLIDER, builder: (controller) => Text(controller.rangeFilterValueMax.toStringAsFixed(1))),
                   ],
                 ),
+                Row(
+                  children: [
+                    const Text('PointCloud:'),
+                    GetBuilder<RealsenseController>(
+                        id: RealsenseController.BUILDER_TEXTURE_OPENGL,
+                        builder: (controller) => Switch(
+                              value: controller.pointCloud,
+                              onChanged: (value) => controller.enablePointCloud(value),
+                            ))
+                  ],
+                )
               ],
             )),
         Expanded(
@@ -142,7 +162,7 @@ class RealsenseView extends GetView<RealsenseController> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(children: [
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               Container(
                   decoration: BoxDecoration(border: Border.all(width: 1)),
                   width: 270,
@@ -188,6 +208,18 @@ class RealsenseView extends GetView<RealsenseController> {
                     },
                   ))
             ]),
+            const SizedBox(height: 8),
+            GetBuilder<RealsenseController>(
+              id: RealsenseController.BUILDER_TEXTURE_OPENGL,
+              builder: (controller) => controller.pointCloud
+                  ? PointCloud(
+                      width: 540,
+                      height: 360,
+                      textureId: controller.openglTextureId,
+                      quarterTurns: 2,
+                    )
+                  : const SizedBox(),
+            )
           ],
         ))
       ]),

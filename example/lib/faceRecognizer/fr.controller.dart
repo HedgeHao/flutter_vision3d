@@ -48,7 +48,7 @@ class FaceRecognizerController extends GetxController {
   Future<dynamic> fvCallback(MethodCall call) async {
     if (call.method == 'onInference') {
       Float32List output = await model!.getTensorOutput(0, [28, 28, 5]);
-      List<FaceInfo> faces = processFaceDetectorOutputs(output, 320, 180);
+      List<FaceInfo> faces = processFaceDetectorOutputs(output, 640, 480);
       if (faces.isEmpty) return;
 
       faces = nms(faces, 0.3);

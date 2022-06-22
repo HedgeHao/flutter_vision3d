@@ -84,8 +84,8 @@ class FaceRecognizerView extends GetView<FaceRecognizerController> {
           children: [
             Container(
                 decoration: BoxDecoration(border: Border.all(width: 1)),
-                width: 320,
-                height: 180,
+                width: 640,
+                height: 480,
                 child: GetBuilder<FaceRecognizerController>(
                   builder: (controller) {
                     return controller.cams.isEmpty
