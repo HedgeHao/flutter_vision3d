@@ -3,6 +3,8 @@ import 'package:flutter_vision_example/efficient_net/efficient_net.binding.dart'
 import 'package:flutter_vision_example/efficient_net/efficient_net.view.dart';
 import 'package:flutter_vision_example/faceRecognizer/fr.binding.dart';
 import 'package:flutter_vision_example/faceRecognizer/fr.view.dart';
+import 'package:flutter_vision_example/hand_detection/hand_detection.binding.dart';
+import 'package:flutter_vision_example/hand_detection/hand_detection.view.dart';
 import 'package:flutter_vision_example/realsense/realsense.binding.dart';
 import 'package:flutter_vision_example/realsense/realsense.view.dart';
 import 'package:flutter_vision_example/route.dart';
@@ -48,6 +50,7 @@ class AppPages {
         GetPage(name: AppRoutes.realsense, page: () => const RealsenseView(), binding: RealsenseBinding()),
         GetPage(name: AppRoutes.fr, page: () => const FaceRecognizerView(), binding: FaceRecognizerBinding()),
         GetPage(name: AppRoutes.efficientNet, page: () => const EfficientNetView(), binding: EfficientNetBinding()),
+        GetPage(name: AppRoutes.handDetection, page: () => const HandDetectionView(), binding: HandDetectionBinding()),
       ],
     ),
   ];
@@ -92,6 +95,11 @@ class HomeView extends StatelessWidget {
             title: const Text('Object Detection'),
             subtitle: const Text('Object Detection with Efficient Net Model'),
             onTap: () => Get.toNamed('/home/efficient_net'),
+          ),
+          ListTile(
+            title: const Text('Hand Detection'),
+            subtitle: const Text('Hand Detection with model provided by MediaPipe'),
+            onTap: () => Get.toNamed('/home/hand_detection'),
           ),
         ],
       ),

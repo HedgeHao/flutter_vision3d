@@ -4,4 +4,5 @@ abstract class AppRoutes {
   static const uvc = '/uvc';
   static const fr = '/fr';
   static const efficientNet = '/efficient_net';
+  static const handDetection = '/hand_detection';
 }
