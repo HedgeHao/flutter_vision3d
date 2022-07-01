@@ -1,0 +1,3 @@
+[submodule "handler"]
+	path = handler
+	url = https://github.com/HedgeHao/flutter_vision_handler_example.git
