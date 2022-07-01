@@ -5,6 +5,8 @@ import 'package:flutter_vision_example/faceRecognizer/fr.binding.dart';
 import 'package:flutter_vision_example/faceRecognizer/fr.view.dart';
 import 'package:flutter_vision_example/hand_detection/hand_detection.binding.dart';
 import 'package:flutter_vision_example/hand_detection/hand_detection.view.dart';
+import 'package:flutter_vision_example/opencv/opencv.binding.dart';
+import 'package:flutter_vision_example/opencv/opencv.view.dart';
 import 'package:flutter_vision_example/realsense/realsense.binding.dart';
 import 'package:flutter_vision_example/realsense/realsense.view.dart';
 import 'package:flutter_vision_example/route.dart';
@@ -51,6 +53,7 @@ class AppPages {
         GetPage(name: AppRoutes.fr, page: () => const FaceRecognizerView(), binding: FaceRecognizerBinding()),
         GetPage(name: AppRoutes.efficientNet, page: () => const EfficientNetView(), binding: EfficientNetBinding()),
         GetPage(name: AppRoutes.handDetection, page: () => const HandDetectionView(), binding: HandDetectionBinding()),
+        GetPage(name: AppRoutes.opencv, page: () => const OpencvView(), binding: OpencvBinding()),
       ],
     ),
   ];
@@ -74,32 +77,42 @@ class HomeView extends StatelessWidget {
           ListTile(
             title: const Text('UVC Camera'),
             subtitle: const Text('USB camera'),
-            onTap: () => Get.toNamed('/home/uvc'),
+            onTap: () => Get.toNamed(AppRoutes.join([AppRoutes.home, AppRoutes.uvc])),
           ),
           ListTile(
             title: const Text('Realsense'),
             subtitle: const Text('Realsense'),
-            onTap: () => Get.toNamed('/home/realsense'),
+            onTap: () => Get.toNamed(AppRoutes.join([AppRoutes.home, AppRoutes.realsense])),
           ),
           const Divider(),
           const ListTile(
-            title: Text('Tensorflow Model', style: TextStyle(fontSize: 20)),
+            title: Text('Pipeline - OpenCV', style: TextStyle(fontSize: 20)),
+            enabled: false,
+          ),
+          ListTile(
+            title: const Text('OpenCV'),
+            subtitle: const Text('Image process functions'),
+            onTap: () => Get.toNamed(AppRoutes.join([AppRoutes.home, AppRoutes.opencv])),
+          ),
+          const Divider(),
+          const ListTile(
+            title: Text('Pipeline - Tensorflow Lite', style: TextStyle(fontSize: 20)),
             enabled: false,
           ),
           ListTile(
             title: const Text('Facial Recognition'),
             subtitle: const Text('Facial Recognition with LIPSFace AI Model'),
-            onTap: () => Get.toNamed('/home/fr'),
+            onTap: () => Get.toNamed(AppRoutes.join([AppRoutes.home, AppRoutes.fr])),
           ),
           ListTile(
             title: const Text('Object Detection'),
             subtitle: const Text('Object Detection with Efficient Net Model'),
-            onTap: () => Get.toNamed('/home/efficient_net'),
+            onTap: () => Get.toNamed(AppRoutes.join([AppRoutes.home, AppRoutes.efficientNet])),
           ),
           ListTile(
             title: const Text('Hand Detection'),
             subtitle: const Text('Hand Detection with model provided by MediaPipe'),
-            onTap: () => Get.toNamed('/home/hand_detection'),
+            onTap: () => Get.toNamed(AppRoutes.join([AppRoutes.home, AppRoutes.handDetection])),
           ),
         ],
       ),
