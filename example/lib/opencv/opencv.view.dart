@@ -18,7 +18,7 @@ class OpencvView extends GetView<OpencvController> {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("UVC"),
+        title: const Text("Pipeline - OpenCV"),
         leading: BackButton(
           color: Colors.white,
           onPressed: () => Get.back(),

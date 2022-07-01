@@ -5,6 +5,8 @@ import 'package:flutter_vision_example/faceRecognizer/fr.binding.dart';
 import 'package:flutter_vision_example/faceRecognizer/fr.view.dart';
 import 'package:flutter_vision_example/hand_detection/hand_detection.binding.dart';
 import 'package:flutter_vision_example/hand_detection/hand_detection.view.dart';
+import 'package:flutter_vision_example/handler/handler.binding.dart';
+import 'package:flutter_vision_example/handler/handler.view.dart';
 import 'package:flutter_vision_example/opencv/opencv.binding.dart';
 import 'package:flutter_vision_example/opencv/opencv.view.dart';
 import 'package:flutter_vision_example/realsense/realsense.binding.dart';
@@ -54,6 +56,7 @@ class AppPages {
         GetPage(name: AppRoutes.efficientNet, page: () => const EfficientNetView(), binding: EfficientNetBinding()),
         GetPage(name: AppRoutes.handDetection, page: () => const HandDetectionView(), binding: HandDetectionBinding()),
         GetPage(name: AppRoutes.opencv, page: () => const OpencvView(), binding: OpencvBinding()),
+        GetPage(name: AppRoutes.handler, page: () => const HandlerView(), binding: HandlerBinding()),
       ],
     ),
   ];
@@ -93,6 +96,11 @@ class HomeView extends StatelessWidget {
             title: const Text('OpenCV'),
             subtitle: const Text('Image process functions'),
             onTap: () => Get.toNamed(AppRoutes.join([AppRoutes.home, AppRoutes.opencv])),
+          ),
+          ListTile(
+            title: const Text('Custom Handler'),
+            subtitle: const Text('Tutorial for using custom handler written in C++'),
+            onTap: () => Get.toNamed(AppRoutes.join([AppRoutes.home, AppRoutes.handler])),
           ),
           const Divider(),
           const ListTile(
