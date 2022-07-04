@@ -210,7 +210,7 @@ public:
         imgPtr = m;
     }
 
-    void add(unsigned int index, const uint8_t *params, unsigned int len, int insertAt = -1, int interval = 0)
+    void add(unsigned int index, const uint8_t *params, unsigned int len, int insertAt = -1, int interval = 0, bool append = false)
     {
         FuncDef f = pipelineFuncs[index];
         f.interval = interval;
@@ -218,17 +218,27 @@ public:
         for (unsigned int i = 0; i < len; i++)
             f.params.push_back(*(params + i));
 
-        if (insertAt == -1)
-            funcs.push_back(f);
+        if (append)
+        {
+            if (insertAt == -1)
+                funcs.push_back(f);
+            else
+                funcs.insert(funcs.begin() + insertAt, f);
+        }
         else
-            funcs.at(insertAt) = f;
+        {
+            if (insertAt == -1)
+                funcs.push_back(f);
+            else
+                funcs.at(insertAt) = f;
+        }
     }
 
     void runOnce(FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
     {
         for (int i = 0; i < funcs.size(); i++)
         {
-            printf("Run:%s\n", funcs[i].name);
+            // printf("Run:%s\n", funcs[i].name);
             funcs[i].func(img, funcs[i].params, registrar, texture, texture_width, texture_height, pixelBuf, models, flChannel);
         }
     }
@@ -291,6 +301,19 @@ public:
         {
             funcs[i].timer = 0;
         }
+    }
+
+    std::string getPipelineInfo()
+    {
+        std::string info;
+
+        for (int i = 0; i < funcs.size(); i++)
+        {
+            info += funcs[i].name;
+            info += " => ";
+        }
+
+        return info;
     }
 
 private:

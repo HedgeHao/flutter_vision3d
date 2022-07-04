@@ -301,20 +301,25 @@ static void flutter_vision_plugin_handle_method_call(
     if (valueInterval != nullptr && fl_value_get_type(valueInterval) != FL_VALUE_TYPE_NULL)
       interval = fl_value_get_int(valueInterval);
 
+    bool append = false;
+    FlValue *valueAppend = fl_value_lookup_string(args, "append");
+    if (valueAppend != nullptr && fl_value_get_type(valueAppend) != FL_VALUE_TYPE_NULL)
+      append = fl_value_get_bool(valueAppend);
+
     FvCamera *cam = FvCamera::findCam(serial, &self->cams);
     if (cam != nullptr)
     {
       if (index == VideoIndex::RGB)
       {
-        cam->rgbTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
+        cam->rgbTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
       }
       else if (index == VideoIndex::Depth)
       {
-        cam->depthTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
+        cam->depthTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
       }
       else if (index == VideoIndex::IR)
       {
-        cam->irTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
+        cam->irTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
       }
     }
 
@@ -367,6 +372,31 @@ static void flutter_vision_plugin_handle_method_call(
     }
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+  }
+  else if (strcmp(method, "pipelineInfo") == 0)
+  {
+    const char *serial = FL_ARG_STRING(args, "serial");
+    const int index = FL_ARG_INT(args, "index");
+
+    std::string info;
+    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    if (cam)
+    {
+      if (index == VideoIndex::RGB)
+      {
+        info = cam->rgbTexture->pipeline->getPipelineInfo();
+      }
+      else if (index == VideoIndex::Depth)
+      {
+        info = cam->depthTexture->pipeline->getPipelineInfo();
+      }
+      else if (index == VideoIndex::IR)
+      {
+        info = cam->irTexture->pipeline->getPipelineInfo();
+      }
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_string(info.c_str())));
   }
   else if (strcmp(method, "fvCameraConfig") == 0)
   {

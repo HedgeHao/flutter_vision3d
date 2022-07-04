@@ -107,53 +107,56 @@ class OpencvView extends GetView<OpencvController> {
               ],
             )),
         Expanded(
-            child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('Original'),
-                const SizedBox(height: 8),
-                Container(
-                    decoration: BoxDecoration(border: Border.all(width: 1)),
-                    width: 320,
-                    height: 240,
-                    child: GetBuilder<OpencvController>(
-                      builder: (controller) {
-                        return controller.originalCam == null
-                            ? const SizedBox()
-                            : Texture(
-                                textureId: controller.originalCam!.rgbTextureId,
-                              );
-                      },
-                    )),
-              ],
-            ),
-            const SizedBox(width: 32),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('Processed'),
-                const SizedBox(height: 8),
-                Container(
-                    decoration: BoxDecoration(border: Border.all(width: 1)),
-                    width: 320,
-                    height: 240,
-                    child: GetBuilder<OpencvController>(
-                      builder: (controller) {
-                        return controller.processCam == null
-                            ? const SizedBox()
-                            : Texture(
-                                textureId: controller.processCam!.rgbTextureId,
-                              );
-                      },
-                    ))
-              ],
-            )
-          ],
-        ))
+            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          GetBuilder<OpencvController>(builder: (controller) => Text('Current Pipeline: ${controller.pipelineInfo}')),
+          const SizedBox(height: 50),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Original'),
+                  const SizedBox(height: 8),
+                  Container(
+                      decoration: BoxDecoration(border: Border.all(width: 1)),
+                      width: 320,
+                      height: 240,
+                      child: GetBuilder<OpencvController>(
+                        builder: (controller) {
+                          return controller.originalCam == null
+                              ? const SizedBox()
+                              : Texture(
+                                  textureId: controller.originalCam!.rgbTextureId,
+                                );
+                        },
+                      )),
+                ],
+              ),
+              const SizedBox(width: 32),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Processed'),
+                  const SizedBox(height: 8),
+                  Container(
+                      decoration: BoxDecoration(border: Border.all(width: 1)),
+                      width: 320,
+                      height: 240,
+                      child: GetBuilder<OpencvController>(
+                        builder: (controller) {
+                          return controller.processCam == null
+                              ? const SizedBox()
+                              : Texture(
+                                  textureId: controller.processCam!.rgbTextureId,
+                                );
+                        },
+                      ))
+                ],
+              )
+            ],
+          )
+        ]))
       ]),
     );
   }

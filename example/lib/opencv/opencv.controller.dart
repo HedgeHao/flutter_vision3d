@@ -15,6 +15,7 @@ class OpencvController extends GetxController {
   int processTextureId = 0;
   int originalTextureId = 0;
   String imgPath = '';
+  String pipelineInfo = '';
 
   OpencvController() {
     Future.wait([
@@ -29,7 +30,7 @@ class OpencvController extends GetxController {
     ]).then((value) => update());
   }
 
-  Future<void> loadImage() async {
+  Future<void> _loadImage() async {
     if (originalCam == null || processCam == null || imgPath.isEmpty) return;
 
     FvPipeline processPipeline = processCam!.rgbPipeline;
@@ -45,45 +46,56 @@ class OpencvController extends GetxController {
     await originalPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
     await originalPipeline.show();
     await originalPipeline.run();
+  }
 
+  Future<void> loadImage() async {
+    if (originalCam == null || processCam == null || imgPath.isEmpty) return;
+
+    await _loadImage();
+
+    FvPipeline processPipeline = processCam!.rgbPipeline;
+    pipelineInfo = await processPipeline.info();
     update();
   }
 
   Future<void> cropImage() async {
     if (originalCam == null || processCam == null || imgPath.isEmpty) return;
 
+    await _loadImage();
+
     FvPipeline processPipeline = processCam!.rgbPipeline;
-    await processPipeline.clear();
-    await processPipeline.imread(imgPath);
-    await processPipeline.crop(0, 300, 0, 100);
-    await processPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
-    await processPipeline.show();
+    await processPipeline.crop(0, 300, 0, 100, at: 1, append: true);
     await processPipeline.run();
+
+    pipelineInfo = await processPipeline.info();
+    update();
   }
 
   Future<void> resize() async {
     if (originalCam == null || processCam == null || imgPath.isEmpty) return;
 
+    await _loadImage();
+
     FvPipeline processPipeline = processCam!.rgbPipeline;
-    await processPipeline.clear();
-    await processPipeline.imread(imgPath);
-    await processPipeline.resize(100, 100);
-    await processPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
-    await processPipeline.show();
+    await processPipeline.resize(100, 100, at: 1, append: true);
     await processPipeline.run();
+
+    pipelineInfo = await processPipeline.info();
+    update();
   }
 
   Future<void> colorMap() async {
     if (originalCam == null || processCam == null || imgPath.isEmpty) return;
 
+    await _loadImage();
+
     FvPipeline processPipeline = processCam!.rgbPipeline;
-    await processPipeline.clear();
-    await processPipeline.imread(imgPath);
-    await processPipeline.convertTo(OpenCV.CV_8UC3, 1);
-    await processPipeline.applyColorMap(OpenCV.COLORMAP_JET);
-    await processPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
-    await processPipeline.show();
+    await processPipeline.convertTo(OpenCV.CV_8UC3, 1, at: 1, append: true);
+    await processPipeline.applyColorMap(OpenCV.COLORMAP_JET, at: 2, append: true);
     await processPipeline.run();
+
+    pipelineInfo = await processPipeline.info();
+    update();
   }
 
   Future<void> replaceColorMap() async {
@@ -94,29 +106,34 @@ class OpencvController extends GetxController {
     FvPipeline processPipeline = processCam!.rgbPipeline;
     await processPipeline.applyColorMap(Random().nextInt(20), at: 2);
     await processPipeline.run();
+
+    pipelineInfo = await processPipeline.info();
+    update();
   }
 
   Future<void> drawRectangle() async {
     if (originalCam == null || processCam == null || imgPath.isEmpty) return;
 
+    await _loadImage();
+
     FvPipeline processPipeline = processCam!.rgbPipeline;
-    await processPipeline.clear();
-    await processPipeline.imread(imgPath);
-    await processPipeline.cvRectangle(200, 30, 370, 140, 255, 0, 0, thickness: 2);
-    await processPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
-    await processPipeline.show();
+    await processPipeline.cvRectangle(200, 30, 370, 140, 255, 0, 0, thickness: 2, at: 1, append: true);
     await processPipeline.run();
+
+    pipelineInfo = await processPipeline.info();
+    update();
   }
 
   Future<void> rotate() async {
     if (originalCam == null || processCam == null || imgPath.isEmpty) return;
 
+    await _loadImage();
+
     FvPipeline processPipeline = processCam!.rgbPipeline;
-    await processPipeline.clear();
-    await processPipeline.imread(imgPath);
-    await processPipeline.rotate(OpenCV.ROTATE_90_CLOCKWISE);
-    await processPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
-    await processPipeline.show();
+    await processPipeline.rotate(OpenCV.ROTATE_90_CLOCKWISE, at: 1, append: true);
     await processPipeline.run();
+
+    pipelineInfo = await processPipeline.info();
+    update();
   }
 }
