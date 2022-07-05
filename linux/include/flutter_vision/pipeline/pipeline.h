@@ -234,9 +234,12 @@ public:
         }
     }
 
-    void runOnce(FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+    void runOnce(FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel, int &from, int &to)
     {
-        for (int i = 0; i < funcs.size(); i++)
+        if (to == -1 || to >= funcs.size())
+            to = funcs.size();
+
+        for (int i = from; i < to; i++)
         {
             // printf("Run:%s\n", funcs[i].name);
             funcs[i].func(img, funcs[i].params, registrar, texture, texture_width, texture_height, pixelBuf, models, flChannel);

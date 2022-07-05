@@ -19,11 +19,11 @@ class OpencvController extends GetxController {
 
   OpencvController() {
     Future.wait([
-      FvCamera.create("origin", CameraType.DUMMY).then((c) {
+      FvCamera.create("process", CameraType.DUMMY).then((c) {
         processCam = c as DummyCamera;
         processTextureId = processCam!.rgbTextureId;
       }),
-      FvCamera.create("process", CameraType.DUMMY).then((c) {
+      FvCamera.create("origin", CameraType.DUMMY).then((c) {
         originalCam = c as DummyCamera;
         originalTextureId = originalCam!.rgbTextureId;
       })
@@ -132,6 +132,23 @@ class OpencvController extends GetxController {
     FvPipeline processPipeline = processCam!.rgbPipeline;
     await processPipeline.rotate(OpenCV.ROTATE_90_CLOCKWISE, at: 1, append: true);
     await processPipeline.run();
+
+    pipelineInfo = await processPipeline.info();
+    update();
+  }
+
+  Future<void> runFromTo() async {
+    if (originalCam == null || processCam == null || imgPath.isEmpty) return;
+
+    await _loadImage();
+
+    FvPipeline processPipeline = processCam!.rgbPipeline;
+    await processPipeline.rotate(OpenCV.ROTATE_90_CLOCKWISE, at: 1, append: true);
+    await processPipeline.cvtColor(OpenCV.COLOR_RGBA2RGB, at: 2, append: true);
+    await processPipeline.convertTo(OpenCV.CV_8UC3, 1, at: 3, append: true);
+    await processPipeline.applyColorMap(OpenCV.COLORMAP_JET, at: 4, append: true);
+
+    await processPipeline.run(from: 2, to: -1);
 
     pipelineInfo = await processPipeline.info();
     update();

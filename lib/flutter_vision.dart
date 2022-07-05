@@ -162,8 +162,8 @@ class FvPipeline {
 
   FvPipeline(this.serial, this.index);
 
-  Future<void> run() async {
-    await FlutterVision.channel.invokeMethod('pipelineRun', {'index': index, 'serial': serial});
+  Future<void> run({int? from, int? to}) async {
+    await FlutterVision.channel.invokeMethod('pipelineRun', {'index': index, 'serial': serial, 'from': from ?? 0, 'to': to ?? -1});
   }
 
   Future<void> clear() async {

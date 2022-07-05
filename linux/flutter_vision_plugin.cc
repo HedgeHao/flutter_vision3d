@@ -330,20 +330,30 @@ static void flutter_vision_plugin_handle_method_call(
     const char *serial = FL_ARG_STRING(args, "serial");
     const int index = FL_ARG_INT(args, "index");
 
+    int from = 0;
+    FlValue *valueFrom = fl_value_lookup_string(args, "from");
+    if (valueFrom != nullptr && fl_value_get_type(valueFrom) != FL_VALUE_TYPE_NULL)
+      from = fl_value_get_int(valueFrom);
+
+    int to = -1;
+    FlValue *valueTo = fl_value_lookup_string(args, "to");
+    if (valueTo != nullptr && fl_value_get_type(valueTo) != FL_VALUE_TYPE_NULL)
+      to = fl_value_get_int(valueTo);
+
     FvCamera *cam = FvCamera::findCam(serial, &self->cams);
     if (cam)
     {
       if (index == VideoIndex::RGB)
       {
-        cam->rgbTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->rgbTexture), cam->rgbTexture->video_width, cam->rgbTexture->video_height, cam->rgbTexture->buffer, &self->models, self->flChannel);
+        cam->rgbTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->rgbTexture), cam->rgbTexture->video_width, cam->rgbTexture->video_height, cam->rgbTexture->buffer, &self->models, self->flChannel, from, to);
       }
       else if (index == VideoIndex::Depth)
       {
-        cam->depthTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->depthTexture), cam->depthTexture->video_width, cam->depthTexture->video_height, cam->depthTexture->buffer, &self->models, self->flChannel);
+        cam->depthTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->depthTexture), cam->depthTexture->video_width, cam->depthTexture->video_height, cam->depthTexture->buffer, &self->models, self->flChannel, from, to);
       }
       else if (index == VideoIndex::IR)
       {
-        cam->irTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->irTexture), cam->irTexture->video_width, cam->irTexture->video_height, cam->irTexture->buffer, &self->models, self->flChannel);
+        cam->irTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->irTexture), cam->irTexture->video_width, cam->irTexture->video_height, cam->irTexture->buffer, &self->models, self->flChannel, from, to);
       }
     }
 

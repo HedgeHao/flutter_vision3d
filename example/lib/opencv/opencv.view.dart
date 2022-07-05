@@ -103,6 +103,14 @@ class OpencvView extends GetView<OpencvController> {
                         child: const Text('Rotate')),
                     const Text(': Rotate image'),
                   ]),
+                  Row(children: [
+                    TextButton(
+                        onPressed: () {
+                          controller.runFromTo();
+                        },
+                        child: const Text('RunFromTo')),
+                    const Text(': Run pipeline from index m to n'),
+                  ]),
                 ]),
               ],
             )),
