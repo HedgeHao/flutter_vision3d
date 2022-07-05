@@ -21,6 +21,7 @@
 #define FL_ARG_FLOAT(args, name) fl_value_get_float(fl_value_lookup_string(args, name))
 #define FL_ARG_BOOL(args, name) fl_value_get_bool(fl_value_lookup_string(args, name))
 #define FL_ARG_INT32_LIST(args, name) fl_value_get_int32_list(fl_value_lookup_string(args, name))
+#define FL_ARG_FLOAT_LIST(args, name) fl_value_get_float_list(fl_value_lookup_string(args, name))
 
 #define PIPELINE_INDEX_TFLITE 8
 
@@ -300,20 +301,25 @@ static void flutter_vision_plugin_handle_method_call(
     if (valueInterval != nullptr && fl_value_get_type(valueInterval) != FL_VALUE_TYPE_NULL)
       interval = fl_value_get_int(valueInterval);
 
+    bool append = false;
+    FlValue *valueAppend = fl_value_lookup_string(args, "append");
+    if (valueAppend != nullptr && fl_value_get_type(valueAppend) != FL_VALUE_TYPE_NULL)
+      append = fl_value_get_bool(valueAppend);
+
     FvCamera *cam = FvCamera::findCam(serial, &self->cams);
     if (cam != nullptr)
     {
       if (index == VideoIndex::RGB)
       {
-        cam->rgbTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
+        cam->rgbTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
       }
       else if (index == VideoIndex::Depth)
       {
-        cam->depthTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
+        cam->depthTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
       }
       else if (index == VideoIndex::IR)
       {
-        cam->irTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
+        cam->irTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
       }
     }
 
@@ -324,24 +330,35 @@ static void flutter_vision_plugin_handle_method_call(
     const char *serial = FL_ARG_STRING(args, "serial");
     const int index = FL_ARG_INT(args, "index");
 
+    int from = 0;
+    FlValue *valueFrom = fl_value_lookup_string(args, "from");
+    if (valueFrom != nullptr && fl_value_get_type(valueFrom) != FL_VALUE_TYPE_NULL)
+      from = fl_value_get_int(valueFrom);
+
+    int to = -1;
+    FlValue *valueTo = fl_value_lookup_string(args, "to");
+    if (valueTo != nullptr && fl_value_get_type(valueTo) != FL_VALUE_TYPE_NULL)
+      to = fl_value_get_int(valueTo);
+
+    int ret = 0;
     FvCamera *cam = FvCamera::findCam(serial, &self->cams);
     if (cam)
     {
       if (index == VideoIndex::RGB)
       {
-        cam->rgbTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->rgbTexture), cam->rgbTexture->video_width, cam->rgbTexture->video_height, cam->rgbTexture->buffer, &self->models, self->flChannel);
+        ret = cam->rgbTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->rgbTexture), cam->rgbTexture->video_width, cam->rgbTexture->video_height, cam->rgbTexture->buffer, &self->models, self->flChannel, from, to);
       }
       else if (index == VideoIndex::Depth)
       {
-        cam->depthTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->depthTexture), cam->depthTexture->video_width, cam->depthTexture->video_height, cam->depthTexture->buffer, &self->models, self->flChannel);
+        ret = cam->depthTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->depthTexture), cam->depthTexture->video_width, cam->depthTexture->video_height, cam->depthTexture->buffer, &self->models, self->flChannel, from, to);
       }
       else if (index == VideoIndex::IR)
       {
-        cam->irTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->irTexture), cam->irTexture->video_width, cam->irTexture->video_height, cam->irTexture->buffer, &self->models, self->flChannel);
+        ret = cam->irTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->irTexture), cam->irTexture->video_width, cam->irTexture->video_height, cam->irTexture->buffer, &self->models, self->flChannel, from, to);
       }
     }
 
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(ret)));
   }
   else if (strcmp(method, "pipelineClear") == 0)
   {
@@ -367,17 +384,70 @@ static void flutter_vision_plugin_handle_method_call(
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
+  else if (strcmp(method, "pipelineInfo") == 0)
+  {
+    const char *serial = FL_ARG_STRING(args, "serial");
+    const int index = FL_ARG_INT(args, "index");
+
+    std::string info;
+    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    if (cam)
+    {
+      if (index == VideoIndex::RGB)
+      {
+        info = cam->rgbTexture->pipeline->getPipelineInfo();
+      }
+      else if (index == VideoIndex::Depth)
+      {
+        info = cam->depthTexture->pipeline->getPipelineInfo();
+      }
+      else if (index == VideoIndex::IR)
+      {
+        info = cam->irTexture->pipeline->getPipelineInfo();
+      }
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_string(info.c_str())));
+  }
+  else if (strcmp(method, "pipelineError") == 0)
+  {
+    const char *serial = FL_ARG_STRING(args, "serial");
+    const int index = FL_ARG_INT(args, "index");
+
+    std::string error;
+    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    if (cam)
+    {
+      if (index == VideoIndex::RGB)
+      {
+        error = cam->rgbTexture->pipeline->error;
+      }
+      else if (index == VideoIndex::Depth)
+      {
+        error = cam->depthTexture->pipeline->error;
+      }
+      else if (index == VideoIndex::IR)
+      {
+        error = cam->irTexture->pipeline->error;
+      }
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_string(error.c_str())));
+  }
   else if (strcmp(method, "fvCameraConfig") == 0)
   {
     const char *serial = FL_ARG_STRING(args, "serial");
     const int prop = FL_ARG_INT(args, "prop");
-    const float value = FL_ARG_FLOAT(args, "value");
+    FlValue *flValue = fl_value_lookup_string(args, "value");
+    const float *value = fl_value_get_float32_list(flValue);
+    const int len = fl_value_get_length(flValue);
 
     FvCamera *cam = FvCamera::findCam(serial, &self->cams);
     int ret = -1;
     if (cam)
     {
-      cam->configure(prop, value);
+      std::vector<float> values(value, value + len);
+      cam->configure(prop, values);
     }
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(ret == 0)));
   }

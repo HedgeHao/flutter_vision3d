@@ -58,12 +58,12 @@ public:
     t.detach();
   }
 
-  void configure(int prop, float value)
+  void configure(int prop, std::vector<float> &value)
   {
     if (!cap)
       return;
 
-    cap->set(prop, value);
+    cap->set(prop, value[0]);
   }
 
 private:

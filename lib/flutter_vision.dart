@@ -155,17 +155,25 @@ class FvPipeline {
   int index;
   String serial;
 
+  Future<String> info() async {
+    return await FlutterVision.channel.invokeMethod('pipelineInfo', {'index': index, 'serial': serial});
+  }
+
+  Future<String> error() async {
+    return await FlutterVision.channel.invokeMethod('pipelineError', {'index': index, 'serial': serial});
+  }
+
   FvPipeline(this.serial, this.index);
 
-  Future<void> run() async {
-    await FlutterVision.channel.invokeMethod('pipelineRun', {'index': index, 'serial': serial});
+  Future<int> run({int? from, int? to}) async {
+    return await FlutterVision.channel.invokeMethod('pipelineRun', {'index': index, 'serial': serial, 'from': from ?? 0, 'to': to ?? -1});
   }
 
   Future<void> clear() async {
     await FlutterVision.channel.invokeMethod('pipelineClear', {'index': index, 'serial': serial});
   }
 
-  Future<void> test(int t, {int? at, int? interval}) async {
+  Future<void> test(int t, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_TEST,
@@ -174,10 +182,11 @@ class FvPipeline {
       'at': at ?? -1,
       'interval': interval ?? 0,
       'serial': serial,
+      'append': append ?? false,
     });
   }
 
-  Future<void> cvtColor(int mode, {int? at, int? interval}) async {
+  Future<void> cvtColor(int mode, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_CVTCOLOR,
@@ -186,10 +195,11 @@ class FvPipeline {
       'at': at ?? -1,
       'interval': interval ?? 0,
       'serial': serial,
+      'append': append ?? false,
     });
   }
 
-  Future<void> imwrite(String path, {int? at, int? interval}) async {
+  Future<void> imwrite(String path, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_IMWRITE,
@@ -198,10 +208,11 @@ class FvPipeline {
       'at': at ?? -1,
       'interval': interval ?? 0,
       'serial': serial,
+      'append': append ?? false,
     });
   }
 
-  Future<void> imread(String path, {int? at, int? interval}) async {
+  Future<void> imread(String path, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_IMREAD,
@@ -210,10 +221,11 @@ class FvPipeline {
       'at': at ?? -1,
       'interval': interval ?? 0,
       'serial': serial,
+      'append': append ?? false,
     });
   }
 
-  Future<void> show({int? at, int? interval}) async {
+  Future<void> show({int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_SHOW,
@@ -222,10 +234,11 @@ class FvPipeline {
       'at': at ?? -1,
       'interval': interval ?? 0,
       'serial': serial,
+      'append': append ?? false,
     });
   }
 
-  Future<void> convertTo(int mode, double scale, {int? at, double? shift, int? interval}) async {
+  Future<void> convertTo(int mode, double scale, {int? at, double? shift, int? interval, bool? append}) async {
     List<Object?> scaleList = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': scale});
     Uint8List scaleBytes = Uint8List.fromList(scaleList.map((e) => e as int).toList());
 
@@ -240,10 +253,11 @@ class FvPipeline {
       'at': at ?? -1,
       'interval': interval ?? 0,
       'serial': serial,
+      'append': append ?? false,
     });
   }
 
-  Future<void> applyColorMap(int colorMap, {int? at, int? interval}) async {
+  Future<void> applyColorMap(int colorMap, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_APPLY_COLOR_MAP,
@@ -252,10 +266,11 @@ class FvPipeline {
       'at': at ?? -1,
       'interval': interval ?? 0,
       'serial': serial,
+      'append': append ?? false,
     });
   }
 
-  Future<void> resize(int width, int height, {int? at, int? mode, int? interval}) async {
+  Future<void> resize(int width, int height, {int? at, int? mode, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_RESIZE,
@@ -264,10 +279,11 @@ class FvPipeline {
       'at': at ?? -1,
       'interval': interval ?? 0,
       'serial': serial,
+      'append': append ?? false,
     });
   }
 
-  Future<void> crop(int xStart, int xEnd, int yStart, int yEnd, {int? at, int? interval}) async {
+  Future<void> crop(int xStart, int xEnd, int yStart, int yEnd, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_CROP,
@@ -276,10 +292,11 @@ class FvPipeline {
       'at': at ?? -1,
       'interval': interval ?? 0,
       'serial': serial,
+      'append': append ?? false,
     });
   }
 
-  Future<void> cvRectangle(double x1, double y1, double x2, double y2, int r, int g, int b, {int? at, int? thickness, int? lineType, int? shift, int? alpha, int? interval}) async {
+  Future<void> cvRectangle(double x1, double y1, double x2, double y2, int r, int g, int b, {int? at, int? thickness, int? lineType, int? shift, int? alpha, int? interval, bool? append}) async {
     Uint8List x1f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': x1});
     Uint8List y1f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': y1});
     Uint8List x2f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': x2});
@@ -293,10 +310,11 @@ class FvPipeline {
       'at': at ?? -1,
       'interval': interval ?? 0,
       'serial': serial,
+      'append': append ?? false,
     });
   }
 
-  Future<void> rotate(int rotateCode, {int? at, int? interval}) async {
+  Future<void> rotate(int rotateCode, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_CV_ROTATE,
@@ -305,10 +323,11 @@ class FvPipeline {
       'at': at ?? -1,
       'interval': interval ?? 0,
       'serial': serial,
+      'append': append ?? false,
     });
   }
 
-  Future<void> setInputTensorData(int modelIndex, int tensorIndex, int dataType, {int? at, int? interval}) async {
+  Future<void> setInputTensorData(int modelIndex, int tensorIndex, int dataType, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_SET_INPUT_TENSOR,
@@ -317,10 +336,11 @@ class FvPipeline {
       'at': at ?? -1,
       'interval': interval ?? 0,
       'serial': serial,
+      'append': append ?? false,
     });
   }
 
-  Future<void> inference(int modelIndex, {int? at, int? interval}) async {
+  Future<void> inference(int modelIndex, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_INFERENCE,
@@ -329,10 +349,11 @@ class FvPipeline {
       'at': at ?? -1,
       'interval': interval ?? 0,
       'serial': serial,
+      'append': append ?? false,
     });
   }
 
-  Future<void> customHandler(int size, {int? at, int? interval}) async {
+  Future<void> customHandler(int size, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': FUNC_CUSTOM_HANDLER,
@@ -341,6 +362,7 @@ class FvPipeline {
       'at': at ?? -1,
       'interval': interval ?? 0,
       'serial': serial,
+      'append': append ?? false,
     });
   }
 }
