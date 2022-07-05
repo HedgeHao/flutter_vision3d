@@ -9,6 +9,8 @@ import 'package:flutter_vision_example/handler/handler.binding.dart';
 import 'package:flutter_vision_example/handler/handler.view.dart';
 import 'package:flutter_vision_example/opencv/opencv.binding.dart';
 import 'package:flutter_vision_example/opencv/opencv.view.dart';
+import 'package:flutter_vision_example/openni2/openni2.binding.dart';
+import 'package:flutter_vision_example/openni2/openni2.view.dart';
 import 'package:flutter_vision_example/realsense/realsense.binding.dart';
 import 'package:flutter_vision_example/realsense/realsense.view.dart';
 import 'package:flutter_vision_example/route.dart';
@@ -52,6 +54,7 @@ class AppPages {
       children: [
         GetPage(name: AppRoutes.uvc, page: () => const UvcView(), binding: UvcBinding()),
         GetPage(name: AppRoutes.realsense, page: () => const RealsenseView(), binding: RealsenseBinding()),
+        GetPage(name: AppRoutes.openni, page: () => const OpenNIView(), binding: OpenNIBinding()),
         GetPage(name: AppRoutes.fr, page: () => const FaceRecognizerView(), binding: FaceRecognizerBinding()),
         GetPage(name: AppRoutes.efficientNet, page: () => const EfficientNetView(), binding: EfficientNetBinding()),
         GetPage(name: AppRoutes.handDetection, page: () => const HandDetectionView(), binding: HandDetectionBinding()),
@@ -86,6 +89,11 @@ class HomeView extends StatelessWidget {
             title: const Text('Realsense'),
             subtitle: const Text('Realsense'),
             onTap: () => Get.toNamed(AppRoutes.join([AppRoutes.home, AppRoutes.realsense])),
+          ),
+          ListTile(
+            title: const Text('OpenNI'),
+            subtitle: const Text('OpenNI'),
+            onTap: () => Get.toNamed(AppRoutes.join([AppRoutes.home, AppRoutes.openni])),
           ),
           const Divider(),
           const ListTile(
