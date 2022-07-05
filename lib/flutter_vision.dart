@@ -156,14 +156,17 @@ class FvPipeline {
   String serial;
 
   Future<String> info() async {
-    String info = await FlutterVision.channel.invokeMethod('pipelineInfo', {'index': index, 'serial': serial});
-    return info;
+    return await FlutterVision.channel.invokeMethod('pipelineInfo', {'index': index, 'serial': serial});
+  }
+
+  Future<String> error() async {
+    return await FlutterVision.channel.invokeMethod('pipelineError', {'index': index, 'serial': serial});
   }
 
   FvPipeline(this.serial, this.index);
 
-  Future<void> run({int? from, int? to}) async {
-    await FlutterVision.channel.invokeMethod('pipelineRun', {'index': index, 'serial': serial, 'from': from ?? 0, 'to': to ?? -1});
+  Future<int> run({int? from, int? to}) async {
+    return await FlutterVision.channel.invokeMethod('pipelineRun', {'index': index, 'serial': serial, 'from': from ?? 0, 'to': to ?? -1});
   }
 
   Future<void> clear() async {

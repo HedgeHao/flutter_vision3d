@@ -199,6 +199,8 @@ const FuncDef pipelineFuncs[] = {
 class Pipeline
 {
 public:
+    std::string error = "";
+
     Pipeline()
     {
         img = cv::Mat(1, 1, CV_8UC4, cv::Scalar(255, 0, 0, 255));
@@ -223,7 +225,15 @@ public:
             if (insertAt == -1)
                 funcs.push_back(f);
             else
+            {
+                if (insertAt > (int)funcs.size() - 1)
+                    insertAt = funcs.size() - 1;
+
+                if (insertAt < 0)
+                    insertAt = 0;
+
                 funcs.insert(funcs.begin() + insertAt, f);
+            }
         }
         else
         {
@@ -234,7 +244,7 @@ public:
         }
     }
 
-    void runOnce(FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel, int &from, int &to)
+    int runOnce(FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel, int &from, int &to)
     {
         if (to == -1 || to >= funcs.size())
             to = funcs.size();
@@ -242,11 +252,22 @@ public:
         for (int i = from; i < to; i++)
         {
             // printf("Run:%s\n", funcs[i].name);
-            funcs[i].func(img, funcs[i].params, registrar, texture, texture_width, texture_height, pixelBuf, models, flChannel);
+            try
+            {
+                error = "";
+                funcs[i].func(img, funcs[i].params, registrar, texture, texture_width, texture_height, pixelBuf, models, flChannel);
+            }
+            catch (std::exception &e)
+            {
+                error = e.what();
+                return -1;
+            }
         }
+
+        return 0;
     }
 
-    void run(cv::Mat &img, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+    int run(cv::Mat &img, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
     {
         if (doScreenshot)
         {
@@ -276,14 +297,24 @@ public:
                 }
             }
 
-            // printf("[Run] %s\n", funcs[i].name);
-            funcs[i].func(img, funcs[i].params, registrar, texture, texture_width, texture_height, pixelBuf, models, flChannel);
+            try
+            {
+                // printf("[Run] %s\n", funcs[i].name);
+                funcs[i].func(img, funcs[i].params, registrar, texture, texture_width, texture_height, pixelBuf, models, flChannel);
+            }
+            catch (cv::Exception &e)
+            {
+                error = e.what();
+                return -1;
+            }
 
             if (funcs[i].interval > 0)
             {
                 getCurrentTime(&funcs[i].timer);
             }
         }
+
+        return 0;
     }
 
     void screenshot(const char *filePath, int convert = -1)

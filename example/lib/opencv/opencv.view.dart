@@ -111,6 +111,14 @@ class OpencvView extends GetView<OpencvController> {
                         child: const Text('RunFromTo')),
                     const Text(': Run pipeline from index m to n'),
                   ]),
+                  Row(children: [
+                    TextButton(
+                        onPressed: () {
+                          controller.getError();
+                        },
+                        child: const Text('GetError')),
+                    const Text(': Get error message when running pipeline'),
+                  ]),
                 ]),
               ],
             )),

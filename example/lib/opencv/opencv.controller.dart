@@ -153,4 +153,21 @@ class OpencvController extends GetxController {
     pipelineInfo = await processPipeline.info();
     update();
   }
+
+  Future<void> getError() async {
+    if (originalCam == null || processCam == null || imgPath.isEmpty) return;
+
+    FvPipeline processPipeline = processCam!.rgbPipeline;
+    await processPipeline.clear();
+    await processPipeline.applyColorMap(OpenCV.COLORMAP_JET, at: 0, append: true);
+    int ret = await processPipeline.run();
+
+    if (ret != 0) {
+      pipelineInfo = await processPipeline.error();
+    } else {
+      pipelineInfo = await processPipeline.info();
+    }
+
+    update();
+  }
 }

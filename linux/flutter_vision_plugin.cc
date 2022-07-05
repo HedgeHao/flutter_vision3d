@@ -340,24 +340,25 @@ static void flutter_vision_plugin_handle_method_call(
     if (valueTo != nullptr && fl_value_get_type(valueTo) != FL_VALUE_TYPE_NULL)
       to = fl_value_get_int(valueTo);
 
+    int ret = 0;
     FvCamera *cam = FvCamera::findCam(serial, &self->cams);
     if (cam)
     {
       if (index == VideoIndex::RGB)
       {
-        cam->rgbTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->rgbTexture), cam->rgbTexture->video_width, cam->rgbTexture->video_height, cam->rgbTexture->buffer, &self->models, self->flChannel, from, to);
+        ret = cam->rgbTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->rgbTexture), cam->rgbTexture->video_width, cam->rgbTexture->video_height, cam->rgbTexture->buffer, &self->models, self->flChannel, from, to);
       }
       else if (index == VideoIndex::Depth)
       {
-        cam->depthTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->depthTexture), cam->depthTexture->video_width, cam->depthTexture->video_height, cam->depthTexture->buffer, &self->models, self->flChannel, from, to);
+        ret = cam->depthTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->depthTexture), cam->depthTexture->video_width, cam->depthTexture->video_height, cam->depthTexture->buffer, &self->models, self->flChannel, from, to);
       }
       else if (index == VideoIndex::IR)
       {
-        cam->irTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->irTexture), cam->irTexture->video_width, cam->irTexture->video_height, cam->irTexture->buffer, &self->models, self->flChannel, from, to);
+        ret = cam->irTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->irTexture), cam->irTexture->video_width, cam->irTexture->video_height, cam->irTexture->buffer, &self->models, self->flChannel, from, to);
       }
     }
 
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(ret)));
   }
   else if (strcmp(method, "pipelineClear") == 0)
   {
@@ -407,6 +408,31 @@ static void flutter_vision_plugin_handle_method_call(
     }
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_string(info.c_str())));
+  }
+  else if (strcmp(method, "pipelineError") == 0)
+  {
+    const char *serial = FL_ARG_STRING(args, "serial");
+    const int index = FL_ARG_INT(args, "index");
+
+    std::string error;
+    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    if (cam)
+    {
+      if (index == VideoIndex::RGB)
+      {
+        error = cam->rgbTexture->pipeline->error;
+      }
+      else if (index == VideoIndex::Depth)
+      {
+        error = cam->depthTexture->pipeline->error;
+      }
+      else if (index == VideoIndex::IR)
+      {
+        error = cam->irTexture->pipeline->error;
+      }
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_string(error.c_str())));
   }
   else if (strcmp(method, "fvCameraConfig") == 0)
   {
