@@ -8,12 +8,6 @@ import 'package:flutter_vision/constants.dart';
 
 enum CameraType { OPENNI, REALSENSE, DUMMY, UVC }
 
-class VideoIndex {
-  static const int RGB = 1;
-  static const int DEPTH = 2;
-  static const int IR = 4;
-}
-
 class OpenNi2Status {
   // OpenNI2
   static const int STATUS_OK = 0;
@@ -125,22 +119,22 @@ class FlutterVision {
   }
 }
 
-const FUNC_TEST = 0;
-const FUNC_CVTCOLOR = 1;
-const FUNC_IMWRITE = 2;
-const FUNC_SHOW = 3;
-const FUNC_CONVERTO = 4;
-const FUNC_APPLY_COLOR_MAP = 5;
-const FUNC_RESIZE = 6;
-const FUNC_CROP = 7;
-const FUNC_IMREAD = 8;
-const FUNC_CV_RECTANGLE = 9;
-const FUNC_CV_ROTATE = 10;
+const _FUNC_TEST = 0;
+const _FUNC_CVTCOLOR = 1;
+const _FUNC_IMWRITE = 2;
+const _FUNC_SHOW = 3;
+const _FUNC_CONVERTO = 4;
+const _FUNC_APPLY_COLOR_MAP = 5;
+const _FUNC_RESIZE = 6;
+const _FUNC_CROP = 7;
+const _FUNC_IMREAD = 8;
+const _FUNC_CV_RECTANGLE = 9;
+const _FUNC_CV_ROTATE = 10;
 
-const FUNC_SET_INPUT_TENSOR = 11;
-const FUNC_INFERENCE = 12;
+const _FUNC_SET_INPUT_TENSOR = 11;
+const _FUNC_INFERENCE = 12;
 
-const FUNC_CUSTOM_HANDLER = 13;
+const _FUNC_CUSTOM_HANDLER = 13;
 
 // TODO: check method can be added to that pipeline
 class FvPipeline {
@@ -176,7 +170,7 @@ class FvPipeline {
   Future<void> test(int t, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
-      'funcIndex': FUNC_TEST,
+      'funcIndex': _FUNC_TEST,
       'params': Uint8List.fromList([t]),
       'len': 1,
       'at': at ?? -1,
@@ -189,7 +183,7 @@ class FvPipeline {
   Future<void> cvtColor(int mode, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
-      'funcIndex': FUNC_CVTCOLOR,
+      'funcIndex': _FUNC_CVTCOLOR,
       'params': Uint8List.fromList([mode]),
       'len': 1,
       'at': at ?? -1,
@@ -202,7 +196,7 @@ class FvPipeline {
   Future<void> imwrite(String path, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
-      'funcIndex': FUNC_IMWRITE,
+      'funcIndex': _FUNC_IMWRITE,
       'params': Uint8List.fromList([path.length, ...utf8.encode(path)]),
       'len': path.length + 1,
       'at': at ?? -1,
@@ -215,7 +209,7 @@ class FvPipeline {
   Future<void> imread(String path, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
-      'funcIndex': FUNC_IMREAD,
+      'funcIndex': _FUNC_IMREAD,
       'params': Uint8List.fromList([path.length, ...utf8.encode(path)]),
       'len': path.length + 1,
       'at': at ?? -1,
@@ -228,7 +222,7 @@ class FvPipeline {
   Future<void> show({int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
-      'funcIndex': FUNC_SHOW,
+      'funcIndex': _FUNC_SHOW,
       'params': null,
       'len': 0,
       'at': at ?? -1,
@@ -247,7 +241,7 @@ class FvPipeline {
 
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
-      'funcIndex': FUNC_CONVERTO,
+      'funcIndex': _FUNC_CONVERTO,
       'params': Uint8List.fromList([mode, ...scaleBytes, ...shiftBytes]),
       'len': 9,
       'at': at ?? -1,
@@ -260,7 +254,7 @@ class FvPipeline {
   Future<void> applyColorMap(int colorMap, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
-      'funcIndex': FUNC_APPLY_COLOR_MAP,
+      'funcIndex': _FUNC_APPLY_COLOR_MAP,
       'params': Uint8List.fromList([colorMap]),
       'len': 1,
       'at': at ?? -1,
@@ -273,7 +267,7 @@ class FvPipeline {
   Future<void> resize(int width, int height, {int? at, int? mode, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
-      'funcIndex': FUNC_RESIZE,
+      'funcIndex': _FUNC_RESIZE,
       'params': Uint8List.fromList([(width >> 8) & 0xff, width & 0xff, (height >> 8) & 0xff, height & 0xff, mode ?? OpenCV.INTER_NEAREST]),
       'len': 5,
       'at': at ?? -1,
@@ -286,7 +280,7 @@ class FvPipeline {
   Future<void> crop(int xStart, int xEnd, int yStart, int yEnd, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
-      'funcIndex': FUNC_CROP,
+      'funcIndex': _FUNC_CROP,
       'params': Uint8List.fromList([xStart >> 8, xStart & 0xff, xEnd >> 8, xEnd & 0xff, yStart >> 8, yStart & 0xff, yEnd >> 8, yEnd & 0xff]),
       'len': 8,
       'at': at ?? -1,
@@ -304,7 +298,7 @@ class FvPipeline {
 
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
-      'funcIndex': FUNC_CV_RECTANGLE,
+      'funcIndex': _FUNC_CV_RECTANGLE,
       'params': Uint8List.fromList([...x1f, ...y1f, ...x2f, ...y2f, r, g, b, alpha ?? 255, thickness ?? 1, lineType ?? OpenCV.LINE_TYPE_LINE_8, shift ?? 0]),
       'len': 23,
       'at': at ?? -1,
@@ -317,7 +311,7 @@ class FvPipeline {
   Future<void> rotate(int rotateCode, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
-      'funcIndex': FUNC_CV_ROTATE,
+      'funcIndex': _FUNC_CV_ROTATE,
       'params': Uint8List.fromList([rotateCode]),
       'len': 1,
       'at': at ?? -1,
@@ -330,7 +324,7 @@ class FvPipeline {
   Future<void> setInputTensorData(int modelIndex, int tensorIndex, int dataType, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
-      'funcIndex': FUNC_SET_INPUT_TENSOR,
+      'funcIndex': _FUNC_SET_INPUT_TENSOR,
       'params': Uint8List.fromList([modelIndex, tensorIndex, dataType]),
       'len': 3,
       'at': at ?? -1,
@@ -343,7 +337,7 @@ class FvPipeline {
   Future<void> inference(int modelIndex, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
-      'funcIndex': FUNC_INFERENCE,
+      'funcIndex': _FUNC_INFERENCE,
       'params': Uint8List.fromList([modelIndex]),
       'len': 1,
       'at': at ?? -1,
@@ -356,7 +350,7 @@ class FvPipeline {
   Future<void> customHandler(int size, {int? at, int? interval, bool? append}) async {
     await FlutterVision.channel.invokeMethod('pipelineAdd', {
       'index': index,
-      'funcIndex': FUNC_CUSTOM_HANDLER,
+      'funcIndex': _FUNC_CUSTOM_HANDLER,
       'params': Uint8List.fromList([size >> 8, size & 0xff]),
       'len': 2,
       'at': at ?? -1,

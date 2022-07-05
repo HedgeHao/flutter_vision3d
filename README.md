@@ -116,19 +116,20 @@ class FlutterVision {
 
 class FvPipeline {
     Future<void> clear()
-    Future<void> cvtColor(int mode, {int? at, int? interval})
-    Future<void> imwrite(String path, {int? at, int? interval})
-    Future<void> imread(String path, {int? at, int? interval})
-    Future<void> show({int? at, int? interval})
-    Future<void> convertTo(int mode, double scale, {int? at, double? shift, int? interval})
-    Future<void> applyColorMap(int colorMap, {int? at, int? interval})
-    Future<void> resize(int width, int height, {int? at, int? mode, int? interval})
-    Future<void> crop(int xStart, int xEnd, int yStart, int yEnd, {int? at, int? interval})
-    Future<void> rotate(int rotateCode, {int? at, int? interval})
-    Future<void> cvRectangle(double x1, double y1, double x2, double y2, int r, int g, int b, {int? at, int? thickness, int? lineType, int? shift, int? alpha, int? interval})
-    Future<void> setInputTensorData(int modelIndex, int tensorIndex, int dataType, {int? at, int? interval})
-    Future<void> inference(int modelIndex, {int? at, int? interval})
-    Future<void> customHandler(int size, {int? at, int? interval})
+    Future<void> cvtColor(int mode, {int? at, int? interval, bool? append})
+    Future<void> imwrite(String path, {int? at, int? interval, bool? append})
+    Future<void> imread(String path, {int? at, int? interval, bool? append})
+    Future<void> show({int? at, int? interval, bool? append})
+    Future<void> convertTo(int mode, double scale, {int? at, double? shift, int? interval, bool? append})
+    Future<void> applyColorMap(int colorMap, {int? at, int? interval, bool? append})
+    Future<void> resize(int width, int height, {int? at, int? mode, int? interval, bool? append})
+    Future<void> crop(int xStart, int xEnd, int yStart, int yEnd, {int? at, int? interval, bool? append})
+    Future<void> rotate(int rotateCode, {int? at, int? interval, bool? append})
+    Future<void> cvRectangle(double x1, double y1, double x2, double y2, int r, int g, int b, {int? at, int? thickness, int? lineType, int? shift, int? alpha, int? interval, bool? append})
+    Future<void> setInputTensorData(int modelIndex, int tensorIndex, int dataType, {int? at, int? interval, bool? append})
+    Future<void> inference(int modelIndex, {int? at, int? interval, bool? append})
+    Future<void> customHandler(int size, {int? at, int? interval, bool? append})
+    Future<int> run({int? from, int? to})
 }
 
 class TFLiteModel{
@@ -148,6 +149,7 @@ class TFLiteModel{
 | Intel Realsense T265  |     ✅    |        |  [Link](https://www.intelrealsense.com/tracking-camera-t265/) |
 | Intel Realsense L515  |     ✅    |        |  [Link](https://www.intelrealsense.com/lidar-camera-l515/) |
 | LIPSedge AE400        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae400) |
+| LIPSedge AE450        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae450) |
 | LIPSedge DL           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-dl-series) |
 | LIPSedge M3           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-m3-series) |
 | LIPSedge L Series     |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-l-series) |

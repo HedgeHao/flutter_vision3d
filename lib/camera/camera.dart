@@ -55,9 +55,9 @@ class FvCamera {
     depthTextureId = m['depthTextureId'] as int;
     irTextureId = m['irTextureId'] as int;
 
-    rgbPipeline = new FvPipeline(serial, FvPipeline.RGB_FRAME);
-    depthPipeline = new FvPipeline(serial, FvPipeline.DEPTH_FRAME);
-    irPipeline = new FvPipeline(serial, FvPipeline.IR_FRAME);
+    rgbPipeline = FvPipeline(serial, FvPipeline.RGB_FRAME);
+    depthPipeline = FvPipeline(serial, FvPipeline.DEPTH_FRAME);
+    irPipeline = FvPipeline(serial, FvPipeline.IR_FRAME);
   }
 
   Future<void> close() async {

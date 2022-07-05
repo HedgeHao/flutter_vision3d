@@ -23,8 +23,6 @@
 #define FL_ARG_INT32_LIST(args, name) fl_value_get_int32_list(fl_value_lookup_string(args, name))
 #define FL_ARG_FLOAT_LIST(args, name) fl_value_get_float_list(fl_value_lookup_string(args, name))
 
-#define PIPELINE_INDEX_TFLITE 8
-
 #define FLUTTER_VISION_PLUGIN(obj)                                     \
   (G_TYPE_CHECK_INSTANCE_CAST((obj), flutter_vision_plugin_get_type(), \
                               FlutterVisionPlugin))
@@ -36,8 +34,6 @@ enum CameraType
   DUMMY = 2,
   UVC = 3,
 };
-
-cv::Mat emptyMat = cv::Mat::zeros(3, 3, CV_64F);
 
 RealsenseCam *findRsCam(const char *serial, std::vector<RealsenseCam *> *cams)
 {
@@ -182,27 +178,6 @@ static void flutter_vision_plugin_handle_method_call(
       }
     }
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(enable)));
-  }
-  else if (strcmp(method, "ni2GetFramePointer") == 0)
-  {
-    // FlValue *valueVideoIndex = fl_value_lookup_string(args, "videoIndex");
-    // const int index = fl_value_get_int(valueVideoIndex);
-
-    long result = 0;
-    // if (index == VideoIndex::RGB)
-    // {
-    //   result = reinterpret_cast<long>(&FV_TEXTURE(self->rgbTexture)->cvImage);
-    // }
-    // else if (index == VideoIndex::Depth)
-    // {
-    //   result = reinterpret_cast<long>(&FV_TEXTURE(self->depthTexture)->cvImage);
-    // }
-    // else if (index == VideoIndex::IR)
-    // {
-    //   result = reinterpret_cast<long>(&FV_TEXTURE(self->irTexture)->cvImage);
-    // }
-
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(result)));
   }
   else if (strcmp(method, "ni2SetVideoSize") == 0)
   {
@@ -528,20 +503,6 @@ static void flutter_vision_plugin_handle_method_call(
     }
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(ret)));
-  }
-  else if (strcmp(method, "test") == 0)
-  {
-    // cv::Mat b(1280, 720, CV_8UC4, cv::Scalar(255, 0, 0, 255));
-    cv::Mat b = cv::imread("/home/hedgehao/test/faces.jpg", cv::IMREAD_COLOR);
-    // cv::cvtColor(b, b, cv::COLOR_BGR2RGB);
-    cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
-    cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
-
-    // self->cams[1]->rgbTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->cams[1]->rgbTexture), self->cams[1]->rgbTexture->video_width, self->cams[1]->rgbTexture->video_height, self->cams[1]->rgbTexture->buffer, &self->models, self->flChannel);
-    // self->cams[1]->depthTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->cams[1]->depthTexture), self->cams[1]->depthTexture->video_width, self->cams[1]->depthTexture->video_height, self->cams[1]->depthTexture->buffer, &self->models, self->flChannel);
-    // self->cams[1]->irTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(self->cams[1]->irTexture), self->cams[1]->irTexture->video_width, self->cams[1]->irTexture->video_height, self->cams[1]->irTexture->buffer, &self->models, self->flChannel);
-
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
   else
   {
