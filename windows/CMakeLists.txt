@@ -4,9 +4,8 @@ project(${PROJECT_NAME} LANGUAGES CXX)
 
 # To avoid multiple warnings
 if(CMAKE_BUILD_TOOL MATCHES "(MSBuild)")
-  add_definitions(/wd4190 /W3 /W2 /W1)
+  add_definitions(/wd4819 /wd4190 /W3 /W2 /W1)
 endif()
-
 
 # This value is used when generating builds using this plugin, so it must
 # not be changed

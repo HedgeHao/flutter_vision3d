@@ -302,7 +302,7 @@ public:
                 // printf("[Run] %s\n", funcs[i].name);
                 funcs[i].func(img, funcs[i].params, registrar, texture, texture_width, texture_height, pixelBuf, models, flChannel);
             }
-            catch (cv::Exception &e)
+            catch (std::exception &e)
             {
                 error = e.what();
                 return -1;

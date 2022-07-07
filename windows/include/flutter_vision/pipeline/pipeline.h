@@ -168,7 +168,7 @@ void PipelineFuncCustomHandler(cv::Mat &img, std::vector<uint8_t> params, flutte
     float *result = new float[size]{0};
     flutterVisionHandler(img, result);
 
-    std::vector<float> list(result, result+size);
+    std::vector<float> list(result, result + size);
     std::unique_ptr<flutter::EncodableValue> test = std::make_unique<flutter::EncodableValue>(list);
 
     flChannel->InvokeMethod("onHandled", std::move(test), nullptr);
@@ -194,6 +194,8 @@ const FuncDef pipelineFuncs[] = {
 class Pipeline
 {
 public:
+    std::string error = "";
+
     Pipeline()
     {
         img = cv::Mat(1, 1, CV_8UC4, cv::Scalar(255, 0, 0, 255));
@@ -205,7 +207,7 @@ public:
         imgPtr = m;
     }
 
-    void add(unsigned int index, const std::vector<uint8_t> &params, unsigned int len, int insertAt = -1, int interval = 0)
+    void add(unsigned int index, const std::vector<uint8_t> &params, unsigned int len, int insertAt = -1, int interval = 0, bool append = false)
     {
         FuncDef f = pipelineFuncs[index];
         f.interval = interval;
@@ -213,22 +215,64 @@ public:
         for (unsigned int i = 0; i < len; i++)
             f.params.push_back(params.at(i));
 
-        if (insertAt == -1)
-            funcs.push_back(f);
-        else
-            funcs.at(insertAt) = f;
-    }
-
-     void runOnce(flutter::TextureRegistrar *registrar, int64_t &textureId, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel)
-    {
-        for (int i = 0; i < funcs.size(); i++)
+        if (append)
         {
-            // std::cout << "RunOnce:" << funcs[i].name << std::endl;
-            funcs[i].func(img, funcs[i].params, registrar, textureId, texture_width, texture_height, pixelBuf, models, flChannel);
+            if (insertAt == -1)
+                funcs.push_back(f);
+            else
+            {
+                if (insertAt > (int)funcs.size() - 1)
+                    insertAt = funcs.size() - 1;
+
+                if (insertAt < 0)
+                    insertAt = 0;
+
+                funcs.insert(funcs.begin() + insertAt, f);
+            }
+        }
+        else
+        {
+            if (insertAt == -1)
+                funcs.push_back(f);
+            else
+                funcs.at(insertAt) = f;
         }
     }
 
-    void run(cv::Mat &img, flutter::TextureRegistrar *registrar, int64_t &textureId, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel)
+    int runOnce(flutter::TextureRegistrar *registrar, int64_t &textureId, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel, int from = 0, int to = -1)
+    {
+        if (to == -1 || to >= funcs.size())
+            to = funcs.size();
+
+        for (int i = from; i < to; i++)
+        {
+            try
+            {
+                // std::cout << "RunOnce:" << funcs[i].name << std::endl;
+                error = "";
+                funcs[i].func(img, funcs[i].params, registrar, textureId, texture_width, texture_height, pixelBuf, models, flChannel);
+            }
+            catch (cv::Exception &e)
+            {
+                error = e.what();
+                return -1;
+            }
+            catch (std::exception &e)
+            {
+                error = e.what();
+                return -2;
+            }
+            catch (...)
+            {
+                error = "Un-handled Error";
+                return -3;
+            }
+        }
+
+        return 0;
+    }
+
+    int run(cv::Mat &img, flutter::TextureRegistrar *registrar, int64_t &textureId, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel)
     {
         for (int i = 0; i < funcs.size(); i++)
         {
@@ -241,8 +285,16 @@ public:
                 }
             }
 
-            // std::cout << "Run:" << funcs[i].name << std::endl;
-            funcs[i].func(img, funcs[i].params, registrar, textureId, texture_width, texture_height, pixelBuf, models, flChannel);
+            try
+            {
+                // std::cout << "Run:" << funcs[i].name << std::endl;
+                funcs[i].func(img, funcs[i].params, registrar, textureId, texture_width, texture_height, pixelBuf, models, flChannel);
+            }
+            catch (std::exception &e)
+            {
+                error = e.what();
+                return -1;
+            }
 
             if (funcs[i].interval > 0)
             {
@@ -267,6 +319,8 @@ public:
             }
             doScreenshot = false;
         }
+
+        return 0;
     }
 
     void screenshot(const char *filePath, int convert = -1)
@@ -279,6 +333,19 @@ public:
     void clear()
     {
         funcs.clear();
+    }
+
+    std::string getPipelineInfo()
+    {
+        std::string info;
+
+        for (int i = 0; i < funcs.size(); i++)
+        {
+            info += funcs[i].name;
+            info += " => ";
+        }
+
+        return info;
     }
 
 private:

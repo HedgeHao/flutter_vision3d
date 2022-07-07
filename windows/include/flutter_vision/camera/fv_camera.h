@@ -9,20 +9,21 @@
 
 enum VideoIndex
 {
-  RGB = 0b1,
-  Depth = 0b10,
-  IR = 0b100,
-  OPENGL = 0b1000,
-  Camera2D = 0b10000,
+    RGB = 0b1,
+    Depth = 0b10,
+    IR = 0b100,
+    OPENGL = 0b1000,
+    Camera2D = 0b10000,
 };
 
-class FvCamera {
+class FvCamera
+{
 public:
     flutter::TextureRegistrar *flRegistrar;
     OpenGLFL *glfl;
     std::vector<TFLiteModel *> *models;
     flutter::MethodChannel<flutter::EncodableValue> *flChannel;
-    
+
     std::string serial;
     std::unique_ptr<FvTexture> rgbTexture;
     std::unique_ptr<FvTexture> depthTexture;
@@ -30,20 +31,19 @@ public:
     bool videoStart = false;
     bool enablePointCloud = false;
 
-    FvCamera(){}
+    FvCamera() {}
 
     FvCamera(const char *s)
     {
         serial = std::string(s);
     }
 
-
-    static FvCamera *findCam(const char *serial, std::vector<FvCamera *>* cams)
+    static FvCamera *findCam(const char *serial, std::vector<FvCamera *> *cams)
     {
         FvCamera *cam = nullptr;
-        for(auto c: *cams)
+        for (auto c : *cams)
         {
-            if(strcmp(c->serial.c_str(), serial) == 0)
+            if (strcmp(c->serial.c_str(), serial) == 0)
             {
                 return c;
             }
@@ -52,7 +52,7 @@ public:
         return nullptr;
     }
 
-    void fvInit(flutter::TextureRegistrar *r, std::vector<TFLiteModel *> *m,flutter::MethodChannel<flutter::EncodableValue> *f, OpenGLFL *g)
+    void fvInit(flutter::TextureRegistrar *r, std::vector<TFLiteModel *> *m, flutter::MethodChannel<flutter::EncodableValue> *f, OpenGLFL *g)
     {
         flRegistrar = r;
         // TODO: check if this is duplicate from texture
@@ -76,7 +76,7 @@ public:
         {
             return depthTexture->textureId;
         }
-            else if (index == VideoIndex::IR)
+        else if (index == VideoIndex::IR)
         {
             return irTexture->textureId;
         }
@@ -90,11 +90,9 @@ public:
     virtual int isConnected() = 0;
     virtual int configVideoStream(int streamIndex, bool *enable) = 0;
     virtual void readVideoFeed() = 0;
-    virtual void configure(int prop, float value) = 0;
+    virtual void configure(int prop, std::vector<float> &value) = 0;
 
 private:
-
-
     virtual void _readVideoFeed() = 0;
 };
 #endif

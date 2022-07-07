@@ -336,6 +336,9 @@ namespace
       int interval = 0;
       parseDartArugment<int>(arguments, "interval", &interval);
 
+      bool append = false;
+      parseDartArugment<bool>(arguments, "append", &append);
+
       std::string serial;
       parseDartArugment<std::string>(arguments, "serial", &serial);
 
@@ -344,15 +347,15 @@ namespace
       {
         if (index == VideoIndex::RGB)
         {
-          cam->rgbTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
+          cam->rgbTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
         }
         else if (index == VideoIndex::Depth)
         {
-          cam->depthTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
+          cam->depthTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
         }
         else if (index == VideoIndex::IR)
         {
-          cam->irTexture->pipeline->add(funcIndex, params, len, insertAt, interval);
+          cam->irTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
         }
       }
 
@@ -366,30 +369,34 @@ namespace
       std::string serial;
       parseDartArugment<std::string>(arguments, "serial", &serial);
 
+      int from = 0;
+      parseDartArugment<int>(arguments, "from", &from);
+
+      int to = -1;
+      parseDartArugment<int>(arguments, "to", &to);
+
+      int ret = 0;
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
       if (cam)
       {
         if (index == VideoIndex::RGB)
         {
-          cam->rgbTexture->pipeline->runOnce(textureRegistrar, cam->rgbTexture->textureId, cam->rgbTexture->videoWidth, cam->rgbTexture->videoHeight, cam->rgbTexture->buffer, &models, flChannel);
-          ;
+          ret = cam->rgbTexture->pipeline->runOnce(textureRegistrar, cam->rgbTexture->textureId, cam->rgbTexture->videoWidth, cam->rgbTexture->videoHeight, cam->rgbTexture->buffer, &models, flChannel, from, to);
           cam->rgbTexture->setPixelBuffer();
         }
         else if (index == VideoIndex::Depth)
         {
-          cam->depthTexture->pipeline->runOnce(textureRegistrar, cam->depthTexture->textureId, cam->depthTexture->videoWidth, cam->depthTexture->videoHeight, cam->depthTexture->buffer, &models, flChannel);
-          ;
+          ret = cam->depthTexture->pipeline->runOnce(textureRegistrar, cam->depthTexture->textureId, cam->depthTexture->videoWidth, cam->depthTexture->videoHeight, cam->depthTexture->buffer, &models, flChannel, from, to);
           cam->depthTexture->setPixelBuffer();
         }
         else if (index == VideoIndex::IR)
         {
-          cam->irTexture->pipeline->runOnce(textureRegistrar, cam->irTexture->textureId, cam->irTexture->videoWidth, cam->irTexture->videoHeight, cam->irTexture->buffer, &models, flChannel);
-          ;
+          ret = cam->irTexture->pipeline->runOnce(textureRegistrar, cam->irTexture->textureId, cam->irTexture->videoWidth, cam->irTexture->videoHeight, cam->irTexture->buffer, &models, flChannel, from, to);
           cam->irTexture->setPixelBuffer();
         }
       }
 
-      result->Success(flutter::EncodableValue(nullptr));
+      result->Success(flutter::EncodableValue(ret));
     }
     else if (method_call.method_name().compare("pipelineClear") == 0)
     {
@@ -418,6 +425,62 @@ namespace
 
       result->Success(flutter::EncodableValue(nullptr));
     }
+    else if (method_call.method_name().compare("pipelineInfo") == 0)
+    {
+      int index = -1;
+      parseDartArugment<int>(arguments, "index", &index);
+
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      std::string info;
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      if (cam)
+      {
+        if (index == VideoIndex::RGB)
+        {
+          info = cam->rgbTexture->pipeline->getPipelineInfo();
+        }
+        else if (index == VideoIndex::Depth)
+        {
+          info = cam->depthTexture->pipeline->getPipelineInfo();
+        }
+        else if (index == VideoIndex::IR)
+        {
+          info = cam->irTexture->pipeline->getPipelineInfo();
+        }
+      }
+
+      result->Success(flutter::EncodableValue(info));
+    }
+    else if (method_call.method_name().compare("pipelineError") == 0)
+    {
+      int index = -1;
+      parseDartArugment<int>(arguments, "index", &index);
+
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      std::string error;
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      if (cam)
+      {
+        if (index == VideoIndex::RGB)
+        {
+          error = cam->rgbTexture->pipeline->error;
+        }
+        else if (index == VideoIndex::Depth)
+        {
+          error = cam->depthTexture->pipeline->error;
+        }
+        else if (index == VideoIndex::IR)
+        {
+          error = cam->irTexture->pipeline->error;
+        }
+      }
+
+      result->Success(flutter::EncodableValue(error));
+    }
     else if (method_call.method_name().compare("fvCameraConfig") == 0)
     {
       std::string serial;
@@ -426,14 +489,15 @@ namespace
       int prop = 0;
       parseDartArugment<int>(arguments, "prop", &prop);
 
-      double value = 0.0f;
-      parseDartArugment<double>(arguments, "value", &value);
+      std::vector<float> value{};
+      parseDartArugment<std::vector<float>>(arguments, "value", &value);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
       int ret = -1;
       if (cam)
       {
         cam->configure(prop, value);
+        ret = 0;
       }
 
       result->Success(flutter::EncodableValue(ret == 0));

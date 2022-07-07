@@ -27,7 +27,7 @@ public:
 
     void readVideoFeed(){}
 
-    void configure(int prop, float value){}
+    void configure(int prop, std::vector<float> &value){}
     
 private:
     void _readVideoFeed(){}

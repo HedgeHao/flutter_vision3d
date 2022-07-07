@@ -88,7 +88,7 @@ public:
     t.detach();
   }
 
-  void configure(int prop, float value){}
+  void configure(int prop, std::vector<float> &value){}
   
 private:
   rs2::config cfg;

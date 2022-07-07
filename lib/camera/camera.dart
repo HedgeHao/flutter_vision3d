@@ -84,7 +84,7 @@ class FvCamera {
     return true;
   }
 
-  Future<void> configure(int prop, List<double> value) async {
+  Future<bool> configure(int prop, List<double> value) async {
     return await FlutterVision.channel.invokeMethod('fvCameraConfig', {'prop': prop, 'value': Float32List.fromList(value), 'serial': serial});
   }
 
