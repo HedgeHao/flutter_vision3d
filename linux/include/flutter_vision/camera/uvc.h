@@ -66,6 +66,8 @@ public:
     cap->set(prop, value[0]);
   }
 
+  int getConfiguration(int prop) { return 0; }
+
 private:
   int uvcIndex = -1;
   cv::VideoCapture *cap;

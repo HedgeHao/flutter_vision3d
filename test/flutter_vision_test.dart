@@ -17,7 +17,5 @@ void main() {
     channel.setMockMethodCallHandler(null);
   });
 
-  test('getPlatformVersion', () async {
-    // expect(await Openni2Flutter.platformVersion, '42');
-  });
+  test('test', () async {});
 }

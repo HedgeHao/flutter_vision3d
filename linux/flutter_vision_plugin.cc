@@ -426,6 +426,20 @@ static void flutter_vision_plugin_handle_method_call(
     }
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(ret == 0)));
   }
+  else if (strcmp(method, "fvCameraGetConfiguration") == 0)
+  {
+    const char *serial = FL_ARG_STRING(args, "serial");
+    const int prop = FL_ARG_INT(args, "prop");
+
+    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    int ret = -1;
+    if (cam)
+    {
+      ret = cam->getConfiguration(prop);
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(ret)));
+  }
   else if (strcmp(method, "tfliteCreateModel") == 0)
   {
     const char *path = FL_ARG_STRING(args, "modelPath");

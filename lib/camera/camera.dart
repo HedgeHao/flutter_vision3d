@@ -86,6 +86,10 @@ class FvCamera {
     return await FlutterVision.channel.invokeMethod('fvCameraConfig', {'prop': prop, 'value': Float32List.fromList(value), 'serial': serial});
   }
 
+  Future<int> getConfiguration(int prop) async {
+    return await FlutterVision.channel.invokeMethod('fvCameraGetConfiguration', {'prop': prop, 'serial': serial});
+  }
+
   Future<bool> screenshot(int index, String path, {int? cvtCode}) async {
     return await FlutterVision.channel.invokeMethod('fvCameraScreenshot', {'index': index, 'path': path, 'cvtCode': cvtCode ?? -1, 'serial': serial});
   }

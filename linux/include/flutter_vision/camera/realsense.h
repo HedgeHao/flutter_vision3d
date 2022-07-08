@@ -136,6 +136,8 @@ public:
     }
   }
 
+  int getConfiguration(int prop) { return 0; }
+
 private:
   rs2::config cfg;
   unsigned int timeout = 1500;
