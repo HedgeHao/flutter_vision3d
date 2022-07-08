@@ -58,8 +58,18 @@ public:
 
   int closeDevice()
   {
-    pipeline->stop();
-    return -1;
+    try
+    {
+      videoStart = false;
+      pipeline->stop();
+    }
+    catch (rs2::error &e)
+    {
+      printf("[Realsense Error]: %s\n", e.what());
+      return -1;
+    }
+
+    return 0;
   }
 
   int isConnected()
@@ -93,8 +103,8 @@ public:
     }
     else
     {
-      pipeline->stop();
       videoStart = false;
+      pipeline->stop();
     }
 
     return -1;
