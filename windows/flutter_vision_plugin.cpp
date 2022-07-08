@@ -507,8 +507,6 @@ namespace
       std::string path;
       parseDartArugment<std::string>(arguments, "modelPath", &path);
 
-      printf("Path:%s\n", path.c_str());
-
       TFLiteModel *m = new TFLiteModel(path.c_str());
       this->models.push_back(m);
 

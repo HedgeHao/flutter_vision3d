@@ -12,8 +12,6 @@ class FvCamera {
   static Future<FvCamera?> create(String serial, CameraType type) async {
     Map<Object?, Object?> result = await FlutterVision.channel.invokeMethod('fvCameraOpen', {'serial': serial, 'cameraType': type.index});
 
-    print(result);
-
     Map<String, dynamic> flResult = {};
     flResult['ret'] = (result['ret'] ?? -1) as int;
     flResult['rgbTextureId'] = (result['rgbTextureId'] ?? 0) as int;

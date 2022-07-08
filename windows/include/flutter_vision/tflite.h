@@ -10,7 +10,8 @@
 #include <tensorflow/lite/model.h>
 #include <tensorflow/lite/optional_debug_tools.h>
 
-struct TensorOutput {
+struct TensorOutput
+{
   int tensorIndex;
   unsigned int index;
   unsigned int size;
@@ -18,37 +19,44 @@ struct TensorOutput {
   const char *name;
 };
 
-class TFLiteModel {
+class TFLiteModel
+{
 public:
   bool valid = false;
   std::string error;
   std::vector<TensorOutput> outputTensors{};
 
-  TFLiteModel(const char *modelPath) {
+  TFLiteModel(const char *modelPath)
+  {
     model = tflite::FlatBufferModel::BuildFromFile(modelPath);
-    if (!model) {
+    if (!model)
+    {
       error = "Failed to load model";
       std::cout << "error:" << error << std::endl;
       return;
     }
 
     tflite::InterpreterBuilder(*model, resolver)(&interpreter);
-    if (!interpreter) {
+    if (!interpreter)
+    {
       error = "Failed to create interpreter builder";
       return;
     }
     interpreter->SetAllowFp16PrecisionForFp32(true);
     interpreter->SetNumThreads(4);
 
-    if (interpreter->AllocateTensors() != TfLiteStatus::kTfLiteOk) {
+    if (interpreter->AllocateTensors() != TfLiteStatus::kTfLiteOk)
+    {
       error = "Failed to allocate tensors";
       return;
     }
 
-    for (unsigned int i = 0; i < interpreter->outputs().size(); i++) {
+    for (unsigned int i = 0; i < interpreter->outputs().size(); i++)
+    {
       auto t = interpreter->tensor(interpreter->outputs()[i]);
       unsigned int size = 1;
-      for (int j = 0; j < t->dims->size; j++) {
+      for (int j = 0; j < t->dims->size; j++)
+      {
         size *= t->dims->data[j];
       }
 
@@ -57,13 +65,13 @@ public:
     }
 
     valid = true;
-    std::cout << "Load Model OK" << std::endl;
   }
 
   ~TFLiteModel() {}
 
   template <typename T>
-  void setInput(unsigned int tensorIndex, cv::Mat &img, size_t size) {
+  void setInput(unsigned int tensorIndex, cv::Mat &img, size_t size)
+  {
     // TODO: check out which way is better
     memcpy(interpreter->typed_input_tensor<T>(tensorIndex), img.data, size * sizeof(T));
 
@@ -78,17 +86,20 @@ public:
     // }
   }
 
-  bool inference() {
+  bool inference()
+  {
     if (!valid)
       return false;
     return interpreter->Invoke() == TfLiteStatus::kTfLiteOk;
   }
 
   template <typename T>
-  void retrieveOutput(unsigned int tensorIndex, unsigned int size, void *output) {
+  void retrieveOutput(unsigned int tensorIndex, unsigned int size, void *output)
+  {
     /* Retreive tensor from all tensors */
     // TfLiteTensor *tensor = interpreter->tensor(tensorIndex);
-    for (unsigned int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++)
+    {
       *(((T *)output) + i) = interpreter->typed_output_tensor<T>(tensorIndex)[i];
     }
   }

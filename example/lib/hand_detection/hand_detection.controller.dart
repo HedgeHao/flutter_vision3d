@@ -37,7 +37,7 @@ class HandDetectionController extends GetxController {
     super.onInit();
   }
 
-  final HAND_DETECTOR = '/home/hedgehao/test/hand_landmark_lite.tflite';
+  final HAND_DETECTOR = 'D:/downloads/hand_landmark_lite.tflite';
 
   FvCamera? cam;
   List<PositionedRect> rects = [];
@@ -103,28 +103,5 @@ class HandDetectionController extends GetxController {
     await rgbPipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
     await rgbPipeline.setInputTensorData(model!.index, 0, FvPipeline.DATATYPE_FLOAT);
     await rgbPipeline.inference(model!.index, interval: 100);
-  }
-
-  void test() async {
-    cam ??= await FvCamera.create("0", CameraType.DUMMY) as DummyCamera;
-
-    if (cam == null) return;
-
-    model ??= await TFLiteModel.create(HAND_DETECTOR);
-    rgbTextureId = cam!.rgbTextureId;
-
-    FvPipeline pipeline = cam!.rgbPipeline;
-    await pipeline.clear();
-    await pipeline.imread('/home/hedgehao/test/hand.jpg');
-    await pipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
-    await pipeline.show();
-    await pipeline.resize(224, 224, mode: OpenCV.INTER_LINEAR);
-    await pipeline.cvtColor(OpenCV.COLOR_RGBA2RGB);
-    await pipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
-    await pipeline.setInputTensorData(model!.index, 0, FvPipeline.DATATYPE_FLOAT);
-    await pipeline.inference(model!.index, interval: 100);
-    await pipeline.run();
-
-    update();
   }
 }

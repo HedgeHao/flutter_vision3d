@@ -76,11 +76,6 @@ class HandDetectionView extends GetView<HandDetectionController> {
                         controller.frPipeline();
                       },
                       child: const Text('Hand Recognition')),
-                  TextButton(
-                      onPressed: () {
-                        controller.test();
-                      },
-                      child: const Text('Test'))
                 ]),
               ],
             )),

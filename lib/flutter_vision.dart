@@ -112,11 +112,6 @@ class FlutterVision {
   static Future<void> cameraOpen(int index) async {
     return await channel.invokeMethod('cameraOpen', {'index': index});
   }
-
-  static Future<void> test() async {
-    await channel.invokeMethod('test');
-    print('');
-  }
 }
 
 const _FUNC_TEST = 0;
