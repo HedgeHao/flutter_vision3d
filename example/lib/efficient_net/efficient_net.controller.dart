@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_vision/camera/camera.dart';
 import 'package:flutter_vision/camera/uvc.dart';
 import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
+import 'package:flutter_vision_example/define.dart';
 import 'package:get/get.dart';
 
 class PositionedRect extends StatelessWidget {
@@ -30,7 +32,6 @@ class PositionedRect extends StatelessWidget {
 class EfficientNetController extends GetxController {
   static const frameWidth = 800.0;
   static const frameHeight = 600.0;
-  final MODEL_EFFICIENT_NET = '/home/hedgehao/test/efficient_net.tflite';
 
   EfficientNetController();
 
@@ -87,7 +88,7 @@ class EfficientNetController extends GetxController {
     if (cam == null) {
       cam = await FvCamera.create(serial, CameraType.UVC) as UvcCamera?;
       if (cam == null) {
-        print('Create Camera Failed');
+        debugPrint('Create Camera Failed');
         return;
       }
       cams.add(cam);
@@ -129,7 +130,12 @@ class EfficientNetController extends GetxController {
   void setPipeline() async {
     if (cams.isEmpty) return;
 
-    model ??= await TFLiteModel.create(MODEL_EFFICIENT_NET);
+    if (!File(Define.EFFICIENT_NET_MODEL).existsSync()) {
+      debugPrint('Model File Not found at: ${Define.EFFICIENT_NET_MODEL}');
+      return;
+    }
+
+    model ??= await TFLiteModel.create(Define.EFFICIENT_NET_MODEL);
 
     FvPipeline rgbPipeline = cams.first.rgbPipeline;
     await rgbPipeline.clear();

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_vision/camera/camera.dart';
 import 'package:flutter_vision/camera/uvc.dart';
 import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
+import 'package:flutter_vision_example/define.dart';
 import 'package:flutter_vision_example/faceRecognizer/LIPSFace.dart';
 import 'package:get/get.dart';
 
@@ -36,8 +38,6 @@ class FaceRecognizerController extends GetxController {
     FlutterVision.listen(fvCallback);
     super.onInit();
   }
-
-  final MODEL_FACE_DETECTOR = '/home/hedgehao/test/faceDetector.tflite';
 
   List<UvcCamera> cams = [];
   List<PositionedRect> rects = [];
@@ -118,7 +118,12 @@ class FaceRecognizerController extends GetxController {
   void frPipeline() async {
     if (cams.isEmpty) return;
 
-    model ??= await TFLiteModel.create(MODEL_FACE_DETECTOR);
+    if (!File(Define.FACE_DETECTOR_MODEL).existsSync()) {
+      debugPrint('Model File Not found at: ${Define.FACE_DETECTOR_MODEL}');
+      return;
+    }
+
+    model ??= await TFLiteModel.create(Define.FACE_DETECTOR_MODEL);
 
     FvPipeline rgbPipeline = cams.first.rgbPipeline;
     await rgbPipeline.clear();

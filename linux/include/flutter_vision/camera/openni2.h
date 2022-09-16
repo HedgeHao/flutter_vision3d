@@ -196,6 +196,7 @@ public:
     {
     case LIPS_FACE_REGISTRATION:
     case LIPS_FACE_RECOGNITION:
+    case LIPS_FACE_DELETE_FACE_DATABASE:
       unsigned short param = value[0];
       device->setProperty(prop, &param, sizeof(unsigned short));
       break;

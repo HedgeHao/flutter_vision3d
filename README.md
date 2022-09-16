@@ -13,7 +13,7 @@ A framework for 2D & 3D image processing with AI (Tensorflow Lite)
 * Install `OpenCV`, `GLEW`,  and `GLFW`
 
 ---
-## Create and Connect to Camera
+## 1. Create and Connect to Camera
 * UVC Camera
 ```dart
 UvcCamera? cam = await FvCamera.create(ctl.text, CameraType.UVC) as UvcCamera?;
@@ -35,18 +35,18 @@ DummyCamera? cam = await FvCamera.create(ctl.text, CameraType.DUMMY) as DummyCam
 ```
 
 ---
-## Enable/Disable camera video stream
+## 2. Enable/Disable camera video stream
 ```dart
 await cam.enableStream();
 await cam.disableStream();
 ```
 ---
-## Bind texture widget
+## 3. Bind texture widget
 ```dart
 Texture(textureId: cam.rgbTextureId);
 ```
 ---
-## Pipeline
+## 4. Pipeline (Set how to process frames captured from camera)
 * Display UVC video stream
 ```dart
 FvPipeline uvcPipeline = cam.rgbPipeline;
@@ -153,3 +153,13 @@ class TFLiteModel{
 | LIPSedge DL           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-dl-series) |
 | LIPSedge M3           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-m3-series) |
 | LIPSedge L Series     |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-l-series) |
+
+## Run Example 
+The example app set all the TensorFlow Lite models in `example/lib/define.dart`. Please download the models. And add this define file, set the correct path, if you want to run Tensorflow Lite pipeline example.
+```dart
+class Define {
+  static const HAND_DETECTOR_MODEL = '/path/to/model';
+  static const FACE_DETECTOR_MODEL = '/path/to/model';
+  static const EFFICIENT_NET_MODEL = '/path/to/model';
+}
+```

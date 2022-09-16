@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_vision/camera/dummy.dart';
 import 'package:flutter_vision/camera/uvc.dart';
 import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
+import 'package:flutter_vision_example/define.dart';
 import 'package:get/get.dart';
 
 class PositionedRect extends StatelessWidget {
@@ -36,8 +38,6 @@ class HandDetectionController extends GetxController {
     FlutterVision.listen(fvCallback);
     super.onInit();
   }
-
-  final HAND_DETECTOR = 'D:/downloads/hand_landmark_lite.tflite';
 
   FvCamera? cam;
   List<PositionedRect> rects = [];
@@ -92,7 +92,12 @@ class HandDetectionController extends GetxController {
   void frPipeline() async {
     if (cam == null) return;
 
-    model ??= await TFLiteModel.create(HAND_DETECTOR);
+    if (!File(Define.HAND_DETECTOR_MODEL).existsSync()) {
+      debugPrint('Model File Not found at: ${Define.HAND_DETECTOR_MODEL}');
+      return;
+    }
+
+    model ??= await TFLiteModel.create(Define.HAND_DETECTOR_MODEL);
 
     FvPipeline rgbPipeline = cam!.rgbPipeline;
     await rgbPipeline.clear();
