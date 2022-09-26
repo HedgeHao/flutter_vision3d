@@ -1,6 +1,6 @@
 name: flutter_vision
 description: Framework for 2D and 3D image processing. Integrate with OpenCV, OpenNI2, Realsense2 and TensorFlow Lite.
-version: 0.5.0
+version: 0.6.0
 homepage:
 
 environment:
@@ -26,3 +26,6 @@ flutter:
         pluginClass: FlutterVisionPlugin
       windows:
         pluginClass: FlutterVisionPlugin
+
+scripts:
+  dependencies-linux: echo "Hello"

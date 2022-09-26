@@ -12,8 +12,6 @@ class FvCamera {
   static Future<FvCamera?> create(String serial, CameraType type) async {
     Map<Object?, Object?> result = await FlutterVision.channel.invokeMethod('fvCameraOpen', {'serial': serial, 'cameraType': type.index});
 
-    print(result);
-
     Map<String, dynamic> flResult = {};
     flResult['ret'] = (result['ret'] ?? -1) as int;
     flResult['rgbTextureId'] = (result['rgbTextureId'] ?? 0) as int;
@@ -55,9 +53,9 @@ class FvCamera {
     depthTextureId = m['depthTextureId'] as int;
     irTextureId = m['irTextureId'] as int;
 
-    rgbPipeline = new FvPipeline(serial, FvPipeline.RGB_FRAME);
-    depthPipeline = new FvPipeline(serial, FvPipeline.DEPTH_FRAME);
-    irPipeline = new FvPipeline(serial, FvPipeline.IR_FRAME);
+    rgbPipeline = FvPipeline(serial, FvPipeline.RGB_FRAME);
+    depthPipeline = FvPipeline(serial, FvPipeline.DEPTH_FRAME);
+    irPipeline = FvPipeline(serial, FvPipeline.IR_FRAME);
   }
 
   Future<void> close() async {
@@ -84,8 +82,12 @@ class FvCamera {
     return true;
   }
 
-  Future<void> configure(int prop, List<double> value) async {
+  Future<bool> configure(int prop, List<double> value) async {
     return await FlutterVision.channel.invokeMethod('fvCameraConfig', {'prop': prop, 'value': Float32List.fromList(value), 'serial': serial});
+  }
+
+  Future<int> getConfiguration(int prop) async {
+    return await FlutterVision.channel.invokeMethod('fvCameraGetConfiguration', {'prop': prop, 'serial': serial});
   }
 
   Future<bool> screenshot(int index, String path, {int? cvtCode}) async {

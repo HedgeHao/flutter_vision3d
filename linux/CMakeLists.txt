@@ -52,5 +52,6 @@ set(flutter_vision_bundled_libraries
   "${PROJECT_SOURCE_DIR}/lib/libmodule-lips2.so"
   "${PROJECT_SOURCE_DIR}/lib/libOpenNI2.so"
   "${PROJECT_SOURCE_DIR}/lib/OpenNI.ini"
+  "${PROJECT_SOURCE_DIR}/lib/libmodule-lips2-sl.so"
   PARENT_SCOPE
 )

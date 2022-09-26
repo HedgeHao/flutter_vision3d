@@ -9,15 +9,14 @@
 
 using namespace openni;
 
-
-
-class OpenniCam :   public FvCamera,
-                    public OpenNI::DeviceConnectedListener,
-                    public OpenNI::DeviceDisconnectedListener,
-                    public OpenNI::DeviceStateChangedListener
+class OpenniCam : public FvCamera,
+                  public OpenNI::DeviceConnectedListener,
+                  public OpenNI::DeviceDisconnectedListener,
+                  public OpenNI::DeviceStateChangedListener
 {
 public:
-    static int openniInit(){
+    static int openniInit()
+    {
         return static_cast<int>(OpenNI::initialize());
     }
 
@@ -31,23 +30,23 @@ public:
 
     virtual void onDeviceStateChanged(const DeviceInfo *pInfo, DeviceState state)
     {
-      // printf("[LISTENER] Device \"%s\" error state changed to %d\n", pInfo->getUri(), state);
+        // printf("[LISTENER] Device \"%s\" error state changed to %d\n", pInfo->getUri(), state);
     }
 
     virtual void onDeviceConnected(const DeviceInfo *pInfo)
     {
-      // printf("[LISTENER] Device \"%s\" connected\n", pInfo->getUri());
+        // printf("[LISTENER] Device \"%s\" connected\n", pInfo->getUri());
     }
 
     virtual void onDeviceDisconnected(const DeviceInfo *pInfo)
     {
-      // TODO: When supporting multiple devices. Find the right device to destory
-      device = nullptr;
+        // TODO: When supporting multiple devices. Find the right device to destory
+        device = nullptr;
     }
 
-    OpenniCam(const char* s): FvCamera(s){};
+    OpenniCam(const char *s) : FvCamera(s){};
 
-    void camInit(){}
+    void camInit() {}
 
     int openDevice()
     {
@@ -68,13 +67,13 @@ public:
                 // char sn[32];
                 // this->device->getProperty(openni::DEVICE_PROPERTY_SERIAL_NUMBER, sn, &size);
 
-                std::cout<<"Valid"<<std::endl;
-                createVideoStream(); 
+                std::cout << "Valid" << std::endl;
+                createVideoStream();
             }
 
             return isValid ? 0 : -1;
         }
-    
+
         return -2;
     }
 
@@ -117,7 +116,7 @@ public:
 
     int configVideoStream(int streamIndex, bool *enable)
     {
-         if (device == nullptr)
+        if (device == nullptr)
             return -1;
 
         int isValid = 0;
@@ -128,7 +127,7 @@ public:
             {
                 vsColor.start();
                 if (vsColor.isValid())
-                isValid += VideoIndex::RGB;
+                    isValid += VideoIndex::RGB;
                 enableRgb = true;
             }
             else
@@ -144,7 +143,7 @@ public:
             {
                 vsDepth.start();
                 if (vsDepth.isValid())
-                isValid += VideoIndex::Depth;
+                    isValid += VideoIndex::Depth;
                 enableDepth = true;
             }
             else
@@ -160,7 +159,7 @@ public:
             {
                 vsIR.start();
                 if (vsIR.isValid())
-                isValid += VideoIndex::IR;
+                    isValid += VideoIndex::IR;
                 enableIr = true;
             }
             else
@@ -191,8 +190,8 @@ public:
         t.detach();
     }
 
-    void configure(int prop, float value){}
-    
+    void configure(int prop, std::vector<float> &value) {}
+
 private:
     VideoStream vsDepth;
     VideoStream vsColor;
@@ -208,7 +207,7 @@ private:
     {
         if (device == nullptr)
         {
-        return;
+            return;
         }
 
         vsColor.destroy();
@@ -303,7 +302,8 @@ private:
         *vertexCount = count;
     }
 
-    void _readVideoFeed(){
+    void _readVideoFeed()
+    {
         VideoFrameRef rgbFrame;
         VideoFrameRef depthFrame;
         VideoFrameRef irFrame;
@@ -313,7 +313,7 @@ private:
         bool irNewFrame = false;
 
         if (!(videoStart))
-        return;
+            return;
 
         while (videoStart)
         {
@@ -325,10 +325,10 @@ private:
             {
                 if (vsColor.readFrame(&rgbFrame) == STATUS_OK)
                 {
-                rgbTexture->cvImage = cv::Mat(rgbFrame.getHeight(), rgbFrame.getWidth(), CV_8UC3, (void *)rgbFrame.getData());
-                rgbTexture->pipeline->run(rgbTexture->cvImage, flRegistrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer, models, flChannel);
-                rgbTexture->setPixelBuffer();
-                rgbNewFrame = true;
+                    rgbTexture->cvImage = cv::Mat(rgbFrame.getHeight(), rgbFrame.getWidth(), CV_8UC3, (void *)rgbFrame.getData());
+                    rgbTexture->pipeline->run(rgbTexture->cvImage, flRegistrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer, models, flChannel);
+                    rgbTexture->setPixelBuffer();
+                    rgbNewFrame = true;
                 }
             }
 
@@ -336,10 +336,10 @@ private:
             {
                 if (vsDepth.readFrame(&depthFrame) == STATUS_OK)
                 {
-                depthTexture->cvImage = cv::Mat(depthFrame.getHeight(), depthFrame.getWidth(), CV_16UC1, (void *)depthFrame.getData());
-                depthTexture->pipeline->run(depthTexture->cvImage, flRegistrar, depthTexture->textureId, depthTexture->videoWidth, depthTexture->videoHeight, depthTexture->buffer, models, flChannel);
-                depthTexture->setPixelBuffer();
-                depthNewFrame = true;
+                    depthTexture->cvImage = cv::Mat(depthFrame.getHeight(), depthFrame.getWidth(), CV_16UC1, (void *)depthFrame.getData());
+                    depthTexture->pipeline->run(depthTexture->cvImage, flRegistrar, depthTexture->textureId, depthTexture->videoWidth, depthTexture->videoHeight, depthTexture->buffer, models, flChannel);
+                    depthTexture->setPixelBuffer();
+                    depthNewFrame = true;
                 }
             }
 
@@ -347,10 +347,10 @@ private:
             {
                 if (vsIR.readFrame(&irFrame) == STATUS_OK)
                 {
-                irTexture->cvImage = cv::Mat(irFrame.getHeight(), irFrame.getWidth(), CV_16UC1, (void *)irFrame.getData());
-                irTexture->pipeline->run(irTexture->cvImage, flRegistrar, irTexture->textureId, irTexture->videoWidth, irTexture->videoHeight, irTexture->buffer, models, flChannel);
-                irTexture->setPixelBuffer();
-                irNewFrame = true;
+                    irTexture->cvImage = cv::Mat(irFrame.getHeight(), irFrame.getWidth(), CV_16UC1, (void *)irFrame.getData());
+                    irTexture->pipeline->run(irTexture->cvImage, flRegistrar, irTexture->textureId, irTexture->videoWidth, irTexture->videoHeight, irTexture->buffer, models, flChannel);
+                    irTexture->setPixelBuffer();
+                    irNewFrame = true;
                 }
             }
 

@@ -4,6 +4,10 @@
 
 #include "fv_camera.h"
 
+#define LIPS_FACE_RECOGNITION 0x258
+#define LIPS_FACE_REGISTRATION 0x259
+#define LIPS_FACE_DELETE_FACE_DATABASE 0x25A
+
 using namespace openni;
 
 class OpenniCam : public FvCamera,
@@ -186,7 +190,25 @@ public:
     t.detach();
   }
 
-  void configure(int prop, std::vector<float> &value) {}
+  void configure(int prop, std::vector<float> &value)
+  {
+    switch (prop)
+    {
+    case LIPS_FACE_REGISTRATION:
+    case LIPS_FACE_RECOGNITION:
+    case LIPS_FACE_DELETE_FACE_DATABASE:
+      unsigned short param = value[0];
+      device->setProperty(prop, &param, sizeof(unsigned short));
+      break;
+    }
+  }
+
+  int getConfiguration(int prop)
+  {
+    unsigned short int result = -1;
+    device->getProperty(prop, &result);
+    return (int)result;
+  }
 
 private:
   VideoStream vsDepth;

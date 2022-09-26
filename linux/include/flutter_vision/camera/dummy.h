@@ -23,6 +23,8 @@ public:
 
   void configure(int prop, std::vector<float> &value) {}
 
+  int getConfiguration(int prop) { return 0; }
+
 private:
   void _readVideoFeed() {}
 };

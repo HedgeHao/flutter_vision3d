@@ -11,19 +11,24 @@
 class UvcCam : public FvCamera
 {
 public:
-    UvcCam(const char* s): FvCamera(s){};
+    UvcCam(const char *s) : FvCamera(s){};
 
-    void camInit(){
+    void camInit()
+    {
         uvcIndex = stoi(serial);
-        if(uvcIndex >= 0){
+        if (uvcIndex >= 0)
+        {
             cap = new cv::VideoCapture();
         }
     }
 
-    int openDevice(){
-        if(!cap) return -1;
+    int openDevice()
+    {
+        if (!cap)
+            return -1;
         bool ret = cap->open(uvcIndex);
-        if(!ret) return -2;
+        if (!ret)
+            return -2;
         return cap->isOpened() ? 0 : -3;
     }
 
@@ -33,13 +38,15 @@ public:
         return 0;
     }
 
-    int isConnected(){return 0;}
+    int isConnected() { return 0; }
 
     int configVideoStream(int streamIndex, bool *enable)
     {
-        if(!cap) return -1;
+        if (!cap)
+            return -1;
 
-        if(!cap->isOpened()) return -2;
+        if (!cap->isOpened())
+            return -2;
 
         videoStart = *enable;
 
@@ -52,12 +59,13 @@ public:
         std::thread t(&UvcCam::_readVideoFeed, this);
         t.detach();
     }
-    
-    void configure(int prop, float value)
+
+    void configure(int prop, std::vector<float> &value)
     {
-        if(!cap) return;
-        
-        cap->set(prop, value);
+        if (!cap)
+            return;
+
+        cap->set(prop, value[0]);
     }
 
 private:
