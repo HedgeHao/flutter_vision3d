@@ -29,10 +29,6 @@ target_include_directories(${PLUGIN_NAME} INTERFACE
 target_link_libraries(${PLUGIN_NAME} PRIVATE flutter)
 target_link_libraries(${PLUGIN_NAME} PRIVATE PkgConfig::GTK)
 
-target_link_libraries(${PLUGIN_NAME} PRIVATE OpenNI2)
-find_package(OpenCV REQUIRED COMPONENTS core imgproc highgui)
-target_link_libraries( ${PLUGIN_NAME} PRIVATE ${OpenCV_LIBS})
-
 set(OpenGL_GL_PREFERENCE LEGACY)
 find_package( OpenGL REQUIRED )
 target_link_libraries( ${PLUGIN_NAME} PRIVATE ${OPENGL_LIBRARIES})
@@ -40,9 +36,42 @@ target_link_libraries( ${PLUGIN_NAME} PRIVATE ${OPENGL_LIBRARIES})
 find_package( GLEW REQUIRED )
 target_link_libraries( ${PLUGIN_NAME} PRIVATE GLEW::GLEW)
 
-target_link_libraries( ${PLUGIN_NAME} PRIVATE tensorflowlite)
 target_link_libraries( ${PLUGIN_NAME} PRIVATE flutterVisionHandler)
-target_link_libraries( ${PLUGIN_NAME} PRIVATE realsense2)
+
+# OpenCV
+find_package(OpenCV REQUIRED COMPONENTS core imgproc highgui)
+if(OpenCV_FOUND)
+  target_link_libraries( ${PLUGIN_NAME} PRIVATE ${OpenCV_LIBS})
+else()
+  message("CANNOT FIND OPENCV LIBRARY")
+endif()
+
+# Realsense SDK
+find_package(realsense2)
+if(realsense2_FOUND)
+  target_link_libraries( ${PLUGIN_NAME} PRIVATE realsense2)
+else()
+  add_definitions(-DDISABLE_REALSENSE)
+  message("CANNOT FIND REALSENSE SDK")
+endif()
+
+# OpenNI2 SDK
+find_path(OPENNI2_INC NAMES OpenNI.h HINTS "$ENV{OPENNI2_INCLUDE}")
+find_library(OPENNI2_LIB NAMES OpenNI2 HINTS "$ENV{OPENNI2_REDIST}")
+if(OPENNI2_INC AND OPENNI2_LIB)
+  target_link_libraries(${PLUGIN_NAME} PRIVATE OpenNI2)
+else()
+  add_definitions(-DDISABLE_OPENNI)
+  message("CANNOT FIND OPENNI2 SDK")
+endif()
+
+# Tensorflow Lite
+find_library(TENSORFLOWLITE_LIB NAMES tensorflowlite REQUIRED)
+if(TENSORFLOWLITE_LIB)
+  target_link_libraries( ${PLUGIN_NAME} PRIVATE tensorflowlite)
+else()
+  message("CANNOT FIND TENSORFLOW LITE LIBRARY")
+endif()
 
 
 # List of absolute paths to libraries that should be bundled with the plugin
