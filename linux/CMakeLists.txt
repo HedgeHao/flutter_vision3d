@@ -39,7 +39,7 @@ target_link_libraries( ${PLUGIN_NAME} PRIVATE GLEW::GLEW)
 target_link_libraries( ${PLUGIN_NAME} PRIVATE flutterVisionHandler)
 
 # OpenCV
-find_package(OpenCV REQUIRED COMPONENTS core imgproc highgui)
+find_package(OpenCV 4.0.0 REQUIRED COMPONENTS core imgproc highgui)
 if(OpenCV_FOUND)
   target_link_libraries( ${PLUGIN_NAME} PRIVATE ${OpenCV_LIBS})
 else()

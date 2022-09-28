@@ -7,10 +7,15 @@ A framework for 2D & 3D image processing with AI (Tensorflow Lite)
 ## Prerequisite
 ### Linux
 
-* `apt install ninja-build cmake build-essential libglew-dev libopencv-dev libglm-dev libgtk-3-dev`
+* GLEW
+* OpenCV 4.0.0+
+* GLM
+* gtk3
 
 ### Windows
-* Install `OpenCV`, `GLEW`,  and `GLFW`
+* OpenCV 4.0.0+
+* GLEW
+* GLFW
 
 ---
 ## 1. Create and Connect to Camera
