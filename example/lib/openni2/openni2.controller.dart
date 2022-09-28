@@ -77,12 +77,20 @@ class OpenNIController extends GetxController {
   void pipelineDepth() async {
     FvPipeline depthPipeline = cam!.depthPipeline;
     await depthPipeline.clear();
-    await depthPipeline.convertTo(0, 255.0 / 1024.0);
+    await depthPipeline.convertTo(OpenCV.CV_8U, 255.0 / 1024.0);
     await depthPipeline.applyColorMap(Random().nextInt(20));
     await depthPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
     await depthPipeline.show();
 
     update([BUILDER_TEXTURE]);
+  }
+
+  void pipelineIr() async {
+    FvPipeline irPipeline = cam!.irPipeline;
+    await irPipeline.clear();
+    await irPipeline.convertTo(OpenCV.CV_8U, 255.0 / 1024.0);
+    await irPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
+    await irPipeline.show();
   }
 
   void selectDevice(int selectIndex) {

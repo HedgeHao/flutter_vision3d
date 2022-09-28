@@ -109,6 +109,14 @@ class OpenNIView extends GetView<OpenNIController> {
                         },
                         child: const Text('Depth Frame')),
                     const Text(': Depth frame with random color map')
+                  ]),
+                  Row(children: [
+                    TextButton(
+                        onPressed: () {
+                          controller.pipelineIr();
+                        },
+                        child: const Text('IR Frame')),
+                    const Text(': IR frame with greys color map')
                   ])
                 ]),
                 const Divider(),
