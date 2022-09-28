@@ -2,14 +2,12 @@
 #define _DEF_DUMMY_CAM_
 #include "fv_camera.h"
 
-using namespace openni;
-
 class DummyCam : public FvCamera
 {
 public:
   DummyCam(const char *s) : FvCamera(s){};
 
-  void camInit() {}
+  int camInit() { return 0; }
 
   int openDevice() { return 0; }
 
@@ -19,13 +17,13 @@ public:
 
   int configVideoStream(int streamIndex, bool *enable) { return 0; }
 
-  void readVideoFeed() {}
+  int readVideoFeed() { return 0; }
 
-  void configure(int prop, std::vector<float> &value) {}
+  int configure(int prop, std::vector<float> &value) { return 0; }
 
   int getConfiguration(int prop) { return 0; }
 
 private:
-  void _readVideoFeed() {}
+  int _readVideoFeed() { return 0; }
 };
 #endif

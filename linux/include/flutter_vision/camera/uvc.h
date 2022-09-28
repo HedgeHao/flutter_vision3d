@@ -11,13 +11,15 @@ class UvcCam : public FvCamera
 public:
   UvcCam(const char *s) : FvCamera(s){};
 
-  void camInit()
+  int camInit()
   {
     uvcIndex = stoi(serial);
     if (uvcIndex >= 0)
     {
       cap = new cv::VideoCapture();
     }
+
+    return 0;
   }
 
   int openDevice()
@@ -51,19 +53,22 @@ public:
     return 0;
   }
 
-  void readVideoFeed()
+  int readVideoFeed()
   {
     videoStart = true;
     std::thread t(&UvcCam::_readVideoFeed, this);
     t.detach();
+    return 0;
   }
 
-  void configure(int prop, std::vector<float> &value)
+  int configure(int prop, std::vector<float> &value)
   {
     if (!cap)
-      return;
+      return -1;
 
     cap->set(prop, value[0]);
+
+    return 0;
   }
 
   int getConfiguration(int prop) { return 0; }
@@ -71,12 +76,12 @@ public:
 private:
   int uvcIndex = -1;
   cv::VideoCapture *cap;
-  void _readVideoFeed()
+  int _readVideoFeed()
   {
     bool newFrame = false;
 
     if (!(videoStart))
-      return;
+      return -1;
 
     while (videoStart)
     {
@@ -88,6 +93,8 @@ private:
         fl_method_channel_invoke_method(flChannel, "onUvcFrame", nullptr, nullptr, nullptr, NULL);
       }
     }
+
+    return 0;
   }
 };
 #endif

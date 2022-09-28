@@ -37,7 +37,6 @@ enum CameraType
 
 RealsenseCam *findRsCam(const char *serial, std::vector<RealsenseCam *> *cams)
 {
-  RealsenseCam *cam = nullptr;
   for (auto c : *cams)
   {
     if (strcmp(c->serial.c_str(), serial) == 0)
@@ -84,6 +83,9 @@ static void flutter_vision_plugin_handle_method_call(
   }
   else if (strcmp(method, "ni2EnumerateDevices") == 0)
   {
+#ifdef DISABLE_OPENNI
+    response = FL_METHOD_RESPONSE(fl_method_error_response_new("NOT SUPPORT", "NOT SUPPORT", nullptr));
+#else
     Array<DeviceInfo> devs;
     OpenniCam::enumerateDevices(&devs);
 
@@ -101,6 +103,7 @@ static void flutter_vision_plugin_handle_method_call(
     }
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(flDeviceList));
+#endif
   }
   else if (strcmp(method, "fvCameraOpen") == 0)
   {
@@ -164,7 +167,7 @@ static void flutter_vision_plugin_handle_method_call(
   else if (strcmp(method, "fvCameraConfigVideoStream") == 0)
   {
     const char *serial = FL_ARG_STRING(args, "serial");
-    int cameraType = FL_ARG_INT(args, "cameraType");
+    // int cameraType = FL_ARG_INT(args, "cameraType");
     int videoModeIndex = FL_ARG_INT(args, "videoModeIndex");
     bool enable = FL_ARG_BOOL(args, "enable");
 
@@ -181,9 +184,9 @@ static void flutter_vision_plugin_handle_method_call(
   }
   else if (strcmp(method, "ni2SetVideoSize") == 0)
   {
-    const int index = FL_ARG_INT(args, "videoIndex");
-    const int width = FL_ARG_INT(args, "width");
-    const int height = FL_ARG_INT(args, "height");
+    // const int index = FL_ARG_INT(args, "videoIndex");
+    // const int width = FL_ARG_INT(args, "width");
+    // const int height = FL_ARG_INT(args, "height");
 
     // TODO: not implement
 
@@ -191,6 +194,9 @@ static void flutter_vision_plugin_handle_method_call(
   }
   else if (strcmp(method, "rsEnumerateDevices") == 0)
   {
+#ifdef DISABLE_REALSENSE
+    response = FL_METHOD_RESPONSE(fl_method_error_response_new("NOT SUPPORT", "NOT SUPPORT", nullptr));
+#else
     std::vector<std::string> serials = RealsenseHelper::enumerateDevices();
 
     auto list = fl_value_new_list();
@@ -200,6 +206,7 @@ static void flutter_vision_plugin_handle_method_call(
     }
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(list));
+#endif
   }
   else if (strcmp(method, "getOpenglTextureId") == 0)
   {

@@ -60,9 +60,15 @@ class FlutterVision {
   }
 
   static Future<List<String>> rsEnumerateDevices() async {
-    List<Object?> list = await channel.invokeMethod('rsEnumerateDevices');
+    try {
+      List<Object?> list = await channel.invokeMethod('rsEnumerateDevices');
 
-    return list.map((e) => e.toString()).toList();
+      return list.map((e) => e.toString()).toList();
+    } catch (e) {
+      print('Realsense SDK is not found');
+    }
+
+    return [];
   }
 
   static Future<int> niInitialize() async {
@@ -70,11 +76,15 @@ class FlutterVision {
   }
 
   static Future<List<OpenNi2Device>> enumerateDevices() async {
-    List<Object?> list = await channel.invokeMethod('ni2EnumerateDevices');
-
     List<OpenNi2Device> deviceList = <OpenNi2Device>[];
 
-    deviceList.addAll(list.map((e) => OpenNi2Device.fromJson(e as Map<dynamic, dynamic>)));
+    try {
+      List<Object?> list = await channel.invokeMethod('ni2EnumerateDevices');
+
+      deviceList.addAll(list.map((e) => OpenNi2Device.fromJson(e as Map<dynamic, dynamic>)));
+    } catch (e) {
+      print('OpenNI SDK is not found');
+    }
 
     return deviceList;
   }

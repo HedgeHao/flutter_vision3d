@@ -1,3 +1,25 @@
+#include "fv_camera.h"
+
+#ifdef DISABLE_REALSENSE
+class RealsenseCam : public FvCamera
+{
+public:
+  RealsenseCam(const char *s) : FvCamera(s) {}
+
+  int camInit() { return NOT_SUPPORT; }
+  int openDevice() { return NOT_SUPPORT; }
+  int closeDevice() { return NOT_SUPPORT; }
+  int isConnected() { return NOT_SUPPORT; }
+  int configVideoStream(int streamIndex, bool *enable) { return NOT_SUPPORT; }
+  int readVideoFeed() { return NOT_SUPPORT; }
+  int configure(int prop, std::vector<float> &value) { return NOT_SUPPORT; }
+  int getConfiguration(int prop) { return NOT_SUPPORT; }
+
+private:
+  int _readVideoFeed() { return NOT_SUPPORT; }
+};
+#else
+
 #include <librealsense2/rs.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -5,8 +27,6 @@
 #include <iostream>
 #include <vector>
 #include <thread>
-
-#include "fv_camera.h"
 
 enum RsVideoIndex
 {
@@ -42,9 +62,10 @@ public:
 
   RealsenseCam(const char *s) : FvCamera(s) {}
 
-  void camInit()
+  int camInit()
   {
     glfl->modelRsPointCloud->rgbFrame = &rgbFrame;
+    return 0;
   }
 
   int openDevice()
@@ -111,14 +132,15 @@ public:
     return -1;
   }
 
-  void readVideoFeed()
+  int readVideoFeed()
   {
     videoStart = true;
     std::thread t(&RealsenseCam::_readVideoFeed, this);
     t.detach();
+    return 0;
   }
 
-  void configure(int prop, std::vector<float> &value)
+  int configure(int prop, std::vector<float> &value)
   {
     if (prop == RsConfiguration::THRESHOLD_FILTER)
     {
@@ -128,13 +150,15 @@ public:
         {
           f.filter->as<rs2::threshold_filter>().set_option(rs2_option::RS2_OPTION_MIN_DISTANCE, value[0]);
           f.filter->as<rs2::threshold_filter>().set_option(rs2_option::RS2_OPTION_MAX_DISTANCE, value[1]);
-          return;
+          return 0;
         }
       }
 
       RsFilter f(RsFilterType::THRESHOLD, new rs2::threshold_filter(value[0], value[1]));
       filters.push_back(f);
     }
+
+    return -1;
   }
 
   int getConfiguration(int prop) { return 0; }
@@ -147,7 +171,7 @@ private:
   rs2::frame rgbFrame;
   std::vector<RsFilter> filters{};
 
-  void _readVideoFeed()
+  int _readVideoFeed()
   {
     while (videoStart)
     {
@@ -202,6 +226,7 @@ private:
         break;
       }
     }
+    return 0;
   }
 
   static cv::Mat frame_to_mat(const rs2::frame &f)
@@ -253,3 +278,5 @@ namespace RealsenseHelper
     return serials;
   }
 };
+
+#endif
