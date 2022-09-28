@@ -52,7 +52,7 @@ if(realsense2_FOUND)
   target_link_libraries( ${PLUGIN_NAME} PRIVATE realsense2)
 else()
   add_definitions(-DDISABLE_REALSENSE)
-  message("CANNOT FIND REALSENSE SDK")
+  message("BUILD WINOUT REALSENSE SDK")
 endif()
 
 # OpenNI2 SDK
@@ -62,7 +62,7 @@ if(OPENNI2_INC AND OPENNI2_LIB)
   target_link_libraries(${PLUGIN_NAME} PRIVATE OpenNI2)
 else()
   add_definitions(-DDISABLE_OPENNI)
-  message("CANNOT FIND OPENNI2 SDK")
+  message("BUILD WINOUT OPENNI2 SDK")
 endif()
 
 # Tensorflow Lite
@@ -76,11 +76,6 @@ endif()
 
 # List of absolute paths to libraries that should be bundled with the plugin
 set(flutter_vision_bundled_libraries
-  "${PROJECT_SOURCE_DIR}/lib/libtensorflowlite.so"
   "${CMAKE_BINARY_DIR}/plugins/flutter_vision/handler/libflutterVisionHandler.so"
-  "${PROJECT_SOURCE_DIR}/lib/libmodule-lips2.so"
-  "${PROJECT_SOURCE_DIR}/lib/libOpenNI2.so"
-  "${PROJECT_SOURCE_DIR}/lib/OpenNI.ini"
-  "${PROJECT_SOURCE_DIR}/lib/libmodule-lips2-sl.so"
   PARENT_SCOPE
 )
