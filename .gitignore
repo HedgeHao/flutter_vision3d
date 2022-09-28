@@ -34,4 +34,3 @@ windows/bin
 handler/bin/*
 example/test.jpg
 .VSCodeCounter
-example/lib/define.dart
