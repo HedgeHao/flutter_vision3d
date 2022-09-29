@@ -42,7 +42,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
   "$ENV{OPENNI2_LIB64}/OpenNI2.lib"
   ${OpenCV_LIBS}
   opengl32
-  "${PROJECT_SOURCE_DIR}/../handler/bin/flutterVisionHandler.lib"
+  "$ENV{FLUTTER_VISION_DEP}/handler/build/flutterVisionHandler.lib"
 )
 
 # List of absolute paths to libraries that should be bundled with the plugin
@@ -50,7 +50,7 @@ set(flutter_vision_bundled_libraries
   "$ENV{FLUTTER_VISION_DEP}/tensorflowlite/bin/tensorflowlite.dll"
   "$ENV{FLUTTER_VISION_DEP}/opengl/bin/glew32.dll"
   "$ENV{FLUTTER_VISION_DEP}/realsense2/bin/x64/realsense2.dll"
-  "${PROJECT_SOURCE_DIR}/../handler/bin/flutterVisionHandler.dll"
+  "$ENV{FLUTTER_VISION_DEP}/handler/build/flutterVisionHandler.dll"
   PARENT_SCOPE
 )
 

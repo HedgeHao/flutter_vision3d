@@ -100,7 +100,8 @@ public:
 
     if (*enable)
     {
-      pipeline->start();
+      cfg.enable_all_streams();
+      pipeline->start(cfg);
     }
     else
     {

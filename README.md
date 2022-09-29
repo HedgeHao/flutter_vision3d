@@ -11,11 +11,21 @@ A framework for 2D & 3D image processing with AI (Tensorflow Lite)
 * OpenCV 4.0.0+
 * GLM
 * gtk3
+* Tensorflow Lite 2.7.0+
 
 ### Windows
-* OpenCV 4.0.0+
-* GLEW
-* GLFW
+
+1. Download dependency files from [here](https://reurl.cc/AOm1d8)
+
+2. Extract downloaded file to where you like.
+
+![](doc/img/01.png)
+
+3. Add system environment variable `FLUTTER_VISION_DEP`
+
+![](doc/img/02.png)
+
+4. Execute and install `LIPS OpenNI2 SDK`
 
 ---
 ## 1. Create and Connect to Camera
