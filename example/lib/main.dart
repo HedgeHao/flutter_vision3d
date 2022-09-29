@@ -33,13 +33,6 @@ class MyApp extends StatelessWidget {
       // logWriterCallback: Logger.write,
       initialRoute: AppPages.defaultRoute,
       getPages: AppPages.routes,
-      // unknownRoute: AppPages.unknownRoute,
-      // locale: TranslationService.locale,
-      // fallbackLocale: TranslationService.fallbackLocale,
-      // translations: TranslationService(),
-      // locale: TranslationService.locale,
-      // fallbackLocale: TranslationService.fallbackLocale,
-      // translations: TranslationService(),
     );
   }
 }
@@ -116,9 +109,9 @@ class HomeView extends StatelessWidget {
             enabled: false,
           ),
           ListTile(
-            title: const Text('Facial Recognition'),
-            subtitle: const Text('Facial Recognition with LIPSFace AI Model'),
-            onTap: () => Get.toNamed(AppRoutes.join([AppRoutes.home, AppRoutes.fr])),
+            title: const Text('Hand Detection'),
+            subtitle: const Text('Hand Detection with model provided by MediaPipe'),
+            onTap: () => Get.toNamed(AppRoutes.join([AppRoutes.home, AppRoutes.handDetection])),
           ),
           ListTile(
             title: const Text('Object Detection'),
@@ -126,9 +119,9 @@ class HomeView extends StatelessWidget {
             onTap: () => Get.toNamed(AppRoutes.join([AppRoutes.home, AppRoutes.efficientNet])),
           ),
           ListTile(
-            title: const Text('Hand Detection'),
-            subtitle: const Text('Hand Detection with model provided by MediaPipe'),
-            onTap: () => Get.toNamed(AppRoutes.join([AppRoutes.home, AppRoutes.handDetection])),
+            title: const Text('Facial Recognition'),
+            subtitle: const Text('Facial Recognition with LIPSFace AI Model'),
+            onTap: () => Get.toNamed(AppRoutes.join([AppRoutes.home, AppRoutes.fr])),
           ),
         ],
       ),

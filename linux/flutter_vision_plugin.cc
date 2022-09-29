@@ -156,6 +156,8 @@ static void flutter_vision_plugin_handle_method_call(
     if (cam != nullptr)
     {
       ret = cam->closeDevice();
+
+      FvCamera::removeCam(serial, &self->cams);
     }
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }

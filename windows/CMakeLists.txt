@@ -52,6 +52,7 @@ set(flutter_vision_bundled_libraries
   "$ENV{FLUTTER_VISION_DEP}/realsense2/bin/x64/realsense2.dll"
   "$ENV{FLUTTER_VISION_DEP}/handler/build/flutterVisionHandler.dll"
   "$ENV{FLUTTER_VISION_DEP}/opencv/x64/vc15/bin/opencv_world454.dll"
+  "$ENV{FLUTTER_VISION_DEP}/opencv/x64/vc15/bin/opencv_world454d.dll"
   "$ENV{OPENNI2_REDIST64}/OpenNI2"
   "$ENV{OPENNI2_REDIST64}/OpenNI.ini"
   "$ENV{OPENNI2_REDIST64}/OpenNI2.dll"

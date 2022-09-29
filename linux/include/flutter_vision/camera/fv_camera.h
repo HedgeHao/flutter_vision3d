@@ -51,6 +51,20 @@ public:
     return nullptr;
   }
 
+  static bool removeCam(const char *serial, std::vector<FvCamera *> *cams)
+  {
+    for (int i = 0; i < cams->size(); i++)
+    {
+      if (strcmp(cams->at(i)->serial.c_str(), serial) == 0)
+      {
+        cams->erase(cams->begin() + i);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   void fvInit(FlTextureRegistrar *r, std::vector<TFLiteModel *> *m, FlMethodChannel *f, OpenGLFL *g)
   {
     flRegistrar = r;

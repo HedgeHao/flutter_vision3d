@@ -15,7 +15,10 @@ class RealsenseView extends GetView<RealsenseController> {
         title: const Text("Realsense"),
         leading: BackButton(
           color: Colors.white,
-          onPressed: () => Get.back(),
+          onPressed: () async {
+            await controller.deconstruct();
+            Get.back();
+          },
         ),
       ),
       body: Row(children: [

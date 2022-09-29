@@ -2,7 +2,14 @@
 
 A framework for 2D & 3D image processing with AI (Tensorflow Lite)
 
+* 3D camera RGB, Depth, IR frames and PointCloud
+![](doc/img/screenshot1.png)
 
+* Capture image from camera and process with OpenCV and TensorflowLite hand recognition AI model.
+![](doc/img/screenshot2.gif)
+
+* Process image by OpenCV functions
+![](doc/img/screenshot6.png)
 ---
 ## Prerequisite
 ### Linux
@@ -12,6 +19,7 @@ A framework for 2D & 3D image processing with AI (Tensorflow Lite)
 * GLM
 * gtk3
 * Tensorflow Lite 2.7.0+
+> All the dependency package can be installed using apt-get expect TensorFlow Lite. Please follow [documentation](https://www.tensorflow.org/install/source) to build `libtensorflowlite.so` and place it to where compiler can find (e.g /usr/lib/)
 
 ### Windows
 
@@ -19,14 +27,56 @@ A framework for 2D & 3D image processing with AI (Tensorflow Lite)
 
 2. Extract downloaded file to where you like.
 
-![](doc/img/01.png)
+![](doc/img/screenshot5.png)
 
 3. Add system environment variable `FLUTTER_VISION_DEP`
 
-![](doc/img/02.png)
+![](doc/img/screenshot4.png)
 
 4. Execute and install `LIPS OpenNI2 SDK`
 
+## Example App
+
+![](doc/img/screenshot3.png)
+
+The example app set all used TensorFlow Lite models in `example/lib/define.dart`. Please download the models. And modify this define file, set the correct path, if you want to run Tensorflow Lite pipeline example.
+
+```dart
+class Define {
+  static const HAND_DETECTOR_MODEL = '/path/to/model';
+  static const FACE_DETECTOR_MODEL = '/path/to/model';
+  static const EFFICIENT_NET_MODEL = '/path/to/model';
+}
+```
+
+| Example    |          Description              |
+| ---------- | --------------------------------  |
+| [Camera] UVC Camera | Display 2D USB camera video frame |
+| [Camera] Realsense  | Display 3D camera RGB, depth, IR frames and PointCloud using Realsense SDK |
+| [Camera] OpenNI     | Display 3D camera RGB, depth, IR frames and PointCloud using OpenNI2 SDK |
+| [Pipeline] OpenCV | Load a image file. Use different pipeline functions to process this image |
+| [Pipeline] Custom Handler | Load a image file. Use pipeline native handler(written in C++) to process this image |
+| [Pipeline] Hand Detection | Load video from UVC camera. Use tensorflow lite pipeline functions to detect hand in frame. Hand detection model from [MediaPipe](https://storage.googleapis.com/mediapipe-assets/palm_detection_lite.tflite)|
+| [Pipeline] Object Detection | Load video from UVC camera. Use tensorflow lite pipeline functions to recognize object in frame. Object detection model from [TensorflowLite](https://tfhub.dev/tensorflow/lite-model/efficientnet/lite4/fp32/2)|
+| [Pipeline] Facial Recognition | Load video from UVC camera. Use tensorflow lite pipeline functions to detect face in frame. Facial Recognition Model from [LIPS Corp.](https://www.lips-hci.com/lipsface-3d-facial-recognition-solution)
+
+## Supported 3D Camera
+| Camera                | Supported | Tested | Product Link |
+| --------------------- | --------- | ------ | ------------ |
+| Intel Realsense D415  |     ✅    |   ✅   |  [Link](https://www.intelrealsense.com/depth-camera-d415/) |
+| Intel Realsense D435  |     ✅    |   ✅   |  [Link](https://www.intelrealsense.com/depth-camera-d435/) |
+| Intel Realsense D435i |     ✅    |        |  [Link](https://www.intelrealsense.com/depth-camera-d435i/) |
+| Intel Realsense D455  |     ✅    |        |  [Link](https://www.intelrealsense.com/depth-camera-d455/) |
+| Intel Realsense T265  |     ✅    |        |  [Link](https://www.intelrealsense.com/tracking-camera-t265/) |
+| Intel Realsense L515  |     ✅    |        |  [Link](https://www.intelrealsense.com/lidar-camera-l515/) |
+| LIPSedge AE400        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae400) |
+| LIPSedge AE450        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae450) |
+| LIPSedge DL           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-dl-series) |
+| LIPSedge M3           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-m3-series) |
+| LIPSedge L Series     |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-l-series) |
+
+
+## Usage
 ---
 ## 1. Create and Connect to Camera
 * UVC Camera
@@ -151,30 +201,5 @@ class TFLiteModel{
     static Future<TFLiteModel> create(modelPath)
 
     Future<Float32List> getTensorOutput(int tensorIndex, List<int> size)
-}
-```
-
-## Supported 3D Camera
-| Camera                | Supported | Tested | Product Link |
-| --------------------- | --------- | ------ | ------------ |
-| Intel Realsense D415  |     ✅    |   ✅   |  [Link](https://www.intelrealsense.com/depth-camera-d415/) |
-| Intel Realsense D435  |     ✅    |   ✅   |  [Link](https://www.intelrealsense.com/depth-camera-d435/) |
-| Intel Realsense D435i |     ✅    |        |  [Link](https://www.intelrealsense.com/depth-camera-d435i/) |
-| Intel Realsense D455  |     ✅    |        |  [Link](https://www.intelrealsense.com/depth-camera-d455/) |
-| Intel Realsense T265  |     ✅    |        |  [Link](https://www.intelrealsense.com/tracking-camera-t265/) |
-| Intel Realsense L515  |     ✅    |        |  [Link](https://www.intelrealsense.com/lidar-camera-l515/) |
-| LIPSedge AE400        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae400) |
-| LIPSedge AE450        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae450) |
-| LIPSedge DL           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-dl-series) |
-| LIPSedge M3           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-m3-series) |
-| LIPSedge L Series     |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-l-series) |
-
-## Run Example 
-The example app set all the TensorFlow Lite models in `example/lib/define.dart`. Please download the models. And add this define file, set the correct path, if you want to run Tensorflow Lite pipeline example.
-```dart
-class Define {
-  static const HAND_DETECTOR_MODEL = '/path/to/model';
-  static const FACE_DETECTOR_MODEL = '/path/to/model';
-  static const EFFICIENT_NET_MODEL = '/path/to/model';
 }
 ```

@@ -15,7 +15,10 @@ class OpenNIView extends GetView<OpenNIController> {
         title: const Text("OpenNI"),
         leading: BackButton(
           color: Colors.white,
-          onPressed: () => Get.back(),
+          onPressed: () async {
+            await controller.deconstruct();
+            Get.back();
+          },
         ),
       ),
       body: Row(children: [

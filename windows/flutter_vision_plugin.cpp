@@ -189,6 +189,8 @@ namespace
       if (cam != nullptr)
       {
         ret = cam->closeDevice();
+
+        FvCamera::removeCam(serial.c_str(), &cams);
       }
 
       result->Success(flutter::EncodableValue(nullptr));

@@ -15,7 +15,10 @@ class UvcView extends GetView<UvcControllerDevice> {
         title: const Text("UVC"),
         leading: BackButton(
           color: Colors.white,
-          onPressed: () => Get.back(),
+          onPressed: () async {
+            await controller.deconstruct();
+            Get.back();
+          },
         ),
       ),
       body: Row(children: [
@@ -87,14 +90,14 @@ class UvcView extends GetView<UvcControllerDevice> {
           children: [
             Container(
                 decoration: BoxDecoration(border: Border.all(width: 1)),
-                width: 320,
-                height: 180,
+                width: 640,
+                height: 480,
                 child: GetBuilder<UvcControllerDevice>(
                   builder: (controller) {
-                    return controller.cams.isEmpty
+                    return controller.cam == null
                         ? const SizedBox()
                         : Texture(
-                            textureId: controller.cams.first.rgbTextureId,
+                            textureId: controller.cam!.rgbTextureId,
                           );
                   },
                 ))

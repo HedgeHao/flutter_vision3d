@@ -42,27 +42,15 @@ class OpenNIController extends GetxController {
   }
 
   void closeOpenNICamera() async {
-    if (cam == null) {
-      return;
-    }
-
-    await cam!.close();
+    await cam?.close();
   }
 
   void enableStreaming() async {
-    if (cam == null) {
-      return;
-    }
-
-    await cam!.enableStream();
+    await cam?.enableStream();
   }
 
   void disableStreaming() async {
-    if (cam == null) {
-      return;
-    }
-
-    await cam!.disableStream();
+    await cam?.disableStream();
   }
 
   void pipelineRGB() async {
@@ -129,5 +117,12 @@ class OpenNIController extends GetxController {
     openglTextureId = await FlutterVision.getOpenglTextureId();
 
     update([BUILDER_TEXTURE_OPENGL]);
+  }
+
+  Future<void> deconstruct() async {
+    await cam?.disableStream();
+    await cam?.close();
+    cam = null;
+    update([BUILDER_TEXTURE]);
   }
 }

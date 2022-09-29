@@ -1,3 +1,6 @@
+## 1.0.0
+* Fix Windows build process (Separate dependencies)
+
 ## 0.7.0
 * Add 3D camera IR frame example
 * Make 3D camera SDK optional when building plugin

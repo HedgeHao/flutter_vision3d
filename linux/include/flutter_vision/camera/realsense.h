@@ -126,7 +126,13 @@ public:
     else
     {
       videoStart = false;
-      pipeline->stop();
+      try
+      {
+        pipeline->stop();
+      }
+      catch (rs2::wrong_api_call_sequence_error &e)
+      {
+      }
     }
 
     return -1;
