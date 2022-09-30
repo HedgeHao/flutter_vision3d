@@ -10,6 +10,11 @@ class FvCamera {
   late final CameraType cameraType;
 
   static Future<FvCamera?> create(String serial, CameraType type) async {
+    if (type == CameraType.UVC && int.tryParse(serial) == null) {
+      print('UVC index should be integer.');
+      return null;
+    }
+
     Map<Object?, Object?> result = await FlutterVision.channel.invokeMethod('fvCameraOpen', {'serial': serial, 'cameraType': type.index});
 
     Map<String, dynamic> flResult = {};

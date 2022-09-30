@@ -5,6 +5,8 @@
 #include "../fv_texture.h"
 #include "../opengl.h"
 
+#define NOT_SUPPORT -99
+
 enum VideoIndex
 {
   RGB = 0b1,
@@ -47,6 +49,20 @@ public:
     }
 
     return nullptr;
+  }
+
+  static bool removeCam(const char *serial, std::vector<FvCamera *> *cams)
+  {
+    for (int i = 0; i < cams->size(); i++)
+    {
+      if (strcmp(cams->at(i)->serial.c_str(), serial) == 0)
+      {
+        cams->erase(cams->begin() + i);
+        return true;
+      }
+    }
+
+    return false;
   }
 
   void fvInit(FlTextureRegistrar *r, std::vector<TFLiteModel *> *m, FlMethodChannel *f, OpenGLFL *g)
@@ -101,16 +117,16 @@ public:
     return -1;
   }
 
-  virtual void camInit() = 0;
+  virtual int camInit() = 0;
   virtual int openDevice() = 0;
   virtual int closeDevice() = 0;
   virtual int isConnected() = 0;
   virtual int configVideoStream(int streamIndex, bool *enable) = 0;
-  virtual void readVideoFeed() = 0;
-  virtual void configure(int prop, std::vector<float> &value) = 0;
+  virtual int readVideoFeed() = 0;
+  virtual int configure(int prop, std::vector<float> &value) = 0;
   virtual int getConfiguration(int prop) = 0;
 
 private:
-  virtual void _readVideoFeed() = 0;
+  virtual int _readVideoFeed() = 0;
 };
 #endif

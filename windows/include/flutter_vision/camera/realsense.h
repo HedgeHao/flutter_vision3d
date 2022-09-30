@@ -100,12 +100,19 @@ public:
 
     if (*enable)
     {
-      pipeline->start();
+      cfg.enable_all_streams();
+      pipeline->start(cfg);
     }
     else
     {
       videoStart = false;
-      pipeline->stop();
+      try
+      {
+        pipeline->stop();
+      }
+      catch (rs2::wrong_api_call_sequence_error &e)
+      {
+      }
     }
 
     return -1;

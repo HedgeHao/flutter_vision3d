@@ -1,8 +1,27 @@
-#ifndef _DEF_OPENNI_CAM_
-#define _DEF_OPENNI_CAM_
-#include <openni2/OpenNI.h>
-
 #include "fv_camera.h"
+
+#ifdef DISABLE_OPENNI
+class OpenniCam : public FvCamera
+{
+public:
+  static int openniInit() { return NOT_SUPPORT; }
+
+  OpenniCam(const char *s) : FvCamera(s) {}
+
+  int camInit() { return NOT_SUPPORT; }
+  int openDevice() { return NOT_SUPPORT; }
+  int closeDevice() { return NOT_SUPPORT; }
+  int isConnected() { return NOT_SUPPORT; }
+  int configVideoStream(int streamIndex, bool *enable) { return NOT_SUPPORT; }
+  int readVideoFeed() { return NOT_SUPPORT; }
+  int configure(int prop, std::vector<float> &value) { return NOT_SUPPORT; }
+  int getConfiguration(int prop) { return NOT_SUPPORT; }
+
+private:
+  int _readVideoFeed() { return NOT_SUPPORT; }
+};
+#else
+#include <OpenNI.h>
 
 #define LIPS_FACE_RECOGNITION 0x258
 #define LIPS_FACE_REGISTRATION 0x259
@@ -47,7 +66,7 @@ public:
 
   OpenniCam(const char *s) : FvCamera(s){};
 
-  void camInit() {}
+  int camInit() { return 0; }
 
   int openDevice()
   {
@@ -183,14 +202,15 @@ public:
     return 0;
   }
 
-  void readVideoFeed()
+  int readVideoFeed()
   {
     videoStart = true;
     std::thread t(&OpenniCam::_readVideoFeed, this);
     t.detach();
+    return 0;
   }
 
-  void configure(int prop, std::vector<float> &value)
+  int configure(int prop, std::vector<float> &value)
   {
     switch (prop)
     {
@@ -201,6 +221,8 @@ public:
       device->setProperty(prop, &param, sizeof(unsigned short));
       break;
     }
+
+    return 0;
   }
 
   int getConfiguration(int prop)
@@ -320,7 +342,7 @@ private:
     *vertexCount = count;
   }
 
-  void _readVideoFeed()
+  int _readVideoFeed()
   {
     VideoFrameRef rgbFrame;
     VideoFrameRef depthFrame;
@@ -331,7 +353,7 @@ private:
     bool irNewFrame = false;
 
     if (!(videoStart))
-      return;
+      return -1;
 
     while (videoStart)
     {
@@ -376,6 +398,8 @@ private:
 
       fl_method_channel_invoke_method(flChannel, "onNiFrame", nullptr, nullptr, nullptr, NULL);
     }
+
+    return 0;
   }
 };
 #endif

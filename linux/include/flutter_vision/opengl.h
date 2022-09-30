@@ -4,7 +4,6 @@
 #include <GL/glew.h>
 #include <glm/ext.hpp>
 #include "shader.h"
-#include <librealsense2/rs.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
@@ -41,6 +40,17 @@ public:
     }
 };
 
+#ifdef DISABLE_REALSENSE
+class ModelRsPointCloud
+{
+public:
+    ModelRsPointCloud(GdkGLContext *g, unsigned int shader, unsigned int fbo, unsigned int w, unsigned int h) {}
+    void init() {}
+    void updateTexture() {}
+    void render(Camera *cam) {}
+};
+#else
+#include <librealsense2/rs.hpp>
 class ModelRsPointCloud
 {
 public:
@@ -172,6 +182,7 @@ private:
     unsigned int height;
     GdkGLContext *gdkContext;
 };
+#endif
 
 class ModelPointCloud
 {

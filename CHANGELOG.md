@@ -1,3 +1,10 @@
+## 1.0.0
+* Fix Windows build process (Separate dependencies)
+
+## 0.7.0
+* Add 3D camera IR frame example
+* Make 3D camera SDK optional when building plugin
+
 ## 0.6.0
 * Add examples
 * [Pipeline] Add `from`, `to` and `append` parameters

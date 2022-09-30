@@ -11,13 +11,14 @@ endif()
 # not be changed
 set(PLUGIN_NAME "flutter_vision_plugin")
 
-set(OpenCV_DIR "D:/bin/opencv/prebuilt/opencv/build")
-set(OPENNI_DIR "C:/Program Files/OpenNI2")
+message("FLUTTER_VISION_DEP=$ENV{FLUTTER_VISION_DEP}")
 include_directories(
-	"${OpenCV_DIR}/include"
-	"${OPENNI_DIR}/Include"
+	"$ENV{FLUTTER_VISION_DEP}/opencv/include"
+  "$ENV{FLUTTER_VISION_DEP}/realsense2/include"
+  "$ENV{FLUTTER_VISION_DEP}/opengl/include"
+  "$ENV{FLUTTER_VISION_DEP}/tensorflowlite/include/"
+	"$ENV{OPENNI2_INCLUDE64}"
   "${PROJECT_SOURCE_DIR}/include/"
-  "${PROJECT_SOURCE_DIR}/include/tensorflow"
 )
 
 add_library(${PLUGIN_NAME} SHARED
@@ -32,24 +33,29 @@ target_include_directories(${PLUGIN_NAME} INTERFACE
   "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
 
-find_package(OpenCV REQUIRED PATHS ${OpenCV_DIR})
+find_package(OpenCV REQUIRED PATHS $ENV{FLUTTER_VISION_DEP}/opencv)
 target_link_libraries(${PLUGIN_NAME} PRIVATE
-  "${PROJECT_SOURCE_DIR}/lib/realsense2.lib"
-  "${PROJECT_SOURCE_DIR}/lib/tensorflowlite.dll.if.lib"
-  "${PROJECT_SOURCE_DIR}/lib/glew32.lib"
-  "${PROJECT_SOURCE_DIR}/lib/glfw3.lib"
-  "${OPENNI_DIR}/Lib/OpenNI2.lib"
+  "$ENV{FLUTTER_VISION_DEP}/realsense2/lib/x64/realsense2.lib"
+  "$ENV{FLUTTER_VISION_DEP}/tensorflowlite/lib/tensorflowlite.dll.if.lib"
+  "$ENV{FLUTTER_VISION_DEP}/opengl/lib/glew32.lib"
+  "$ENV{FLUTTER_VISION_DEP}/opengl/lib/glfw3.lib"
+  "$ENV{OPENNI2_LIB64}/OpenNI2.lib"
   ${OpenCV_LIBS}
   opengl32
-  "${PROJECT_SOURCE_DIR}/../handler/bin/flutterVisionHandler.lib"
+  "$ENV{FLUTTER_VISION_DEP}/handler/build/flutterVisionHandler.lib"
 )
 
 # List of absolute paths to libraries that should be bundled with the plugin
 set(flutter_vision_bundled_libraries
-  "${PROJECT_SOURCE_DIR}/bin/tensorflowlite.dll"
-  "${PROJECT_SOURCE_DIR}/bin/glew32.dll"
-  "${PROJECT_SOURCE_DIR}/bin/realsense2.dll"
-  "${PROJECT_SOURCE_DIR}/../handler/bin/flutterVisionHandler.dll"
+  "$ENV{FLUTTER_VISION_DEP}/tensorflowlite/bin/tensorflowlite.dll"
+  "$ENV{FLUTTER_VISION_DEP}/opengl/bin/glew32.dll"
+  "$ENV{FLUTTER_VISION_DEP}/realsense2/bin/x64/realsense2.dll"
+  "$ENV{FLUTTER_VISION_DEP}/handler/build/flutterVisionHandler.dll"
+  "$ENV{FLUTTER_VISION_DEP}/opencv/x64/vc15/bin/opencv_world454.dll"
+  "$ENV{FLUTTER_VISION_DEP}/opencv/x64/vc15/bin/opencv_world454d.dll"
+  "$ENV{OPENNI2_REDIST64}/OpenNI2"
+  "$ENV{OPENNI2_REDIST64}/OpenNI.ini"
+  "$ENV{OPENNI2_REDIST64}/OpenNI2.dll"
   PARENT_SCOPE
 )
 

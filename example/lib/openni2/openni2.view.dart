@@ -15,7 +15,10 @@ class OpenNIView extends GetView<OpenNIController> {
         title: const Text("OpenNI"),
         leading: BackButton(
           color: Colors.white,
-          onPressed: () => Get.back(),
+          onPressed: () async {
+            await controller.deconstruct();
+            Get.back();
+          },
         ),
       ),
       body: Row(children: [
@@ -109,6 +112,14 @@ class OpenNIView extends GetView<OpenNIController> {
                         },
                         child: const Text('Depth Frame')),
                     const Text(': Depth frame with random color map')
+                  ]),
+                  Row(children: [
+                    TextButton(
+                        onPressed: () {
+                          controller.pipelineIr();
+                        },
+                        child: const Text('IR Frame')),
+                    const Text(': IR frame with greys color map')
                   ])
                 ]),
                 const Divider(),
