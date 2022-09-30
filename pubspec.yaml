@@ -1,7 +1,8 @@
 name: flutter_vision
 description: Framework for 2D and 3D image processing. Integrate with OpenCV, OpenNI2, Realsense2 and TensorFlow Lite.
 version: 1.0.0
-homepage:
+homepage: https://github.com/HedgeHao/flutter_vision
+repository: https://github.com/HedgeHao/flutter_vision
 
 environment:
   sdk: ">=2.16.1 <3.0.0"

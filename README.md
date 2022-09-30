@@ -203,3 +203,7 @@ class TFLiteModel{
     Future<Float32List> getTensorOutput(int tensorIndex, List<int> size)
 }
 ```
+
+## Known Issues
+
+* Tensorflow Lite model cannot load in debug mode on Windows. If you want to use tensorflow lite functions on Windows, run flutter app with release mode.
