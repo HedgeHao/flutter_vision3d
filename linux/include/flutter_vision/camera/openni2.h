@@ -21,7 +21,7 @@ private:
   int _readVideoFeed() { return NOT_SUPPORT; }
 };
 #else
-#include <openni2/OpenNI.h>
+#include <OpenNI.h>
 
 #define LIPS_FACE_RECOGNITION 0x258
 #define LIPS_FACE_REGISTRATION 0x259

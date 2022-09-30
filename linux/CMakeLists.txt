@@ -14,6 +14,7 @@ include_directories(
 )
 link_directories(
   "${PROJECT_SOURCE_DIR}/lib"
+  "$ENV{OPENNI2_REDIST}"
 )
 
 add_library(${PLUGIN_NAME} SHARED
@@ -52,17 +53,18 @@ if(realsense2_FOUND)
   target_link_libraries( ${PLUGIN_NAME} PRIVATE realsense2)
 else()
   add_definitions(-DDISABLE_REALSENSE)
-  message("BUILD WINOUT REALSENSE SDK")
+  message("BUILD WITHOUT REALSENSE SDK")
 endif()
 
 # OpenNI2 SDK
 find_path(OPENNI2_INC NAMES OpenNI.h HINTS "$ENV{OPENNI2_INCLUDE}")
 find_library(OPENNI2_LIB NAMES OpenNI2 HINTS "$ENV{OPENNI2_REDIST}")
 if(OPENNI2_INC AND OPENNI2_LIB)
+  include_directories($ENV{OPENNI2_INCLUDE})
   target_link_libraries(${PLUGIN_NAME} PRIVATE OpenNI2)
 else()
   add_definitions(-DDISABLE_OPENNI)
-  message("BUILD WINOUT OPENNI2 SDK")
+  message("BUILD WITHOUT OPENNI2 SDK")
 endif()
 
 # Tensorflow Lite

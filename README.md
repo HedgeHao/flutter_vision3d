@@ -12,16 +12,16 @@ A framework for 2D & 3D image processing with AI (Tensorflow Lite)
 ![](doc/img/screenshot6.png)
 ---
 ## Prerequisite
-### Linux
+### Ubuntu 20.04 / Ubuntu 18.04
 
-* GLEW
-* OpenCV 4.0.0+
-* GLM
-* gtk3
+* libglew-dev
+* libopencv-dev (4.0.0+)
+* libglm-dev
+* freeglut3-dev
 * Tensorflow Lite 2.7.0+
 > All the dependency package can be installed using apt-get expect TensorFlow Lite. Please follow [documentation](https://www.tensorflow.org/install/source) to build `libtensorflowlite.so` and place it to where compiler can find (e.g /usr/lib/)
 
-### Windows
+### Windows 10
 
 1. Download dependency files from [here](https://reurl.cc/AOm1d8)
 
