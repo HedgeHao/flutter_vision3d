@@ -56,7 +56,7 @@ class Define {
 | [Camera] OpenNI     | Display 3D camera RGB, depth, IR frames and PointCloud using OpenNI2 SDK |
 | [Pipeline] OpenCV | Load a image file. Use different pipeline functions to process this image |
 | [Pipeline] Custom Handler | Load a image file. Use pipeline native handler(written in C++) to process this image |
-| [Pipeline] Hand Detection | Load video from UVC camera. Use tensorflow lite pipeline functions to detect hand in frame. Hand detection model from [MediaPipe](https://storage.googleapis.com/mediapipe-assets/palm_detection_lite.tflite)|
+| [Pipeline] Hand Detection | Load video from UVC camera. Use tensorflow lite pipeline functions to detect hand in frame. Hand detection model original from [MediaPipe](https://github.com/jiuqiant/mediapipe_multi_hands_tracking_aar_example/blob/master/app/src/main/assets/hand_landmark.tflite)|
 | [Pipeline] Object Detection | Load video from UVC camera. Use tensorflow lite pipeline functions to recognize object in frame. Object detection model from [TensorflowLite](https://tfhub.dev/tensorflow/lite-model/efficientnet/lite4/fp32/2)|
 | [Pipeline] Facial Recognition | Load video from UVC camera. Use tensorflow lite pipeline functions to detect face in frame. Facial Recognition Model from [LIPS Corp.](https://www.lips-hci.com/lipsface-3d-facial-recognition-solution)
 
