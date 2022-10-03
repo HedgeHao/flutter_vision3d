@@ -504,7 +504,7 @@ namespace
 
       result->Success(flutter::EncodableValue(ret == 0));
     }
-    else if (method_call.method_name().compare("fvCameraGetConfiguration"))
+    else if (method_call.method_name().compare("fvCameraGetConfiguration") == 0)
     {
       std::string serial;
       parseDartArugment<std::string>(arguments, "serial", &serial);
