@@ -8,28 +8,28 @@
 
 using namespace openni;
 
-
-
 class DummyCam : public FvCamera
 {
 public:
-    DummyCam(const char* s): FvCamera(s){};
+    DummyCam(const char *s) : FvCamera(s){};
 
-    void camInit(){}
+    void camInit() {}
 
-    int openDevice(){return 0;}
+    int openDevice() { return 0; }
 
-    int closeDevice(){return 0;}
+    int closeDevice() { return 0; }
 
-    int isConnected(){return 0;}
+    int isConnected() { return 0; }
 
-    int configVideoStream(int streamIndex, bool *enable){return 0;}
+    int configVideoStream(int streamIndex, bool *enable) { return 0; }
 
-    void readVideoFeed(){}
+    void readVideoFeed() {}
 
-    void configure(int prop, std::vector<float> &value){}
-    
+    void configure(int prop, std::vector<float> &value) {}
+
+    int getConfiguration(int prop) { return 0; }
+
 private:
-    void _readVideoFeed(){}
+    void _readVideoFeed() {}
 };
 #endif
