@@ -504,6 +504,23 @@ namespace
 
       result->Success(flutter::EncodableValue(ret == 0));
     }
+    else if (method_call.method_name().compare("fvCameraGetConfiguration"))
+    {
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      int prop = 0;
+      parseDartArugment<int>(arguments, "prop", &prop);
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      int ret = -1;
+      if (cam)
+      {
+        ret = cam->getConfiguration(prop);
+      }
+
+      result->Success(flutter::EncodableValue(ret));
+    }
     else if (method_call.method_name().compare("tfliteCreateModel") == 0)
     {
       std::string path;
