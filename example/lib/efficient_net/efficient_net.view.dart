@@ -15,7 +15,10 @@ class EfficientNetView extends GetView<EfficientNetController> {
         title: const Text("UVC"),
         leading: BackButton(
           color: Colors.white,
-          onPressed: () => Get.back(),
+          onPressed: () async {
+            await controller.deconstruct();
+            Get.back();
+          },
         ),
       ),
       body: Row(children: [
@@ -88,10 +91,10 @@ class EfficientNetView extends GetView<EfficientNetController> {
                 height: EfficientNetController.frameHeight,
                 child: GetBuilder<EfficientNetController>(
                   builder: (controller) {
-                    return controller.cams.isEmpty
+                    return controller.cam == null
                         ? const SizedBox()
                         : Stack(children: [
-                            Texture(textureId: controller.cams.first.rgbTextureId),
+                            Texture(textureId: controller.cam!.rgbTextureId),
                             ...controller.rects,
                           ]);
                   },
