@@ -17,7 +17,10 @@ class HandDetectionView extends GetView<HandDetectionController> {
         title: const Text("UVC"),
         leading: BackButton(
           color: Colors.white,
-          onPressed: () => Get.back(),
+          onPressed: () async {
+            await controller.deconstruct();
+            Get.back();
+          },
         ),
       ),
       body: Row(children: [
