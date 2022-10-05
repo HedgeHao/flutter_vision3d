@@ -70,6 +70,7 @@ class Define {
 | Intel Realsense T265  |     ✅    |        |  [Link](https://www.intelrealsense.com/tracking-camera-t265/) |
 | Intel Realsense L515  |     ✅    |        |  [Link](https://www.intelrealsense.com/lidar-camera-l515/) |
 | LIPSedge AE400        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae400) |
+| LIPSedge AE430        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae430) |
 | LIPSedge AE450        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae450) |
 | LIPSedge DL           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-dl-series) |
 | LIPSedge M3           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-m3-series) |
