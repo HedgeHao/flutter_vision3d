@@ -39,7 +39,7 @@ class FaceRecognizerController extends GetxController {
     super.onInit();
   }
 
-  List<UvcCamera> cams = [];
+  UvcCamera? cam;
   List<PositionedRect> rects = [];
   int rgbTextureId = 0;
 
@@ -71,7 +71,6 @@ class FaceRecognizerController extends GetxController {
 
   Future<void> openUvcCamera(String serial) async {
     RxStatus.empty();
-    UvcCamera? cam = cams.firstWhereOrNull((e) => e.serial == serial.toString());
 
     if (cam == null) {
       cam = await FvCamera.create(serial, CameraType.UVC) as UvcCamera?;
@@ -79,44 +78,25 @@ class FaceRecognizerController extends GetxController {
         print('Create Camera Failed');
         return;
       }
-      cams.add(cam);
     }
 
     update();
   }
 
   void closeUvcCamera(String serial) async {
-    UvcCamera? cam = cams.firstWhereOrNull((e) => e.serial == serial.toString());
-
-    if (cam == null) {
-      return;
-    }
-
-    await cam.close();
+    await cam?.close();
   }
 
   void enableStreaming(String serial) async {
-    UvcCamera? cam = cams.firstWhereOrNull((e) => e.serial == serial.toString());
-
-    if (cam == null) {
-      return;
-    }
-
-    await cam.enableStream();
+    await cam?.enableStream();
   }
 
   void disableStreaming(String serial) async {
-    UvcCamera? cam = cams.firstWhereOrNull((e) => e.serial == serial.toString());
-
-    if (cam == null) {
-      return;
-    }
-
-    await cam.disableStream();
+    await cam?.disableStream();
   }
 
   void frPipeline() async {
-    if (cams.isEmpty) return;
+    if (cam == null) return;
 
     if (!File(Define.FACE_DETECTOR_MODEL).existsSync()) {
       debugPrint('Model File Not found at: ${Define.FACE_DETECTOR_MODEL}');
@@ -125,7 +105,7 @@ class FaceRecognizerController extends GetxController {
 
     model ??= await TFLiteModel.create(Define.FACE_DETECTOR_MODEL);
 
-    FvPipeline rgbPipeline = cams.first.rgbPipeline;
+    FvPipeline rgbPipeline = cam!.rgbPipeline;
     await rgbPipeline.clear();
     await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
     await rgbPipeline.show();
@@ -134,5 +114,12 @@ class FaceRecognizerController extends GetxController {
     await rgbPipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
     await rgbPipeline.setInputTensorData(model!.index, 0, FvPipeline.DATATYPE_FLOAT);
     await rgbPipeline.inference(model!.index, interval: 100);
+  }
+
+  Future<void> deconstruct() async {
+    await cam?.disableStream();
+    await cam?.close();
+    cam = null;
+    update();
   }
 }

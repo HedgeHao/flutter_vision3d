@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vision/camera/camera.dart';
-import 'package:flutter_vision/camera/dummy.dart';
 import 'package:flutter_vision/camera/uvc.dart';
 import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
@@ -97,7 +96,7 @@ class HandDetectionController extends GetxController {
       return;
     }
 
-    model ??= await TFLiteModel.create(Define.HAND_DETECTOR_MODEL);
+    model = await TFLiteModel.create(Define.HAND_DETECTOR_MODEL);
 
     FvPipeline rgbPipeline = cam!.rgbPipeline;
     await rgbPipeline.clear();
@@ -108,5 +107,12 @@ class HandDetectionController extends GetxController {
     await rgbPipeline.convertTo(OpenCV.CV_32FC3, 1.0 / 255.0);
     await rgbPipeline.setInputTensorData(model!.index, 0, FvPipeline.DATATYPE_FLOAT);
     await rgbPipeline.inference(model!.index, interval: 100);
+  }
+
+  Future<void> deconstruct() async {
+    await cam?.disableStream();
+    await cam?.close();
+    cam = null;
+    update();
   }
 }

@@ -41,7 +41,7 @@ class EfficientNetController extends GetxController {
     super.onInit();
   }
 
-  List<UvcCamera> cams = [];
+  UvcCamera? cam;
   List<PositionedRect> rects = [];
   int rgbTextureId = 0;
   String displayText = '';
@@ -83,7 +83,6 @@ class EfficientNetController extends GetxController {
 
   Future<void> openUvcCamera(String serial) async {
     RxStatus.empty();
-    UvcCamera? cam = cams.firstWhereOrNull((e) => e.serial == serial.toString());
 
     if (cam == null) {
       cam = await FvCamera.create(serial, CameraType.UVC) as UvcCamera?;
@@ -91,44 +90,25 @@ class EfficientNetController extends GetxController {
         debugPrint('Create Camera Failed');
         return;
       }
-      cams.add(cam);
     }
 
     update();
   }
 
   void closeUvcCamera(String serial) async {
-    UvcCamera? cam = cams.firstWhereOrNull((e) => e.serial == serial.toString());
-
-    if (cam == null) {
-      return;
-    }
-
-    await cam.close();
+    await cam?.close();
   }
 
   void enableStreaming(String serial) async {
-    UvcCamera? cam = cams.firstWhereOrNull((e) => e.serial == serial.toString());
-
-    if (cam == null) {
-      return;
-    }
-
-    await cam.enableStream();
+    await cam?.enableStream();
   }
 
   void disableStreaming(String serial) async {
-    UvcCamera? cam = cams.firstWhereOrNull((e) => e.serial == serial.toString());
-
-    if (cam == null) {
-      return;
-    }
-
-    await cam.disableStream();
+    await cam?.disableStream();
   }
 
   void setPipeline() async {
-    if (cams.isEmpty) return;
+    if (cam == null) return;
 
     if (!File(Define.EFFICIENT_NET_MODEL).existsSync()) {
       debugPrint('Model File Not found at: ${Define.EFFICIENT_NET_MODEL}');
@@ -137,7 +117,7 @@ class EfficientNetController extends GetxController {
 
     model ??= await TFLiteModel.create(Define.EFFICIENT_NET_MODEL);
 
-    FvPipeline rgbPipeline = cams.first.rgbPipeline;
+    FvPipeline rgbPipeline = cam!.rgbPipeline;
     await rgbPipeline.clear();
     // await rgbPipeline.crop(100, 600, 100, 600);
     await rgbPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
@@ -146,6 +126,13 @@ class EfficientNetController extends GetxController {
     await rgbPipeline.cvtColor(OpenCV.COLOR_RGBA2BGR);
     await rgbPipeline.setInputTensorData(model!.index, 0, FvPipeline.DATATYPE_UINT8);
     await rgbPipeline.inference(model!.index);
+  }
+
+  Future<void> deconstruct() async {
+    await cam?.disableStream();
+    await cam?.close();
+    cam = null;
+    update();
   }
 }
 
