@@ -98,4 +98,12 @@ class FvCamera {
   Future<bool> screenshot(int index, String path, {int? cvtCode}) async {
     return await FlutterVision.channel.invokeMethod('fvCameraScreenshot', {'index': index, 'path': path, 'cvtCode': cvtCode ?? -1, 'serial': serial});
   }
+
+  Future<int> getOpenCVMat(int index) async {
+    return await FlutterVision.channel.invokeMethod('fvGetOpenCVMat', {'index': index, 'serial': serial});
+  }
+
+  Future<void> test(int pointer) async {
+    return await FlutterVision.channel.invokeMethod('test', {'pointer': pointer});
+  }
 }

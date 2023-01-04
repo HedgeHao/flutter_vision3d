@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 class UvcControllerDevice extends GetxController {
   UvcCamera? cam;
   int rgbTextureId = 0;
+  int cvMatPointer = 0;
 
   Future<void> openUvcCamera(String serial) async {
     RxStatus.empty();
@@ -55,5 +56,14 @@ class UvcControllerDevice extends GetxController {
     await cam?.close();
     cam = null;
     update();
+  }
+
+  Future<void> getOpenCVMat() async {
+    cvMatPointer = await cam?.getOpenCVMat(1) ?? 0;
+    update();
+  }
+
+  void test() {
+    cam?.test(cvMatPointer);
   }
 }

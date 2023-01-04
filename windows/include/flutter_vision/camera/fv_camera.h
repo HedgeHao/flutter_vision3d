@@ -98,6 +98,25 @@ public:
         return -1;
     }
 
+    // TODO: check if long if enough
+    uintptr_t getOpenCVMat(int index)
+    {
+        if (index == VideoIndex::RGB)
+        {
+            return reinterpret_cast<std::uintptr_t>(&rgbTexture->cvImage);
+        }
+        else if (index == VideoIndex::IR)
+        {
+            return reinterpret_cast<std::uintptr_t>(&irTexture->cvImage);
+        }
+        else if (index == VideoIndex::RGB)
+        {
+            return reinterpret_cast<std::uintptr_t>(&depthTexture->cvImage);
+        }
+
+        return 0;
+    }
+
     virtual void camInit() = 0;
     virtual int openDevice() = 0;
     virtual int closeDevice() = 0;

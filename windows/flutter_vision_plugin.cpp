@@ -227,6 +227,25 @@ namespace
       // TODO: check enable/disable is really success
       result->Success(flutter::EncodableValue(enable));
     }
+    else if (method_call.method_name().compare("fvGetOpenCVMat") == 0)
+    {
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      int index;
+      parseDartArugment<int>(arguments, "index", &index);
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      if (cam)
+      {
+        int64_t pointer = cam->getOpenCVMat(index);
+        std::cout << pointer << std::endl;
+        result->Success(flutter::EncodableValue(pointer));
+        return;
+      }
+
+      result->Success(flutter::EncodableValue(0));
+    }
     else if (method_call.method_name().compare("ni2SetVideoSize") == 0)
     {
       int videoIndex;
@@ -619,18 +638,31 @@ namespace
     }
     else if (method_call.method_name().compare("test") == 0)
     {
-      // cv::Mat b(1280, 720, CV_8UC4, cv::Scalar(255, 0, 0, 255));
-      cv::Mat b = cv::imread("D:/test/faces.jpg", cv::IMREAD_COLOR);
-      cv::cvtColor(b, b, cv::COLOR_BGR2RGB);
-      cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
-      cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
+      int64_t pointer;
+      parseDartArugment<int64_t>(arguments, "pointer", &pointer);
 
-      cams[1]->rgbTexture->pipeline->run(b, textureRegistrar, cams[1]->rgbTexture->textureId, cams[1]->rgbTexture->videoWidth, cams[1]->rgbTexture->videoHeight, cams[1]->rgbTexture->buffer, &models, flChannel);
-      cams[1]->rgbTexture->setPixelBuffer();
-      cams[1]->irTexture->pipeline->run(g, textureRegistrar, cams[1]->irTexture->textureId, cams[1]->irTexture->videoWidth, cams[1]->irTexture->videoHeight, cams[1]->irTexture->buffer, &models, flChannel);
-      cams[1]->irTexture->setPixelBuffer();
-      cams[1]->depthTexture->pipeline->run(r, textureRegistrar, cams[1]->depthTexture->textureId, cams[1]->depthTexture->videoWidth, cams[1]->depthTexture->videoHeight, cams[1]->depthTexture->buffer, &models, flChannel);
-      cams[1]->depthTexture->setPixelBuffer();
+      std::cout << "Pointer:" << pointer << std::endl;
+
+      std::uintptr_t t = 1234;
+
+      std::uintptr_t ptr = pointer;
+      cv::Mat* m = (cv::Mat *)ptr;
+
+      std::cout << m->cols << "," << m->rows << std::endl;
+
+
+      // cv::Mat b(1280, 720, CV_8UC4, cv::Scalar(255, 0, 0, 255));
+      // cv::Mat b = cv::imread("D:/test/faces.jpg", cv::IMREAD_COLOR);
+      // cv::cvtColor(b, b, cv::COLOR_BGR2RGB);
+      // cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
+      // cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
+
+      // cams[1]->rgbTexture->pipeline->run(b, textureRegistrar, cams[1]->rgbTexture->textureId, cams[1]->rgbTexture->videoWidth, cams[1]->rgbTexture->videoHeight, cams[1]->rgbTexture->buffer, &models, flChannel);
+      // cams[1]->rgbTexture->setPixelBuffer();
+      // cams[1]->irTexture->pipeline->run(g, textureRegistrar, cams[1]->irTexture->textureId, cams[1]->irTexture->videoWidth, cams[1]->irTexture->videoHeight, cams[1]->irTexture->buffer, &models, flChannel);
+      // cams[1]->irTexture->setPixelBuffer();
+      // cams[1]->depthTexture->pipeline->run(r, textureRegistrar, cams[1]->depthTexture->textureId, cams[1]->depthTexture->videoWidth, cams[1]->depthTexture->videoHeight, cams[1]->depthTexture->buffer, &models, flChannel);
+      // cams[1]->depthTexture->setPixelBuffer();
       // uvcTexture->pipeline->run(b, textureRegistrar, uvcTexture->textureId, uvcTexture->videoWidth, uvcTexture->videoHeight, uvcTexture->buffer, &models, flChannel);
       // uvcTexture->setPixelBuffer();
 
