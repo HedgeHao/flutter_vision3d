@@ -540,6 +540,46 @@ namespace
 
       result->Success(flutter::EncodableValue(ret));
     }
+    else if (method_call.method_name().compare("fvGetIntrinsic") == 0)
+    {
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      int index = -1;
+      parseDartArugment<int>(arguments, "index", &index);
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      flutter::EncodableMap map = flutter::EncodableMap();
+      double fx, fy, cx, cy;
+      if (cam)
+      {
+        cam->getIntrinsic(index, fx, fy, cx, cy);
+      }
+
+      map[flutter::EncodableValue("fx")] = fx;
+      map[flutter::EncodableValue("fy")] = fy;
+      map[flutter::EncodableValue("cx")] = cx;
+      map[flutter::EncodableValue("cy")] = cy;
+
+      result->Success(flutter::EncodableValue(map));
+    }
+    else if (method_call.method_name().compare("fvEnableRegistration") == 0)
+    {
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      bool enable;
+      parseDartArugment<bool>(arguments, "enable", &enable);
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      int ret = -1;
+      if (cam)
+      {
+        ret = cam->enableImageRegistration(enable);
+      }
+
+      result->Success(flutter::EncodableValue(ret));
+    }
     else if (method_call.method_name().compare("tfliteCreateModel") == 0)
     {
       std::string path;
@@ -646,10 +686,9 @@ namespace
       std::uintptr_t t = 1234;
 
       std::uintptr_t ptr = pointer;
-      cv::Mat* m = (cv::Mat *)ptr;
+      cv::Mat *m = (cv::Mat *)ptr;
 
       std::cout << m->cols << "," << m->rows << std::endl;
-
 
       // cv::Mat b(1280, 720, CV_8UC4, cv::Scalar(255, 0, 0, 255));
       // cv::Mat b = cv::imread("D:/test/faces.jpg", cv::IMREAD_COLOR);

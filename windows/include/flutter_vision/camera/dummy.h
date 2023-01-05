@@ -29,6 +29,10 @@ public:
 
     int getConfiguration(int prop) { return 0; }
 
+    void getIntrinsic(int index, double &fx, double &fy, double &cx, double &cy) {}
+
+    bool enableImageRegistration(bool enable) { return true; }
+
 private:
     void _readVideoFeed() {}
 };

@@ -73,6 +73,10 @@ public:
     return 0;
   }
 
+  void getIntrinsic(int index, double &fx, double &fy, double &cx, double &cy){
+    // TODO: Unimplement
+  }
+
   int isConnected()
   {
     return 0;
@@ -145,6 +149,9 @@ public:
   }
 
   int getConfiguration(int prop) { return 0; }
+
+  // TODO: Not Implement
+  bool enableImageRegistration(bool enable){return true;}
 
 private:
   rs2::config cfg;

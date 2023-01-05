@@ -103,6 +103,16 @@ class FvCamera {
     return await FlutterVision.channel.invokeMethod('fvGetOpenCVMat', {'index': index, 'serial': serial});
   }
 
+  Future<Map<String, double>> getIntrinsic(int index) async {
+    Map<dynamic, dynamic> map = await FlutterVision.channel.invokeMethod('fvGetIntrinsic', {'index': index, 'serial': serial});
+
+    return <String, double>{'fx': map['fx'], 'fy': map['fy'], 'cx': map['cx'], 'cy': map['cy']};
+  }
+
+  Future<bool> enableRegistraion(bool enable) async {
+    return await FlutterVision.channel.invokeMethod('fvEnableRegistration', {'enable': enable, 'serial': serial});
+  }
+
   Future<void> test(int pointer) async {
     return await FlutterVision.channel.invokeMethod('test', {'pointer': pointer});
   }

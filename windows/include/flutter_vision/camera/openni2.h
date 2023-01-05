@@ -5,6 +5,10 @@
 #define LIPS_FACE_RECOGNITION 0x258
 #define LIPS_FACE_REGISTRATION 0x259
 #define LIPS_FACE_DELETE_FACE_DATABASE 0x25A
+#define STREAM_PROPERTY_FOCAL_LENGTH_X 200
+#define STREAM_PROPERTY_FOCAL_LENGTH_Y 201
+#define STREAM_PROPERTY_PRINCIPAL_POINT_X 202
+#define STREAM_PROPERTY_PRINCIPAL_POINT_Y 203
 
 #include <OpenNI.h>
 #include <iostream>
@@ -118,6 +122,28 @@ public:
         return this->device->isValid();
     }
 
+    void getIntrinsic(int index, double &fx, double &fy, double &cx, double &cy)
+    {
+
+        if (device == nullptr)
+            return;
+
+        if (index == VideoIndex::RGB)
+        {
+            vsColor.getProperty(STREAM_PROPERTY_FOCAL_LENGTH_X, &fx);
+            vsColor.getProperty(STREAM_PROPERTY_FOCAL_LENGTH_Y, &fy);
+            vsColor.getProperty(STREAM_PROPERTY_PRINCIPAL_POINT_X, &cx);
+            vsColor.getProperty(STREAM_PROPERTY_PRINCIPAL_POINT_Y, &cy);
+        }
+        else if (index == VideoIndex::Depth)
+        {
+            vsDepth.getProperty(STREAM_PROPERTY_FOCAL_LENGTH_X, &fx);
+            vsDepth.getProperty(STREAM_PROPERTY_FOCAL_LENGTH_Y, &fy);
+            vsDepth.getProperty(STREAM_PROPERTY_PRINCIPAL_POINT_X, &cx);
+            vsDepth.getProperty(STREAM_PROPERTY_PRINCIPAL_POINT_Y, &cy);
+        }
+    }
+
     int configVideoStream(int streamIndex, bool *enable)
     {
         if (device == nullptr)
@@ -212,6 +238,16 @@ public:
         unsigned short int result = -1;
         device->getProperty(prop, &result);
         return (int)result;
+    }
+
+    bool enableImageRegistration(bool enable){
+        if(device == nullptr) return false;
+
+        if(device->isImageRegistrationModeSupported(IMAGE_REGISTRATION_DEPTH_TO_COLOR)){
+            return openni::STATUS_OK == device->setImageRegistrationMode( openni::IMAGE_REGISTRATION_DEPTH_TO_COLOR );
+        }
+
+        return false;
     }
 
 private:

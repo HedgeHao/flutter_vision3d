@@ -125,6 +125,8 @@ public:
     virtual void readVideoFeed() = 0;
     virtual void configure(int prop, std::vector<float> &value) = 0;
     virtual int getConfiguration(int prop) = 0;
+    virtual void getIntrinsic(int index, double &fx, double &fy, double &cx, double &cy) = 0;
+    virtual bool enableImageRegistration(bool enable) = 0;
 
 private:
     virtual void _readVideoFeed() = 0;

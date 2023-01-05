@@ -70,6 +70,9 @@ public:
 
     int getConfiguration(int prop) { return 0; }
 
+    bool enableImageRegistration(bool enable) { return true; }
+    void getIntrinsic(int index, double &fx, double &fy, double &cx, double &cy) {}
+
 private:
     int uvcIndex = -1;
     cv::VideoCapture *cap;

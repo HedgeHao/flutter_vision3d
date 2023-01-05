@@ -23,7 +23,9 @@ class OpenNIController extends GetxController {
   int irTextureId = 0;
   int openglTextureId = 0;
   bool pointCloud = false;
+  bool registration = false;
   List<DropdownMenuItem<int>> items = [];
+  double fx = 0, fy = 0, cx = 0, cy = 0;
 
   int selected = 0;
   List<OpenNi2Device> deviceList = <OpenNi2Device>[];
@@ -119,10 +121,30 @@ class OpenNIController extends GetxController {
     update([BUILDER_TEXTURE_OPENGL]);
   }
 
+  void enableRegistration(bool value) async {
+    if (cam == null) return;
+
+    cam!.enableRegistraion(value);
+
+    update();
+  }
+
   Future<void> deconstruct() async {
     await cam?.disableStream();
     await cam?.close();
     cam = null;
     update([BUILDER_TEXTURE]);
+  }
+
+  Future<void> getIntrinsic() async {
+    if (cam == null) return;
+
+    Map<String, double> param = await cam!.getIntrinsic(2);
+    fx = param['fx']!;
+    fy = param['fy']!;
+    cx = param['cx']!;
+    cy = param['cy']!;
+
+    update();
   }
 }
