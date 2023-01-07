@@ -16,6 +16,7 @@ class RealsenseController extends GetxController {
   static const BUILDER_SLIDER = 'BUILDER_SLIDER';
 
   RealsenseCamera? cam;
+  double fx = 0, fy = 0, cx = 0, cy = 0;
   int rgbTextureId = 0;
   int depthTextureId = 0;
   int irTextureId = 0;
@@ -138,5 +139,17 @@ class RealsenseController extends GetxController {
     await cam?.close();
     cam = null;
     update([BUILDER_TEXTURE]);
+  }
+
+  Future<void> getIntrinsic() async {
+    if (cam == null) return;
+
+    Map<String, double> param = await cam!.getIntrinsic(2);
+    fx = param['fx']!;
+    fy = param['fy']!;
+    cx = param['cx']!;
+    cy = param['cy']!;
+
+    update();
   }
 }

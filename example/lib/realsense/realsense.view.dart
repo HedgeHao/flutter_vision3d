@@ -165,7 +165,23 @@ class RealsenseView extends GetView<RealsenseController> {
                               onChanged: (value) => controller.enablePointCloud(value),
                             ))
                   ],
-                )
+                ),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  const Text('Intrinsic'),
+                  TextButton(
+                      onPressed: () {
+                        controller.getIntrinsic();
+                      },
+                      child: const Text('Update'))
+                ]),
+                GetBuilder<RealsenseController>(
+                  builder: (controller) => Column(children: [
+                    Row(children: [const Text('fx:'), const SizedBox(width: 8), Text(controller.fx.toStringAsFixed(6))]),
+                    Row(children: [const Text('fy:'), const SizedBox(width: 8), Text(controller.fy.toStringAsFixed(6))]),
+                    Row(children: [const Text('cx:'), const SizedBox(width: 8), Text(controller.cx.toStringAsFixed(6))]),
+                    Row(children: [const Text('cy:'), const SizedBox(width: 8), Text(controller.cy.toStringAsFixed(6))]),
+                  ]),
+                ),
               ],
             )),
         Expanded(

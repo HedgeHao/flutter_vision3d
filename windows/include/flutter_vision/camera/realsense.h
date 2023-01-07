@@ -73,8 +73,26 @@ public:
     return 0;
   }
 
-  void getIntrinsic(int index, double &fx, double &fy, double &cx, double &cy){
-    // TODO: Unimplement
+  void getIntrinsic(int index, double &fx, double &fy, double &cx, double &cy)
+  {
+    if (pipeline == nullptr)
+      return;
+
+    rs2_intrinsics intrinsics;
+    auto profile = pipeline->get_active_profile();
+    if (index == VideoIndex::RGB)
+    {
+      intrinsics = profile.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>().get_intrinsics();
+    }
+    else if (index == VideoIndex::Depth)
+    {
+      intrinsics = profile.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>().get_intrinsics();
+    }
+
+    fx = intrinsics.fx;
+    fy = intrinsics.fy;
+    cx = intrinsics.ppx;
+    cy = intrinsics.ppy;
   }
 
   int isConnected()
@@ -151,7 +169,7 @@ public:
   int getConfiguration(int prop) { return 0; }
 
   // TODO: Not Implement
-  bool enableImageRegistration(bool enable){return true;}
+  bool enableImageRegistration(bool enable) { return true; }
 
 private:
   rs2::config cfg;
@@ -229,6 +247,8 @@ private:
     auto vf = f.as<video_frame>();
     const int w = vf.get_width();
     const int h = vf.get_height();
+
+    // std::cout << w << "," << h << ", format=" << f.get_profile().format()<< "," << f.get_data_size() << std::endl;
 
     if (f.get_profile().format() == RS2_FORMAT_BGR8)
     {

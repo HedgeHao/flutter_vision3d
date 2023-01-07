@@ -33,6 +33,7 @@ target_include_directories(${PLUGIN_NAME} INTERFACE
   "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
 
+
 find_package(OpenCV REQUIRED PATHS $ENV{FLUTTER_VISION_DEP}/opencv)
 target_link_libraries(${PLUGIN_NAME} PRIVATE
   "$ENV{FLUTTER_VISION_DEP}/realsense2/lib/x64/realsense2.lib"
@@ -40,7 +41,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
   "$ENV{FLUTTER_VISION_DEP}/opengl/lib/glew32.lib"
   "$ENV{FLUTTER_VISION_DEP}/opengl/lib/glfw3.lib"
   "$ENV{OPENNI2_LIB64}/OpenNI2.lib"
-  ${OpenCV_LIBS}
+  "$ENV{FLUTTER_VISION_DEP}/opencv/x64/vc14/lib/opencv_world460d.lib"
   opengl32
   "$ENV{FLUTTER_VISION_DEP}/handler/build/flutterVisionHandler.lib"
 )
@@ -51,8 +52,8 @@ set(flutter_vision_bundled_libraries
   "$ENV{FLUTTER_VISION_DEP}/opengl/bin/glew32.dll"
   "$ENV{FLUTTER_VISION_DEP}/realsense2/bin/x64/realsense2.dll"
   "$ENV{FLUTTER_VISION_DEP}/handler/build/flutterVisionHandler.dll"
-  "$ENV{FLUTTER_VISION_DEP}/opencv/x64/vc15/bin/opencv_world454.dll"
-  "$ENV{FLUTTER_VISION_DEP}/opencv/x64/vc15/bin/opencv_world454d.dll"
+  "$ENV{FLUTTER_VISION_DEP}/opencv/x64/vc15/bin/opencv_world460.dll"
+  "$ENV{FLUTTER_VISION_DEP}/opencv/x64/vc15/bin/opencv_world460d.dll"
   "$ENV{OPENNI2_REDIST64}/OpenNI2"
   "$ENV{OPENNI2_REDIST64}/OpenNI.ini"
   "$ENV{OPENNI2_REDIST64}/OpenNI2.dll"
