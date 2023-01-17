@@ -44,6 +44,7 @@ public:
         flutterPixelBuffer.buffer = buffer.data();
         flutterPixelBuffer.width = videoWidth;
         flutterPixelBuffer.height = videoHeight;
+        textureRegistrar->MarkTextureFrameAvailable(textureId);
     }
 private:
     flutter::TextureRegistrar *textureRegistrar = nullptr;

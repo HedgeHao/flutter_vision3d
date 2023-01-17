@@ -9,6 +9,8 @@
 
 #include "fv_camera.h"
 
+int64_t tsRs = 0;
+
 enum RsVideoIndex
 {
   RS_RGB = 0b1,
@@ -181,8 +183,13 @@ private:
 
   void _readVideoFeed()
   {
+    int64_t now;
     while (videoStart)
     {
+      getCurrentTime(&now);
+      if(now - tsRs < 32) continue;
+      tsRs = now;
+
       try
       {
         rs2::frameset frames = pipeline->wait_for_frames(timeout);

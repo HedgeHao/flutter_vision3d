@@ -109,7 +109,7 @@ public:
         {
             return reinterpret_cast<std::uintptr_t>(&irTexture->cvImage);
         }
-        else if (index == VideoIndex::RGB)
+        else if (index == VideoIndex::Depth)
         {
             return reinterpret_cast<std::uintptr_t>(&depthTexture->cvImage);
         }
