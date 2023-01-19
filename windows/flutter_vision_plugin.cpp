@@ -239,12 +239,29 @@ namespace
       if (cam)
       {
         int64_t pointer = cam->getOpenCVMat(index);
-        std::cout << pointer << std::endl;
         result->Success(flutter::EncodableValue(pointer));
         return;
       }
 
       result->Success(flutter::EncodableValue(0));
+    }
+    else if (method_call.method_name().compare("fvPauseStream") == 0)
+    {
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      bool pause;
+      parseDartArugment<bool>(arguments, "pause", &pause);
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      if (cam)
+      {
+        cam->pause(pause);
+        result->Success(flutter::EncodableValue(true));
+        return;
+      }
+
+      result->Success(flutter::EncodableValue(false));
     }
     else if (method_call.method_name().compare("ni2SetVideoSize") == 0)
     {

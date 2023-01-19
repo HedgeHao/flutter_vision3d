@@ -34,14 +34,16 @@ target_include_directories(${PLUGIN_NAME} INTERFACE
 target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
 
 
-find_package(OpenCV REQUIRED PATHS "$ENV{FLUTTER_VISION_DEP}/opencv")
+set(OpenCV_DIR "$ENV{FLUTTER_VISION_DEP}/opencv")
+find_package(OpenCV REQUIRED)
+message(${OpenCV_INCLUDE_DIRS})
 target_link_libraries(${PLUGIN_NAME} PRIVATE
   "$ENV{FLUTTER_VISION_DEP}/realsense2/lib/x64/realsense2.lib"
   "$ENV{FLUTTER_VISION_DEP}/tensorflowlite/lib/tensorflowlite.dll.if.lib"
   "$ENV{FLUTTER_VISION_DEP}/opengl/lib/glew32.lib"
   "$ENV{FLUTTER_VISION_DEP}/opengl/lib/glfw3.lib"
   "$ENV{OPENNI2_LIB64}/OpenNI2.lib"
-  "$ENV{FLUTTER_VISION_DEP}/opencv/x64/vc14/lib/opencv_world460.lib"
+  ${OpenCV_LIBS}
   opengl32
   "$ENV{FLUTTER_VISION_DEP}/handler/build/flutterVisionHandler.lib"
 )

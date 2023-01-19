@@ -186,6 +186,8 @@ private:
     int64_t now;
     while (videoStart)
     {
+      if(pauseStream) continue;
+
       getCurrentTime(&now);
       if(now - tsRs < 32) continue;
       tsRs = now;

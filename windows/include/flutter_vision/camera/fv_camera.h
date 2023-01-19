@@ -30,6 +30,7 @@ public:
     std::unique_ptr<FvTexture> irTexture;
     bool videoStart = false;
     bool enablePointCloud = false;
+    bool pauseStream = false;
 
     FvCamera() {}
 
@@ -115,6 +116,10 @@ public:
         }
 
         return 0;
+    }
+
+    void pause(bool p){
+        pauseStream = p;
     }
 
     virtual void camInit() = 0;
