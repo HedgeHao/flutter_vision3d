@@ -72,6 +72,7 @@ public:
 
     bool enableImageRegistration(bool enable) { return true; }
     void getIntrinsic(int index, double &fx, double &fy, double &cx, double &cy) {}
+    void getVideoMode(int index, std::vector<std::string>& rModes){}
 
 private:
     int uvcIndex = -1;

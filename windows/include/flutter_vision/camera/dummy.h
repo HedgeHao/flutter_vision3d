@@ -33,6 +33,8 @@ public:
 
     bool enableImageRegistration(bool enable) { return true; }
 
+    void getVideoMode(int index, std::vector<std::string>& rModes){}
+
 private:
     void _readVideoFeed() {}
 };

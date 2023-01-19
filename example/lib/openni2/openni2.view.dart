@@ -141,7 +141,7 @@ class OpenNIView extends GetView<OpenNIController> {
                     GetBuilder<OpenNIController>(
                         builder: (controller) => Switch(
                               value: controller.registration,
-                              onChanged: (value) => controller.enablePointCloud(value),
+                              onChanged: (value) => controller.enableRegistration(value),
                             ))
                   ],
                 ),
@@ -161,6 +161,15 @@ class OpenNIView extends GetView<OpenNIController> {
                     Row(children: [const Text('cy:'), const SizedBox(width: 8), Text(controller.cy.toStringAsFixed(6))]),
                   ]),
                 ),
+                Row(
+                  children: [
+                    const Text('VideoMode:'),
+                    TextButton(onPressed: () => controller.getVideoModes(1), child: const Text('Color')),
+                    TextButton(onPressed: () => controller.getVideoModes(2), child: const Text('Depth')),
+                    TextButton(onPressed: () => controller.getVideoModes(4), child: const Text('IR')),
+                  ],
+                ),
+                GetBuilder<OpenNIController>(builder: (controller) => Text(controller.videoModes)),
               ],
             )),
         Expanded(

@@ -173,6 +173,8 @@ public:
   // TODO: Not Implement
   bool enableImageRegistration(bool enable) { return true; }
 
+  void getVideoMode(int index, std::vector<std::string> &rModes) {}
+
 private:
   rs2::config cfg;
   unsigned int timeout = 1500;
@@ -186,10 +188,12 @@ private:
     int64_t now;
     while (videoStart)
     {
-      if(pauseStream) continue;
+      if (pauseStream)
+        continue;
 
       getCurrentTime(&now);
-      if(now - tsRs < 32) continue;
+      if (now - tsRs < 32)
+        continue;
       tsRs = now;
 
       try

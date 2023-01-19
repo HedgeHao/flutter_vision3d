@@ -26,6 +26,7 @@ class OpenNIController extends GetxController {
   bool registration = false;
   List<DropdownMenuItem<int>> items = [];
   double fx = 0, fy = 0, cx = 0, cy = 0;
+  String videoModes = '';
 
   int selected = 0;
   List<OpenNi2Device> deviceList = <OpenNi2Device>[];
@@ -144,6 +145,14 @@ class OpenNIController extends GetxController {
     fy = param['fy']!;
     cx = param['cx']!;
     cy = param['cy']!;
+
+    update();
+  }
+
+  Future<void> getVideoModes(int index) async {
+    if (cam == null) return;
+
+    videoModes = (await cam!.getVideoModes(index)).join('\n');
 
     update();
   }

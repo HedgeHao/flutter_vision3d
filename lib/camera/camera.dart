@@ -117,6 +117,11 @@ class FvCamera {
     return await FlutterVision.channel.invokeMethod('fvPauseStream', {'pause': pause, 'serial': serial});
   }
 
+  Future<List<String>> getVideoModes(int index) async {
+    List<Object?> modes = await FlutterVision.channel.invokeMethod('ni2GetVideoMode', {'videoModeIndex': index, 'serial': serial});
+    return modes.map((e) => e.toString()).toList();
+  }
+
   Future<void> test(int pointer) async {
     return await FlutterVision.channel.invokeMethod('test', {'pointer': pointer});
   }

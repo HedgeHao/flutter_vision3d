@@ -12,6 +12,7 @@
 
 #include <OpenNI.h>
 #include <iostream>
+#include <sstream>
 
 #include "fv_camera.h"
 
@@ -240,14 +241,52 @@ public:
         return (int)result;
     }
 
-    bool enableImageRegistration(bool enable){
-        if(device == nullptr) return false;
+    bool enableImageRegistration(bool enable)
+    {
+        if (device == nullptr)
+            return false;
 
-        if(device->isImageRegistrationModeSupported(IMAGE_REGISTRATION_DEPTH_TO_COLOR)){
-            return openni::STATUS_OK == device->setImageRegistrationMode( openni::IMAGE_REGISTRATION_DEPTH_TO_COLOR );
+        if (device->isImageRegistrationModeSupported(IMAGE_REGISTRATION_DEPTH_TO_COLOR))
+        {
+            return openni::STATUS_OK == device->setImageRegistrationMode(openni::IMAGE_REGISTRATION_DEPTH_TO_COLOR);
         }
 
         return false;
+    }
+
+    void getVideoMode(int index, std::vector<std::string>& rModes)
+    {
+        const openni::SensorInfo *info;
+        if (index == VideoIndex::RGB)
+        {
+            info = device->getSensorInfo(openni::SENSOR_COLOR);
+        }
+        else if (index == VideoIndex::Depth)
+        {
+            info = device->getSensorInfo(openni::SENSOR_DEPTH);
+        }
+        else if (index == VideoIndex::IR)
+        {
+            info = device->getSensorInfo(openni::SENSOR_IR);
+        }
+
+        auto &modes = info->getSupportedVideoModes();
+
+        rModes.clear();
+        for(int i=0;i<modes.getSize();i++){
+            std::stringstream ss;
+            ss << modes[i].getResolutionX();
+            ss << ",";
+            ss << modes[i].getResolutionY();
+            ss << ",";
+            ss << modes[i].getFps();
+            ss << ",";
+            ss << modes[i].getPixelFormat();
+
+            std::string s;
+            ss >> s;
+            rModes.push_back(s);
+        }
     }
 
 private:

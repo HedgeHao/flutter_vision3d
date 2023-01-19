@@ -134,6 +134,31 @@ namespace
 
       result->Success(flDeviceList);
     }
+    else if (method_call.method_name().compare("ni2GetVideoMode") == 0)
+    {
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      int videoModeIndex;
+      parseDartArugment<int>(arguments, "videoModeIndex", &videoModeIndex);
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      int ret = -1;
+
+      flutter::EncodableList list = flutter::EncodableList();
+      if (cam != nullptr && cam->type == (CameraType::OPENNI))
+      {
+        std::vector<std::string> modes;
+        cam->getVideoMode(videoModeIndex, modes);
+
+        for (auto s : modes)
+        {
+          list.push_back(s);
+        }
+      }
+
+       result->Success(flutter::EncodableValue(list));
+    }
     else if (method_call.method_name().compare("fvCameraOpen") == 0)
     {
       std::string serial;
@@ -159,6 +184,8 @@ namespace
       {
         cam = new UvcCam(serial.c_str());
       }
+
+      cam->type = cameraType;
 
       int ret = -1;
       if (cam != nullptr)
