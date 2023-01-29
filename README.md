@@ -72,6 +72,7 @@ class Define {
 | LIPSedge AE400        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae400) |
 | LIPSedge AE430        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae430) |
 | LIPSedge AE450        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae450) |
+| LIPSedge AE470        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae470) |
 | LIPSedge DL           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-dl-series) |
 | LIPSedge M3           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-m3-series) |
 | LIPSedge L Series     |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-l-series) |
