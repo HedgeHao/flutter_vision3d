@@ -163,13 +163,49 @@ class OpenNIView extends GetView<OpenNIController> {
                 ),
                 Row(
                   children: [
-                    const Text('VideoMode:'),
+                    const Text('Available Video Modes:'),
                     TextButton(onPressed: () => controller.getVideoModes(1), child: const Text('Color')),
                     TextButton(onPressed: () => controller.getVideoModes(2), child: const Text('Depth')),
                     TextButton(onPressed: () => controller.getVideoModes(4), child: const Text('IR')),
                   ],
                 ),
                 GetBuilder<OpenNIController>(builder: (controller) => Text(controller.videoModes)),
+                Row(
+                  children: [
+                    const Text('Set Video Mode: '),
+                    DropdownButton(
+                        value: controller.selectedVideoModeItem,
+                        items: controller.videoModeItems,
+                        onChanged: (value) {
+                          controller.selectedVideoModeItem = value as int;
+                        }),
+                    SizedBox(
+                      width: 50,
+                      child: TextField(
+                        controller: controller.videoModeCtl,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    TextButton(
+                        onPressed: () {
+                          controller.setVideoMode();
+                        },
+                        child: const Text('Set'))
+                  ],
+                ),
+                Row(
+                  children: [
+                    const Text('Current Modes:'),
+                    TextButton(
+                        onPressed: () {
+                          controller.getCurrentVideoMode();
+                        },
+                        child: const Text('Update')),
+                  ],
+                ),
+                Row(children: [const Text('RGB:'), GetBuilder<OpenNIController>(builder: (controller) => Text(controller.currentModeRGB))]),
+                Row(children: [const Text('Depth:'), GetBuilder<OpenNIController>(builder: (controller) => Text(controller.currentModeDepth))]),
+                Row(children: [const Text('IR:'), GetBuilder<OpenNIController>(builder: (controller) => Text(controller.currentModeIR))]),
               ],
             )),
         Expanded(

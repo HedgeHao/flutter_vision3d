@@ -173,7 +173,9 @@ public:
   // TODO: Not Implement
   bool enableImageRegistration(bool enable) { return true; }
 
-  void getVideoMode(int index, std::vector<std::string> &rModes) {}
+  void getAvailableVideoModes(int index, std::vector<std::string> &rModes) {}
+  void getCurrentVideoMode(int index, std::string& mode){}
+  bool setVideoMode(int index, int mode){return true;}
 
 private:
   rs2::config cfg;

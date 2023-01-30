@@ -134,22 +134,21 @@ namespace
 
       result->Success(flDeviceList);
     }
-    else if (method_call.method_name().compare("ni2GetVideoMode") == 0)
+    else if (method_call.method_name().compare("ni2GetAvailableVideoModes") == 0)
     {
       std::string serial;
       parseDartArugment<std::string>(arguments, "serial", &serial);
 
-      int videoModeIndex;
-      parseDartArugment<int>(arguments, "videoModeIndex", &videoModeIndex);
+      int index;
+      parseDartArugment<int>(arguments, "index", &index);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
-      int ret = -1;
 
       flutter::EncodableList list = flutter::EncodableList();
       if (cam != nullptr && cam->type == (CameraType::OPENNI))
       {
         std::vector<std::string> modes;
-        cam->getVideoMode(videoModeIndex, modes);
+        cam->getAvailableVideoModes(index, modes);
 
         for (auto s : modes)
         {
@@ -157,7 +156,50 @@ namespace
         }
       }
 
-       result->Success(flutter::EncodableValue(list));
+      result->Success(flutter::EncodableValue(list));
+    }
+    else if (method_call.method_name().compare("ni2GetCurrentVideoMode") == 0)
+    {
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      int index;
+      parseDartArugment<int>(arguments, "index", &index);
+
+      std::string mode = "";
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      if (cam != nullptr && cam->type == (CameraType::OPENNI)){
+        cam->getCurrentVideoMode(index, mode);
+
+        result->Success(flutter::EncodableValue(mode));
+        return;
+      }
+
+      result->Success(flutter::EncodableValue(""));
+    }
+    else if (method_call.method_name().compare("ni2SetVideoMode") == 0)
+    {
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      int index;
+      parseDartArugment<int>(arguments, "index", &index);
+
+      int mode;
+      parseDartArugment<int>(arguments, "mode", &mode);
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+
+      if (cam != nullptr && cam->type == (CameraType::OPENNI))
+      {
+        cam->setVideoMode(index, mode);
+
+        result->Success(flutter::EncodableValue(true));
+        return;
+      }
+
+      result->Success(flutter::EncodableValue(false));
     }
     else if (method_call.method_name().compare("fvCameraOpen") == 0)
     {

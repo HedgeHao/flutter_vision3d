@@ -118,8 +118,16 @@ class FvCamera {
   }
 
   Future<List<String>> getVideoModes(int index) async {
-    List<Object?> modes = await FlutterVision.channel.invokeMethod('ni2GetVideoMode', {'videoModeIndex': index, 'serial': serial});
+    List<Object?> modes = await FlutterVision.channel.invokeMethod('ni2GetAvailableVideoModes', {'index': index, 'serial': serial});
     return modes.map((e) => e.toString()).toList();
+  }
+
+  Future<bool> setVideMode(int index, int mode) async {
+    return await FlutterVision.channel.invokeMethod('ni2SetVideoMode', {'index': index, 'mode': mode, 'serial': serial});
+  }
+
+  Future<String> getCurrentVideoMode(int index) async {
+    return await FlutterVision.channel.invokeMethod('ni2GetCurrentVideoMode', {'index': index, 'serial': serial});
   }
 
   Future<void> test(int pointer) async {

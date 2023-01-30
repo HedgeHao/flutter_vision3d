@@ -254,7 +254,7 @@ public:
         return false;
     }
 
-    void getVideoMode(int index, std::vector<std::string>& rModes)
+    void getAvailableVideoModes(int index, std::vector<std::string> &rModes)
     {
         const openni::SensorInfo *info;
         if (index == VideoIndex::RGB)
@@ -273,7 +273,8 @@ public:
         auto &modes = info->getSupportedVideoModes();
 
         rModes.clear();
-        for(int i=0;i<modes.getSize();i++){
+        for (int i = 0; i < modes.getSize(); i++)
+        {
             std::stringstream ss;
             ss << modes[i].getResolutionX();
             ss << ",";
@@ -287,6 +288,65 @@ public:
             ss >> s;
             rModes.push_back(s);
         }
+    }
+
+    void getCurrentVideoMode(int index, std::string &mode)
+    {
+        openni::VideoMode m;
+        if (index == VideoIndex::RGB)
+        {
+            m = vsColor.getVideoMode();
+        }
+        else if (index == VideoIndex::Depth)
+        {
+            m = vsDepth.getVideoMode();
+        }
+        else if (index == VideoIndex::IR)
+        {
+            m = vsIR.getVideoMode();
+        }
+
+        std::stringstream ss;
+        ss << m.getResolutionX();
+        ss << ",";
+        ss << m.getResolutionY();
+        ss << ",";
+        ss << m.getFps();
+        ss << ",";
+        ss << m.getPixelFormat();
+
+        mode.clear();
+        ss >> mode;
+    }
+
+    bool setVideoMode(int index, int mode)
+    {
+        if (index == VideoIndex::RGB)
+        {
+            auto &modes = device->getSensorInfo(openni::SENSOR_COLOR)->getSupportedVideoModes();
+            if (mode > modes.getSize())
+                return false;
+            vsColor.setVideoMode(modes[mode]);
+            return true;
+        }
+        else if (index == VideoIndex::Depth)
+        {
+            auto &modes = device->getSensorInfo(openni::SENSOR_DEPTH)->getSupportedVideoModes();
+            if (mode > modes.getSize())
+                return false;
+            vsDepth.setVideoMode(modes[mode]);
+            return true;
+        }
+        else if (index == VideoIndex::IR)
+        {
+            auto &modes = device->getSensorInfo(openni::SENSOR_IR)->getSupportedVideoModes();
+            if (mode > modes.getSize())
+                return false;
+            vsIR.setVideoMode(modes[mode]);
+            return true;
+        }
+
+        return false;
     }
 
 private:
