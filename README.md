@@ -33,7 +33,7 @@ A framework for 2D & 3D image processing with AI (Tensorflow Lite)
 
 ![](doc/img/screenshot4.png)
 
-4. Execute and install `LIPS OpenNI2 SDK`
+4. Execute and install `LIPSedge-SDK-v2.4.1.1`
 
 ## Example App
 
