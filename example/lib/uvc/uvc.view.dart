@@ -81,6 +81,23 @@ class UvcView extends GetView<UvcControllerDevice> {
                     const Text(': Display original color frame')
                   ])
                 ]),
+                Row(
+                  children: [
+                    const Text("CV Mat:"),
+                    const SizedBox(width: 6),
+                    Text(controller.cvMatPointer.toString()),
+                    TextButton(
+                        onPressed: () {
+                          controller.getOpenCVMat();
+                        },
+                        child: const Text('Get')),
+                    TextButton(
+                        onPressed: () {
+                          controller.test();
+                        },
+                        child: const Text('test'))
+                  ],
+                )
               ],
             )),
         Expanded(

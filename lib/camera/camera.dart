@@ -98,4 +98,39 @@ class FvCamera {
   Future<bool> screenshot(int index, String path, {int? cvtCode}) async {
     return await FlutterVision.channel.invokeMethod('fvCameraScreenshot', {'index': index, 'path': path, 'cvtCode': cvtCode ?? -1, 'serial': serial});
   }
+
+  Future<int> getOpenCVMat(int index) async {
+    return await FlutterVision.channel.invokeMethod('fvGetOpenCVMat', {'index': index, 'serial': serial});
+  }
+
+  Future<Map<String, double>> getIntrinsic(int index) async {
+    Map<dynamic, dynamic> map = await FlutterVision.channel.invokeMethod('fvGetIntrinsic', {'index': index, 'serial': serial});
+
+    return <String, double>{'fx': map['fx'], 'fy': map['fy'], 'cx': map['cx'], 'cy': map['cy']};
+  }
+
+  Future<bool> enableRegistraion(bool enable) async {
+    return await FlutterVision.channel.invokeMethod('fvEnableRegistration', {'enable': enable, 'serial': serial});
+  }
+
+  Future<bool> pauseStream(bool pause) async {
+    return await FlutterVision.channel.invokeMethod('fvPauseStream', {'pause': pause, 'serial': serial});
+  }
+
+  Future<List<String>> getVideoModes(int index) async {
+    List<Object?> modes = await FlutterVision.channel.invokeMethod('ni2GetAvailableVideoModes', {'index': index, 'serial': serial});
+    return modes.map((e) => e.toString()).toList();
+  }
+
+  Future<bool> setVideMode(int index, int mode) async {
+    return await FlutterVision.channel.invokeMethod('ni2SetVideoMode', {'index': index, 'mode': mode, 'serial': serial});
+  }
+
+  Future<String> getCurrentVideoMode(int index) async {
+    return await FlutterVision.channel.invokeMethod('ni2GetCurrentVideoMode', {'index': index, 'serial': serial});
+  }
+
+  Future<void> test(int pointer) async {
+    return await FlutterVision.channel.invokeMethod('test', {'pointer': pointer});
+  }
 }

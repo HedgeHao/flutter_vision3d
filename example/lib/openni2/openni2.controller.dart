@@ -23,11 +23,25 @@ class OpenNIController extends GetxController {
   int irTextureId = 0;
   int openglTextureId = 0;
   bool pointCloud = false;
+  bool registration = false;
   List<DropdownMenuItem<int>> items = [];
+  List<DropdownMenuItem<int>> videoModeItems = const [
+    DropdownMenuItem(child: Text('RGB'), value: 1),
+    DropdownMenuItem(child: Text('Depth'), value: 2),
+    DropdownMenuItem(child: Text('IR'), value: 4),
+  ];
+  double fx = 0, fy = 0, cx = 0, cy = 0;
+  String videoModes = '';
+  String currentModeRGB = '';
+  String currentModeDepth = '';
+  String currentModeIR = '';
 
   int selected = 0;
+  int selectedVideoModeItem = 1;
   List<OpenNi2Device> deviceList = <OpenNi2Device>[];
   OpenNi2Device? selectedNiDevice;
+
+  TextEditingController videoModeCtl = TextEditingController();
 
   Future<void> openOpenNICamera() async {
     if (selectedNiDevice == null) return;
@@ -119,10 +133,55 @@ class OpenNIController extends GetxController {
     update([BUILDER_TEXTURE_OPENGL]);
   }
 
+  void enableRegistration(bool value) async {
+    if (cam == null) return;
+
+    cam!.enableRegistraion(value);
+
+    update();
+  }
+
   Future<void> deconstruct() async {
     await cam?.disableStream();
     await cam?.close();
     cam = null;
     update([BUILDER_TEXTURE]);
+  }
+
+  Future<void> getIntrinsic() async {
+    if (cam == null) return;
+
+    Map<String, double> param = await cam!.getIntrinsic(2);
+    fx = param['fx']!;
+    fy = param['fy']!;
+    cx = param['cx']!;
+    cy = param['cy']!;
+
+    update();
+  }
+
+  Future<void> getVideoModes(int index) async {
+    if (cam == null) return;
+
+    videoModes = (await cam!.getVideoModes(index)).join('\n');
+
+    update();
+  }
+
+  Future<void> setVideoMode() async {
+    if (cam == null) return;
+
+    print('$selectedVideoModeItem, $videoModeCtl.text');
+    await cam!.setVideMode(selectedVideoModeItem, int.parse(videoModeCtl.text));
+
+    getCurrentVideoMode();
+  }
+
+  Future<void> getCurrentVideoMode() async {
+    currentModeRGB = await cam!.getCurrentVideoMode(1);
+    currentModeDepth = await cam!.getCurrentVideoMode(2);
+    currentModeIR = await cam!.getCurrentVideoMode(4);
+
+    update();
   }
 }

@@ -134,7 +134,78 @@ class OpenNIView extends GetView<OpenNIController> {
                               onChanged: (value) => controller.enablePointCloud(value),
                             ))
                   ],
-                )
+                ),
+                Row(
+                  children: [
+                    const Text('Image Rigistration'),
+                    GetBuilder<OpenNIController>(
+                        builder: (controller) => Switch(
+                              value: controller.registration,
+                              onChanged: (value) => controller.enableRegistration(value),
+                            ))
+                  ],
+                ),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  const Text('Intrinsic'),
+                  TextButton(
+                      onPressed: () {
+                        controller.getIntrinsic();
+                      },
+                      child: const Text('Update'))
+                ]),
+                GetBuilder<OpenNIController>(
+                  builder: (controller) => Column(children: [
+                    Row(children: [const Text('fx:'), const SizedBox(width: 8), Text(controller.fx.toStringAsFixed(6))]),
+                    Row(children: [const Text('fy:'), const SizedBox(width: 8), Text(controller.fy.toStringAsFixed(6))]),
+                    Row(children: [const Text('cx:'), const SizedBox(width: 8), Text(controller.cx.toStringAsFixed(6))]),
+                    Row(children: [const Text('cy:'), const SizedBox(width: 8), Text(controller.cy.toStringAsFixed(6))]),
+                  ]),
+                ),
+                Row(
+                  children: [
+                    const Text('Available Video Modes:'),
+                    TextButton(onPressed: () => controller.getVideoModes(1), child: const Text('Color')),
+                    TextButton(onPressed: () => controller.getVideoModes(2), child: const Text('Depth')),
+                    TextButton(onPressed: () => controller.getVideoModes(4), child: const Text('IR')),
+                  ],
+                ),
+                GetBuilder<OpenNIController>(builder: (controller) => Text(controller.videoModes)),
+                Row(
+                  children: [
+                    const Text('Set Video Mode: '),
+                    DropdownButton(
+                        value: controller.selectedVideoModeItem,
+                        items: controller.videoModeItems,
+                        onChanged: (value) {
+                          controller.selectedVideoModeItem = value as int;
+                        }),
+                    SizedBox(
+                      width: 50,
+                      child: TextField(
+                        controller: controller.videoModeCtl,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    TextButton(
+                        onPressed: () {
+                          controller.setVideoMode();
+                        },
+                        child: const Text('Set'))
+                  ],
+                ),
+                Row(
+                  children: [
+                    const Text('Current Modes:'),
+                    TextButton(
+                        onPressed: () {
+                          controller.getCurrentVideoMode();
+                        },
+                        child: const Text('Update')),
+                  ],
+                ),
+                Row(children: [const Text('RGB:'), GetBuilder<OpenNIController>(builder: (controller) => Text(controller.currentModeRGB))]),
+                Row(children: [const Text('Depth:'), GetBuilder<OpenNIController>(builder: (controller) => Text(controller.currentModeDepth))]),
+                Row(children: [const Text('IR:'), GetBuilder<OpenNIController>(builder: (controller) => Text(controller.currentModeIR))]),
               ],
             )),
         Expanded(

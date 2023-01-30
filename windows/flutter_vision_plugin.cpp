@@ -134,6 +134,73 @@ namespace
 
       result->Success(flDeviceList);
     }
+    else if (method_call.method_name().compare("ni2GetAvailableVideoModes") == 0)
+    {
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      int index;
+      parseDartArugment<int>(arguments, "index", &index);
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+
+      flutter::EncodableList list = flutter::EncodableList();
+      if (cam != nullptr && cam->type == (CameraType::OPENNI))
+      {
+        std::vector<std::string> modes;
+        cam->getAvailableVideoModes(index, modes);
+
+        for (auto s : modes)
+        {
+          list.push_back(s);
+        }
+      }
+
+      result->Success(flutter::EncodableValue(list));
+    }
+    else if (method_call.method_name().compare("ni2GetCurrentVideoMode") == 0)
+    {
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      int index;
+      parseDartArugment<int>(arguments, "index", &index);
+
+      std::string mode = "";
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      if (cam != nullptr && cam->type == (CameraType::OPENNI)){
+        cam->getCurrentVideoMode(index, mode);
+
+        result->Success(flutter::EncodableValue(mode));
+        return;
+      }
+
+      result->Success(flutter::EncodableValue(""));
+    }
+    else if (method_call.method_name().compare("ni2SetVideoMode") == 0)
+    {
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      int index;
+      parseDartArugment<int>(arguments, "index", &index);
+
+      int mode;
+      parseDartArugment<int>(arguments, "mode", &mode);
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+
+      if (cam != nullptr && cam->type == (CameraType::OPENNI))
+      {
+        cam->setVideoMode(index, mode);
+
+        result->Success(flutter::EncodableValue(true));
+        return;
+      }
+
+      result->Success(flutter::EncodableValue(false));
+    }
     else if (method_call.method_name().compare("fvCameraOpen") == 0)
     {
       std::string serial;
@@ -159,6 +226,8 @@ namespace
       {
         cam = new UvcCam(serial.c_str());
       }
+
+      cam->type = cameraType;
 
       int ret = -1;
       if (cam != nullptr)
@@ -226,6 +295,42 @@ namespace
 
       // TODO: check enable/disable is really success
       result->Success(flutter::EncodableValue(enable));
+    }
+    else if (method_call.method_name().compare("fvGetOpenCVMat") == 0)
+    {
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      int index;
+      parseDartArugment<int>(arguments, "index", &index);
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      if (cam)
+      {
+        int64_t pointer = cam->getOpenCVMat(index);
+        result->Success(flutter::EncodableValue(pointer));
+        return;
+      }
+
+      result->Success(flutter::EncodableValue(0));
+    }
+    else if (method_call.method_name().compare("fvPauseStream") == 0)
+    {
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      bool pause;
+      parseDartArugment<bool>(arguments, "pause", &pause);
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      if (cam)
+      {
+        cam->pause(pause);
+        result->Success(flutter::EncodableValue(true));
+        return;
+      }
+
+      result->Success(flutter::EncodableValue(false));
     }
     else if (method_call.method_name().compare("ni2SetVideoSize") == 0)
     {
@@ -521,6 +626,46 @@ namespace
 
       result->Success(flutter::EncodableValue(ret));
     }
+    else if (method_call.method_name().compare("fvGetIntrinsic") == 0)
+    {
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      int index = -1;
+      parseDartArugment<int>(arguments, "index", &index);
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      flutter::EncodableMap map = flutter::EncodableMap();
+      double fx, fy, cx, cy;
+      if (cam)
+      {
+        cam->getIntrinsic(index, fx, fy, cx, cy);
+      }
+
+      map[flutter::EncodableValue("fx")] = fx;
+      map[flutter::EncodableValue("fy")] = fy;
+      map[flutter::EncodableValue("cx")] = cx;
+      map[flutter::EncodableValue("cy")] = cy;
+
+      result->Success(flutter::EncodableValue(map));
+    }
+    else if (method_call.method_name().compare("fvEnableRegistration") == 0)
+    {
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      bool enable;
+      parseDartArugment<bool>(arguments, "enable", &enable);
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      int ret = -1;
+      if (cam)
+      {
+        ret = cam->enableImageRegistration(enable);
+      }
+
+      result->Success(flutter::EncodableValue(ret));
+    }
     else if (method_call.method_name().compare("tfliteCreateModel") == 0)
     {
       std::string path;
@@ -619,18 +764,30 @@ namespace
     }
     else if (method_call.method_name().compare("test") == 0)
     {
-      // cv::Mat b(1280, 720, CV_8UC4, cv::Scalar(255, 0, 0, 255));
-      cv::Mat b = cv::imread("D:/test/faces.jpg", cv::IMREAD_COLOR);
-      cv::cvtColor(b, b, cv::COLOR_BGR2RGB);
-      cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
-      cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
+      int64_t pointer;
+      parseDartArugment<int64_t>(arguments, "pointer", &pointer);
 
-      cams[1]->rgbTexture->pipeline->run(b, textureRegistrar, cams[1]->rgbTexture->textureId, cams[1]->rgbTexture->videoWidth, cams[1]->rgbTexture->videoHeight, cams[1]->rgbTexture->buffer, &models, flChannel);
-      cams[1]->rgbTexture->setPixelBuffer();
-      cams[1]->irTexture->pipeline->run(g, textureRegistrar, cams[1]->irTexture->textureId, cams[1]->irTexture->videoWidth, cams[1]->irTexture->videoHeight, cams[1]->irTexture->buffer, &models, flChannel);
-      cams[1]->irTexture->setPixelBuffer();
-      cams[1]->depthTexture->pipeline->run(r, textureRegistrar, cams[1]->depthTexture->textureId, cams[1]->depthTexture->videoWidth, cams[1]->depthTexture->videoHeight, cams[1]->depthTexture->buffer, &models, flChannel);
-      cams[1]->depthTexture->setPixelBuffer();
+      std::cout << "Pointer:" << pointer << std::endl;
+
+      std::uintptr_t t = 1234;
+
+      std::uintptr_t ptr = pointer;
+      cv::Mat *m = (cv::Mat *)ptr;
+
+      std::cout << m->cols << "," << m->rows << std::endl;
+
+      // cv::Mat b(1280, 720, CV_8UC4, cv::Scalar(255, 0, 0, 255));
+      // cv::Mat b = cv::imread("D:/test/faces.jpg", cv::IMREAD_COLOR);
+      // cv::cvtColor(b, b, cv::COLOR_BGR2RGB);
+      // cv::Mat g(500, 500, CV_16UC1, cv::Scalar(125, 125, 125, 255));
+      // cv::Mat r(500, 500, CV_16UC1, cv::Scalar(220, 220, 220, 255));
+
+      // cams[1]->rgbTexture->pipeline->run(b, textureRegistrar, cams[1]->rgbTexture->textureId, cams[1]->rgbTexture->videoWidth, cams[1]->rgbTexture->videoHeight, cams[1]->rgbTexture->buffer, &models, flChannel);
+      // cams[1]->rgbTexture->setPixelBuffer();
+      // cams[1]->irTexture->pipeline->run(g, textureRegistrar, cams[1]->irTexture->textureId, cams[1]->irTexture->videoWidth, cams[1]->irTexture->videoHeight, cams[1]->irTexture->buffer, &models, flChannel);
+      // cams[1]->irTexture->setPixelBuffer();
+      // cams[1]->depthTexture->pipeline->run(r, textureRegistrar, cams[1]->depthTexture->textureId, cams[1]->depthTexture->videoWidth, cams[1]->depthTexture->videoHeight, cams[1]->depthTexture->buffer, &models, flChannel);
+      // cams[1]->depthTexture->setPixelBuffer();
       // uvcTexture->pipeline->run(b, textureRegistrar, uvcTexture->textureId, uvcTexture->videoWidth, uvcTexture->videoHeight, uvcTexture->buffer, &models, flChannel);
       // uvcTexture->setPixelBuffer();
 

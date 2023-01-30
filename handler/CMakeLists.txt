@@ -11,5 +11,6 @@ IF (MSVC)
     ENDIF()
 ENDIF()
 
+set(OpenCV_DIR "$ENV{FLUTTER_VISION_DEP}/opencv")
 find_package(OpenCV REQUIRED)
 target_link_libraries( ${TARGET} ${OpenCV_LIBS})
