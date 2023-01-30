@@ -28,6 +28,8 @@ private:
 #include <vector>
 #include <thread>
 
+int64_t tsRs = 0;
+
 enum RsVideoIndex
 {
   RS_RGB = 0b1,
@@ -91,6 +93,28 @@ public:
     }
 
     return 0;
+  }
+
+  void getIntrinsic(int index, double &fx, double &fy, double &cx, double &cy)
+  {
+    if (pipeline == nullptr)
+      return;
+
+    rs2_intrinsics intrinsics;
+    auto profile = pipeline->get_active_profile();
+    if (index == VideoIndex::RGB)
+    {
+      intrinsics = profile.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>().get_intrinsics();
+    }
+    else if (index == VideoIndex::Depth)
+    {
+      intrinsics = profile.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>().get_intrinsics();
+    }
+
+    fx = intrinsics.fx;
+    fy = intrinsics.fy;
+    cx = intrinsics.ppx;
+    cy = intrinsics.ppy;
   }
 
   int isConnected()
@@ -169,6 +193,13 @@ public:
 
   int getConfiguration(int prop) { return 0; }
 
+  // TODO: Not Implement
+  bool enableImageRegistration(bool enable) { return true; }
+
+  void getAvailableVideoModes(int index, std::vector<std::string> &rModes) {}
+  void getCurrentVideoMode(int index, std::string &mode) {}
+  bool setVideoMode(int index, int mode) { return true; }
+
 private:
   rs2::config cfg;
   unsigned int timeout = 1500;
@@ -179,8 +210,17 @@ private:
 
   int _readVideoFeed()
   {
+    int64_t now;
     while (videoStart)
     {
+      if (pauseStream)
+        continue;
+
+      getCurrentTime(&now);
+      if (now - tsRs < 32)
+        continue;
+      tsRs = now;
+
       try
       {
         rs2::frameset frames = pipeline->wait_for_frames(timeout);

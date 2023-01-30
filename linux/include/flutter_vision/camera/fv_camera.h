@@ -30,6 +30,8 @@ public:
   FvTexture *irTexture;
   bool videoStart = false;
   bool enablePointCloud = false;
+  bool pauseStream = false;
+  int type;
 
   FvCamera() {}
 
@@ -117,6 +119,30 @@ public:
     return -1;
   }
 
+  // TODO: check if long is enough
+  uintptr_t getOpenCVMat(int index)
+  {
+    if (index == VideoIndex::RGB)
+    {
+      return reinterpret_cast<std::uintptr_t>(&rgbTexture->cvImage);
+    }
+    else if (index == VideoIndex::IR)
+    {
+      return reinterpret_cast<std::uintptr_t>(&irTexture->cvImage);
+    }
+    else if (index == VideoIndex::Depth)
+    {
+      return reinterpret_cast<std::uintptr_t>(&depthTexture->cvImage);
+    }
+
+    return 0;
+  }
+
+  void pause(bool p)
+  {
+    pauseStream = p;
+  }
+
   virtual int camInit() = 0;
   virtual int openDevice() = 0;
   virtual int closeDevice() = 0;
@@ -125,6 +151,11 @@ public:
   virtual int readVideoFeed() = 0;
   virtual int configure(int prop, std::vector<float> &value) = 0;
   virtual int getConfiguration(int prop) = 0;
+  virtual void getIntrinsic(int index, double &fx, double &fy, double &cx, double &cy) = 0;
+  virtual bool enableImageRegistration(bool enable) = 0;
+  virtual void getAvailableVideoModes(int index, std::vector<std::string> &) = 0;
+  virtual void getCurrentVideoMode(int index, std::string &mode) = 0;
+  virtual bool setVideoMode(int index, int mode) = 0;
 
 private:
   virtual int _readVideoFeed() = 0;

@@ -105,6 +105,70 @@ static void flutter_vision_plugin_handle_method_call(
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(flDeviceList));
 #endif
   }
+  else if (strcmp(method, "ni2GetAvailableVideoModes") == 0)
+  {
+#ifdef DISABLE_OPENNI
+    response = FL_METHOD_RESPONSE(fl_method_error_response_new("NOT SUPPORT", "NOT SUPPORT", nullptr));
+#else
+    const char *serial = FL_ARG_STRING(args, "serial");
+    const int index = FL_ARG_INT(args, "index");
+
+    auto flList = fl_value_new_list();
+
+    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    if (cam != nullptr)
+    {
+      std::vector<std::string> modes;
+      cam->getAvailableVideoModes(index, modes);
+
+      for (auto s : modes)
+      {
+        fl_value_append_take(flList, fl_value_new_string(s.c_str()));
+      }
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(flList));
+#endif
+  }
+  else if (strcmp(method, "ni2GetCurrentVideoMode") == 0)
+  {
+#ifdef DISABLE_OPENNI
+    response = FL_METHOD_RESPONSE(fl_method_error_response_new("NOT SUPPORT", "NOT SUPPORT", nullptr));
+#else
+    const char *serial = FL_ARG_STRING(args, "serial");
+    const int index = FL_ARG_INT(args, "index");
+
+    std::string mode = "";
+
+    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    if (cam != nullptr)
+    {
+      cam->getCurrentVideoMode(index, mode);
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_string(mode.c_str())));
+#endif
+  }
+  else if (strcmp(method, "ni2SetVideoMode") == 0)
+  {
+#ifdef DISABLE_OPENNI
+    response = FL_METHOD_RESPONSE(fl_method_error_response_new("NOT SUPPORT", "NOT SUPPORT", nullptr));
+#else
+    const char *serial = FL_ARG_STRING(args, "serial");
+    const int index = FL_ARG_INT(args, "index");
+    const int mode = FL_ARG_INT(args, "mode");
+
+    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    bool ret = false;
+    if (cam != nullptr)
+    {
+      cam->setVideoMode(index, mode);
+
+      ret = true;
+    }
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(ret)));
+#endif
+  }
   else if (strcmp(method, "fvCameraOpen") == 0)
   {
     const char *serial = FL_ARG_STRING(args, "serial");
@@ -128,6 +192,8 @@ static void flutter_vision_plugin_handle_method_call(
     {
       cam = new UvcCam(serial);
     }
+
+    cam->type = cameraType;
 
     int ret = -1;
     if (cam != nullptr)
@@ -183,6 +249,35 @@ static void flutter_vision_plugin_handle_method_call(
       }
     }
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(enable)));
+  }
+  else if (strcmp(method, "fvGetOpenCVMat") == 0)
+  {
+    const char *serial = FL_ARG_STRING(args, "serial");
+    const int index = FL_ARG_INT(args, "index");
+
+    int64_t pointer = 0;
+    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    if (cam)
+    {
+      pointer = cam->getOpenCVMat(index);
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(pointer)));
+  }
+  else if (strcmp(method, "fvPauseStream") == 0)
+  {
+    const char *serial = FL_ARG_STRING(args, "serial");
+    const bool pause = FL_ARG_BOOL(args, "pause");
+
+    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    bool ret = false;
+    if (cam)
+    {
+      cam->pause(pause);
+      ret = true;
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(ret)));
   }
   else if (strcmp(method, "ni2SetVideoSize") == 0)
   {
@@ -448,6 +543,28 @@ static void flutter_vision_plugin_handle_method_call(
     }
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(ret)));
+  }
+  else if (strcmp(method, "fvGetIntrinsic") == 0)
+  {
+
+    const char *serial = FL_ARG_STRING(args, "serial");
+    const int index = FL_ARG_INT(args, "index");
+
+    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    double fx = 0.0, fy = 0.0, cx = 0.0, cy = 0.0;
+
+    FlValue *map = fl_value_new_map();
+    if (cam)
+    {
+      cam->getIntrinsic(index, fx, fy, cx, cy);
+    }
+
+    fl_value_set(map, fl_value_new_string("fx"), fl_value_new_float(fx));
+    fl_value_set(map, fl_value_new_string("fy"), fl_value_new_float(fy));
+    fl_value_set(map, fl_value_new_string("cx"), fl_value_new_float(cx));
+    fl_value_set(map, fl_value_new_string("cy"), fl_value_new_float(cy));
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(map));
   }
   else if (strcmp(method, "tfliteCreateModel") == 0)
   {
