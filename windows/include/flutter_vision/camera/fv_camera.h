@@ -100,7 +100,7 @@ public:
         return -1;
     }
 
-    // TODO: check if long if enough
+    // TODO: check if long is enough
     uintptr_t getOpenCVMat(int index)
     {
         if (index == VideoIndex::RGB)
@@ -119,7 +119,8 @@ public:
         return 0;
     }
 
-    void pause(bool p){
+    void pause(bool p)
+    {
         pauseStream = p;
     }
 

@@ -33,7 +33,7 @@ A framework for 2D & 3D image processing with AI (Tensorflow Lite)
 
 ![](doc/img/screenshot4.png)
 
-4. Execute and install `LIPS OpenNI2 SDK`
+4. Execute and install `LIPSedge-SDK-v2.4.1.1`
 
 ## Example App
 
@@ -72,6 +72,7 @@ class Define {
 | LIPSedge AE400        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae400) |
 | LIPSedge AE430        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae430) |
 | LIPSedge AE450        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae450) |
+| LIPSedge AE470        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae470) |
 | LIPSedge DL           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-dl-series) |
 | LIPSedge M3           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-m3-series) |
 | LIPSedge L Series     |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-l-series) |
