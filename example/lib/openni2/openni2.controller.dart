@@ -26,9 +26,9 @@ class OpenNIController extends GetxController {
   bool registration = false;
   List<DropdownMenuItem<int>> items = [];
   List<DropdownMenuItem<int>> videoModeItems = const [
-    DropdownMenuItem(child: Text('RGB'), value: 1),
-    DropdownMenuItem(child: Text('Depth'), value: 2),
-    DropdownMenuItem(child: Text('IR'), value: 4),
+    DropdownMenuItem(child: Text('RGB'), value: StreamIndex.RGB),
+    DropdownMenuItem(child: Text('Depth'), value: StreamIndex.DEPTH),
+    DropdownMenuItem(child: Text('IR'), value: StreamIndex.IR),
   ];
   double fx = 0, fy = 0, cx = 0, cy = 0;
   String videoModes = '';
@@ -180,9 +180,9 @@ class OpenNIController extends GetxController {
   }
 
   Future<void> getCurrentVideoMode() async {
-    currentModeRGB = await cam!.getCurrentVideoMode(1);
-    currentModeDepth = await cam!.getCurrentVideoMode(2);
-    currentModeIR = await cam!.getCurrentVideoMode(4);
+    currentModeRGB = await cam!.getCurrentVideoMode(StreamIndex.RGB);
+    currentModeDepth = await cam!.getCurrentVideoMode(StreamIndex.DEPTH);
+    currentModeIR = await cam!.getCurrentVideoMode(StreamIndex.IR);
 
     update();
   }

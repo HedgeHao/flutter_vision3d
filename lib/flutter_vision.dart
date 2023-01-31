@@ -88,8 +88,6 @@ class FlutterVision {
       List<Object?> list = await channel.invokeMethod('ni2EnumerateDevices');
 
       deviceList.addAll(list.map((e) => OpenNi2Device.fromJson(e as Map<dynamic, dynamic>)));
-
-      print(deviceList[0].toJson());
     } catch (e) {
       print('OpenNI SDK is not found');
     }

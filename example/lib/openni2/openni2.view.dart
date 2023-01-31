@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision_example/openni2/openni2.controller.dart';
 import 'package:flutter_vision_example/widgets/pointcloud/pointcloud.view.dart';
 import 'package:get/get.dart';
@@ -165,9 +166,9 @@ class OpenNIView extends GetView<OpenNIController> {
                 Row(
                   children: [
                     const Text('Available Video Modes:'),
-                    TextButton(onPressed: () => controller.getVideoModes(1), child: const Text('Color')),
-                    TextButton(onPressed: () => controller.getVideoModes(2), child: const Text('Depth')),
-                    TextButton(onPressed: () => controller.getVideoModes(4), child: const Text('IR')),
+                    TextButton(onPressed: () => controller.getVideoModes(StreamIndex.RGB), child: const Text('Color')),
+                    TextButton(onPressed: () => controller.getVideoModes(StreamIndex.DEPTH), child: const Text('Depth')),
+                    TextButton(onPressed: () => controller.getVideoModes(StreamIndex.IR), child: const Text('IR')),
                   ],
                 ),
                 GetBuilder<OpenNIController>(builder: (controller) => Text(controller.videoModes)),
