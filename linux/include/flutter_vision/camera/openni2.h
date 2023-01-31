@@ -366,6 +366,18 @@ public:
     return false;
   }
 
+  bool getSerialNumber(std::string &sn)
+  {
+    if (device == nullptr)
+      return false;
+
+    char s[32];
+    device->getProperty(openni::DEVICE_PROPERTY_SERIAL_NUMBER, &s);
+    sn = s;
+
+    return true;
+  }
+
 private:
   VideoStream vsDepth;
   VideoStream vsColor;

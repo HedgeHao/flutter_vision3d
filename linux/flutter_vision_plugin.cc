@@ -279,6 +279,20 @@ static void flutter_vision_plugin_handle_method_call(
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(ret)));
   }
+  else if (strcmp(method, "fvGetSerialNumber") == 0)
+  {
+    const char *serial = FL_ARG_STRING(args, "serial");
+
+    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    bool ret = false;
+    std::string sn = "";
+    if (cam)
+    {
+      ret = cam->getSerialNumber(sn);
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_string(sn.c_str())));
+  }
   else if (strcmp(method, "ni2SetVideoSize") == 0)
   {
     // const int index = FL_ARG_INT(args, "videoIndex");

@@ -14,6 +14,11 @@ public:
   int readVideoFeed() { return NOT_SUPPORT; }
   int configure(int prop, std::vector<float> &value) { return NOT_SUPPORT; }
   int getConfiguration(int prop) { return NOT_SUPPORT; }
+  bool enableImageRegistration(bool enable) { return true; }
+  void getAvailableVideoModes(int index, std::vector<std::string> &rModes) {}
+  void getCurrentVideoMode(int index, std::string &mode) {}
+  bool setVideoMode(int index, int mode) { return true; }
+  bool getSerialNumber(std::string &sn) {}
 
 private:
   int _readVideoFeed() { return NOT_SUPPORT; }
@@ -199,6 +204,12 @@ public:
   void getAvailableVideoModes(int index, std::vector<std::string> &rModes) {}
   void getCurrentVideoMode(int index, std::string &mode) {}
   bool setVideoMode(int index, int mode) { return true; }
+
+  bool getSerialNumber(std::string &sn)
+  {
+    sn = serial;
+    return true;
+  }
 
 private:
   rs2::config cfg;
