@@ -83,6 +83,9 @@ public:
 
   bool setVideoMode(int index, int mode) { return true; }
 
+  // TODO: Use USB library to do this if needed
+  bool getSerialNumber(std::string &sn) { return true; }
+
 private:
   int uvcIndex = -1;
   cv::VideoCapture *cap;

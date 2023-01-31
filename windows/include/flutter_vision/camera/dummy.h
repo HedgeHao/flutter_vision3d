@@ -39,6 +39,8 @@ public:
 
     bool setVideoMode(int index, int mode){return true;}
 
+    bool getSerialNumber(std::string &sn){return true;}
+
 private:
     void _readVideoFeed() {}
 };

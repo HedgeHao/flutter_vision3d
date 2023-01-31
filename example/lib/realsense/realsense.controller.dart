@@ -16,6 +16,7 @@ class RealsenseController extends GetxController {
   static const BUILDER_SLIDER = 'BUILDER_SLIDER';
 
   RealsenseCamera? cam;
+  String sn = '';
   double fx = 0, fy = 0, cx = 0, cy = 0;
   int rgbTextureId = 0;
   int depthTextureId = 0;
@@ -52,7 +53,9 @@ class RealsenseController extends GetxController {
       return;
     }
 
-    update([BUILDER_TEXTURE, BUILDER_SLIDER]);
+    sn = await cam!.getSerialNumber();
+
+    update();
   }
 
   void closeRealsenseCamera() async {

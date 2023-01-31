@@ -156,6 +156,7 @@ public:
   virtual void getAvailableVideoModes(int index, std::vector<std::string> &) = 0;
   virtual void getCurrentVideoMode(int index, std::string &mode) = 0;
   virtual bool setVideoMode(int index, int mode) = 0;
+  virtual bool getSerialNumber(std::string &sn) = 0;
 
 private:
   virtual int _readVideoFeed() = 0;

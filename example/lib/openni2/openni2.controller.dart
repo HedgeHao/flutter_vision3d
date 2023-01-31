@@ -26,15 +26,16 @@ class OpenNIController extends GetxController {
   bool registration = false;
   List<DropdownMenuItem<int>> items = [];
   List<DropdownMenuItem<int>> videoModeItems = const [
-    DropdownMenuItem(child: Text('RGB'), value: 1),
-    DropdownMenuItem(child: Text('Depth'), value: 2),
-    DropdownMenuItem(child: Text('IR'), value: 4),
+    DropdownMenuItem(child: Text('RGB'), value: StreamIndex.RGB),
+    DropdownMenuItem(child: Text('Depth'), value: StreamIndex.DEPTH),
+    DropdownMenuItem(child: Text('IR'), value: StreamIndex.IR),
   ];
   double fx = 0, fy = 0, cx = 0, cy = 0;
   String videoModes = '';
   String currentModeRGB = '';
   String currentModeDepth = '';
   String currentModeIR = '';
+  String sn = '';
 
   int selected = 0;
   int selectedVideoModeItem = 1;
@@ -52,7 +53,9 @@ class OpenNIController extends GetxController {
       return;
     }
 
-    update([BUILDER_TEXTURE, BUILDER_SLIDER]);
+    sn = await cam!.getSerialNumber();
+
+    update();
   }
 
   void closeOpenNICamera() async {
@@ -171,16 +174,15 @@ class OpenNIController extends GetxController {
   Future<void> setVideoMode() async {
     if (cam == null) return;
 
-    print('$selectedVideoModeItem, $videoModeCtl.text');
     await cam!.setVideMode(selectedVideoModeItem, int.parse(videoModeCtl.text));
 
     getCurrentVideoMode();
   }
 
   Future<void> getCurrentVideoMode() async {
-    currentModeRGB = await cam!.getCurrentVideoMode(1);
-    currentModeDepth = await cam!.getCurrentVideoMode(2);
-    currentModeIR = await cam!.getCurrentVideoMode(4);
+    currentModeRGB = await cam!.getCurrentVideoMode(StreamIndex.RGB);
+    currentModeDepth = await cam!.getCurrentVideoMode(StreamIndex.DEPTH);
+    currentModeIR = await cam!.getCurrentVideoMode(StreamIndex.IR);
 
     update();
   }

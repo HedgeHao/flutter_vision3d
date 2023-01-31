@@ -63,6 +63,7 @@ class RealsenseView extends GetView<RealsenseController> {
                         child: const Text('Refresh'))
                   ],
                 ),
+                Row(children: [const Text('Serial Number:'), GetBuilder<RealsenseController>(builder: (controller) => Text(controller.sn))]),
                 Row(
                   children: [
                     const Text('Device:'),

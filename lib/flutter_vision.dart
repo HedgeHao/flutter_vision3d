@@ -8,6 +8,12 @@ import 'package:flutter_vision/constants.dart';
 
 enum CameraType { OPENNI, REALSENSE, DUMMY, UVC }
 
+class StreamIndex {
+  static const RGB = 1;
+  static const DEPTH = 2;
+  static const IR = 4;
+}
+
 class OpenNi2Status {
   // OpenNI2
   static const int STATUS_OK = 0;
