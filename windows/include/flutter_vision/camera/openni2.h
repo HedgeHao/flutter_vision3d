@@ -5,6 +5,7 @@
 #define LIPS_FACE_RECOGNITION 0x258
 #define LIPS_FACE_REGISTRATION 0x259
 #define LIPS_FACE_DELETE_FACE_DATABASE 0x25A
+#define LIPS_L21X_LASER 307
 #define STREAM_PROPERTY_FOCAL_LENGTH_X 200
 #define STREAM_PROPERTY_FOCAL_LENGTH_Y 201
 #define STREAM_PROPERTY_PRINCIPAL_POINT_X 202
@@ -228,8 +229,9 @@ public:
         case LIPS_FACE_REGISTRATION:
         case LIPS_FACE_RECOGNITION:
         case LIPS_FACE_DELETE_FACE_DATABASE:
-            unsigned short param = value[0];
-            device->setProperty(prop, &param, sizeof(unsigned short));
+        case LIPS_L21X_LASER:
+            int param = value[0];
+            device->setProperty(prop, &param, sizeof(int));
             break;
         }
     }

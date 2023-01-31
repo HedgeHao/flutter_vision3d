@@ -171,7 +171,6 @@ class OpenNIController extends GetxController {
   Future<void> setVideoMode() async {
     if (cam == null) return;
 
-    print('$selectedVideoModeItem, $videoModeCtl.text');
     await cam!.setVideMode(selectedVideoModeItem, int.parse(videoModeCtl.text));
 
     getCurrentVideoMode();

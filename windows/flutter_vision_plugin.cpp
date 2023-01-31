@@ -658,7 +658,7 @@ namespace
       parseDartArugment<bool>(arguments, "enable", &enable);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
-      int ret = -1;
+      bool ret = false;
       if (cam)
       {
         ret = cam->enableImageRegistration(enable);
