@@ -130,6 +130,10 @@ class FvCamera {
     return await FlutterVision.channel.invokeMethod('ni2GetCurrentVideoMode', {'index': index, 'serial': serial});
   }
 
+  Future<String> getSerialNumber() async {
+    return await FlutterVision.channel.invokeMethod('fvGetSerialNumber', {'serial': serial});
+  }
+
   Future<void> test(int pointer) async {
     return await FlutterVision.channel.invokeMethod('test', {'pointer': pointer});
   }

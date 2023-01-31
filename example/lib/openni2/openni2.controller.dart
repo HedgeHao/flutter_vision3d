@@ -35,6 +35,7 @@ class OpenNIController extends GetxController {
   String currentModeRGB = '';
   String currentModeDepth = '';
   String currentModeIR = '';
+  String sn = '';
 
   int selected = 0;
   int selectedVideoModeItem = 1;
@@ -52,7 +53,9 @@ class OpenNIController extends GetxController {
       return;
     }
 
-    update([BUILDER_TEXTURE, BUILDER_SLIDER]);
+    sn = await cam!.getSerialNumber();
+
+    update();
   }
 
   void closeOpenNICamera() async {

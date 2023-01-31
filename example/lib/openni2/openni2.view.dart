@@ -63,6 +63,7 @@ class OpenNIView extends GetView<OpenNIController> {
                         child: const Text('Refresh'))
                   ],
                 ),
+                Row(children: [const Text('Serial Number:'), GetBuilder<OpenNIController>(builder: (controller) => Text(controller.sn))]),
                 Row(
                   children: [
                     const Text('Device:'),

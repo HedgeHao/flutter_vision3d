@@ -177,8 +177,14 @@ public:
   void getCurrentVideoMode(int index, std::string& mode){}
   bool setVideoMode(int index, int mode){return true;}
 
+  bool getSerialNumber(std::string &sn){
+    sn = serial;
+    return true;
+  }
+
 private:
   rs2::config cfg;
+  
   unsigned int timeout = 1500;
   bool isRgbEnable = false, isDepthEnable = false, isIrEnable = false;
   rs2::pointcloud rsPointcloud;

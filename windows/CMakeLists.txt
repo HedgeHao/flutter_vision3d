@@ -36,7 +36,6 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
 
 set(OpenCV_DIR "$ENV{FLUTTER_VISION_DEP}/opencv")
 find_package(OpenCV REQUIRED)
-message(${OpenCV_INCLUDE_DIRS})
 target_link_libraries(${PLUGIN_NAME} PRIVATE
   "$ENV{FLUTTER_VISION_DEP}/realsense2/lib/x64/realsense2.lib"
   "$ENV{FLUTTER_VISION_DEP}/tensorflowlite/lib/tensorflowlite.dll.if.lib"
@@ -61,10 +60,3 @@ set(flutter_vision_bundled_libraries
   "$ENV{OPENNI2_REDIST64}/OpenNI2.dll"
   PARENT_SCOPE
 )
-
-# add_custom_command(TARGET ${PLUGIN_NAME} POST_BUILD 
-#  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#  "./OpenNI"
-#  "${CMAKE_BINARY_DIR}/runner/Debug/OpenNI"
-#  COMMENT "Copying 'OpenNI2.dll' to ${CMAKE_BINARY_DIR}/runner/Debug/"
-# )

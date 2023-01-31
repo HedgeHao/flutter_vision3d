@@ -169,7 +169,8 @@ namespace
       std::string mode = "";
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
-      if (cam != nullptr && cam->type == (CameraType::OPENNI)){
+      if (cam != nullptr && cam->type == (CameraType::OPENNI))
+      {
         cam->getCurrentVideoMode(index, mode);
 
         result->Success(flutter::EncodableValue(mode));
@@ -331,6 +332,23 @@ namespace
       }
 
       result->Success(flutter::EncodableValue(false));
+    }
+    else if (method_call.method_name().compare("fvGetSerialNumber") == 0)
+    {
+      std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      if (cam)
+      {
+        std::string sn;
+        cam->getSerialNumber(sn);
+
+        result->Success(flutter::EncodableValue(sn.c_str()));
+        return;
+      }
+
+      result->Success(flutter::EncodableValue(""));
     }
     else if (method_call.method_name().compare("ni2SetVideoSize") == 0)
     {
