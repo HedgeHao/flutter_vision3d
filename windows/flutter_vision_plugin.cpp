@@ -644,6 +644,20 @@ namespace
 
       result->Success(flutter::EncodableValue(ret));
     }
+    else if(method_call.method_name().compare("rsLoadPresetParameters") == 0){
+        std::string serial;
+      parseDartArugment<std::string>(arguments, "serial", &serial);
+
+        std::string path;
+      parseDartArugment<std::string>(arguments, "path", &serial);
+
+       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+       if(cam){
+        cam->loadPresetParameters(path);
+       }
+
+       result->Success(flutter::EncodableValue(nullptr));
+    }
     else if (method_call.method_name().compare("fvGetIntrinsic") == 0)
     {
       std::string serial;

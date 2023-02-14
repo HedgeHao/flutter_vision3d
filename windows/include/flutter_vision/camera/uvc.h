@@ -75,6 +75,7 @@ public:
     void getAvailableVideoModes(int index, std::vector<std::string>& rModes){}
     void getCurrentVideoMode(int index, std::string& mode){}
     bool setVideoMode(int index, int mode){return true;}
+    void loadPresetParameters(std::string &path){}
 
     // TODO: Use USB library to do this if needed
     bool getSerialNumber(std::string &sn){return true;}

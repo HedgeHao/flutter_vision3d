@@ -1,4 +1,5 @@
 #include <librealsense2/rs.hpp>
+#include <librealsense2/rs_advanced_mode.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -42,6 +43,7 @@ class RealsenseCam : public FvCamera
 public:
   rs2::context ctx;
   rs2::pipeline *pipeline;
+  rs2::pipeline_profile profile;
 
   RealsenseCam(const char *s) : FvCamera(s) {}
 
@@ -125,7 +127,7 @@ public:
     if (*enable)
     {
       cfg.enable_all_streams();
-      pipeline->start(cfg);
+      profile = pipeline->start(cfg);
     }
     else
     {
@@ -169,6 +171,10 @@ public:
   }
 
   int getConfiguration(int prop) { return 0; }
+
+ void loadPresetParameters(std::string &path){
+    profile.get_device().as<rs400::advanced_mode>().load_json(path);
+  }
 
   // TODO: Not Implement
   bool enableImageRegistration(bool enable) { return true; }

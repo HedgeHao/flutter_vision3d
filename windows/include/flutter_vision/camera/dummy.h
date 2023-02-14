@@ -41,6 +41,8 @@ public:
 
     bool getSerialNumber(std::string &sn){return true;}
 
+    void loadPresetParameters(std::string &path){}
+
 private:
     void _readVideoFeed() {}
 };

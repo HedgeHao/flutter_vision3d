@@ -231,6 +231,7 @@ public:
         case LIPS_FACE_DELETE_FACE_DATABASE:
         case LIPS_L21X_LASER:
             int param = value[0];
+            std::cout << "[Configure]" << prop << "," << param << std::endl;
             device->setProperty(prop, &param, sizeof(int));
             break;
         }
@@ -361,6 +362,8 @@ public:
 
         return true;
     }
+
+    void loadPresetParameters(std::string &path){}
 
 private:
     VideoStream vsDepth;

@@ -134,6 +134,10 @@ class FvCamera {
     return await FlutterVision.channel.invokeMethod('fvGetSerialNumber', {'serial': serial});
   }
 
+  Future<void> loadPresetParameter(String path) async {
+    return await FlutterVision.channel.invokeMethod('rsLoadPresetParameters', {'serial': serial, 'path': path});
+  }
+
   Future<void> test(int pointer) async {
     return await FlutterVision.channel.invokeMethod('test', {'pointer': pointer});
   }
