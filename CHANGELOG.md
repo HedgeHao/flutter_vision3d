@@ -1,3 +1,7 @@
+## 1.0.1
+* Add Realsense configuration for frame sync
+* Add function to load realsense preset parameters JSON file for D400 series
+
 ## 1.0.0
 * Fix Windows build process (Separate dependencies)
 

@@ -139,7 +139,7 @@ class OpenNIController extends GetxController {
   void enableRegistration(bool value) async {
     if (cam == null) return;
 
-    cam!.enableRegistraion(value);
+    cam!.enableRegistration(value);
 
     update();
   }

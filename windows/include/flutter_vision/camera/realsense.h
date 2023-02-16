@@ -22,11 +22,15 @@ enum RsVideoIndex
 enum RsConfiguration
 {
   THRESHOLD_FILTER = 0,
+  FRAME_SYNC_COLOR_FILTER = 1,
+  FRAME_SYNC_DEPTH_FILTER = 2,
 };
 
 enum RsFilterType
 {
-  THRESHOLD = 0
+  THRESHOLD = 0,
+  FRAME_SYNC_COLOR = 1,
+  FRAME_SYNC_DEPTH = 2,
 };
 
 class RsFilter
@@ -168,11 +172,50 @@ public:
       RsFilter f(RsFilterType::THRESHOLD, new rs2::threshold_filter(value[0], value[1]));
       filters.push_back(f);
     }
+    else if (prop == RsConfiguration::FRAME_SYNC_COLOR_FILTER)
+    {
+      for (int i = 0; i < filters.size(); i++)
+      {
+        if (filters[i].type == RsFilterType::FRAME_SYNC_COLOR)
+        {
+          if (value[0] == 0)
+          {
+            filters.erase(filters.begin() + i);
+          }
+          return;
+        }
+      }
+
+      if (value[0] == 1)
+      {
+        filters.push_back(RsFilter(RsFilterType::FRAME_SYNC_COLOR, new rs2::align(RS2_STREAM_COLOR)));
+      }
+    }
+    else if (prop == RsConfiguration::FRAME_SYNC_DEPTH_FILTER)
+    {
+      for (int i = 0; i < filters.size(); i++)
+      {
+        if (filters[i].type == RsFilterType::FRAME_SYNC_DEPTH)
+        {
+          if (value[0] == 0)
+          {
+            filters.erase(filters.begin() + i);
+          }
+          return;
+        }
+      }
+
+      if (value[0] == 1)
+      {
+        filters.push_back(RsFilter(RsFilterType::FRAME_SYNC_DEPTH, new rs2::align(RS2_STREAM_DEPTH)));
+      }
+    }
   }
 
   int getConfiguration(int prop) { return 0; }
 
- void loadPresetParameters(std::string &path){
+  void loadPresetParameters(std::string &path)
+  {
     profile.get_device().as<rs400::advanced_mode>().load_json(path);
   }
 
@@ -180,17 +223,18 @@ public:
   bool enableImageRegistration(bool enable) { return true; }
 
   void getAvailableVideoModes(int index, std::vector<std::string> &rModes) {}
-  void getCurrentVideoMode(int index, std::string& mode){}
-  bool setVideoMode(int index, int mode){return true;}
+  void getCurrentVideoMode(int index, std::string &mode) {}
+  bool setVideoMode(int index, int mode) { return true; }
 
-  bool getSerialNumber(std::string &sn){
+  bool getSerialNumber(std::string &sn)
+  {
     sn = serial;
     return true;
   }
 
 private:
   rs2::config cfg;
-  
+
   unsigned int timeout = 1500;
   bool isRgbEnable = false, isDepthEnable = false, isIrEnable = false;
   rs2::pointcloud rsPointcloud;
@@ -217,8 +261,7 @@ private:
         {
           for (RsFilter f : filters)
           {
-
-            frames = f.filter->as<rs2::threshold_filter>().process(frames);
+            frames = f.filter->process(frames);
           }
         }
 

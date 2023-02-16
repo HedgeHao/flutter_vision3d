@@ -109,7 +109,7 @@ class FvCamera {
     return <String, double>{'fx': map['fx'], 'fy': map['fy'], 'cx': map['cx'], 'cy': map['cy']};
   }
 
-  Future<bool> enableRegistraion(bool enable) async {
+  Future<bool> enableRegistration(bool enable) async {
     return await FlutterVision.channel.invokeMethod('fvEnableRegistration', {'enable': enable, 'serial': serial});
   }
 
