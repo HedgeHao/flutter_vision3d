@@ -85,8 +85,9 @@ class RealsenseView extends GetView<RealsenseController> {
                     const Text('Streaming:'),
                     const SizedBox(width: 10),
                     TextButton(
-                        onPressed: () {
-                          controller.enableStreaming();
+                        onPressed: () async {
+                          bool ret = await controller.enableStreaming();
+                          print('Enable:$ret');
                         },
                         child: const Text('start')),
                     TextButton(

@@ -287,7 +287,12 @@ namespace
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
       if (cam)
       {
-        cam->configVideoStream(videoModeIndex, &enable);
+        int ret = cam->configVideoStream(videoModeIndex, &enable);
+        if(ret != 0){
+          result->Success(flutter::EncodableValue(false));
+          return;
+        }
+
         if (enable)
         {
           cam->readVideoFeed();

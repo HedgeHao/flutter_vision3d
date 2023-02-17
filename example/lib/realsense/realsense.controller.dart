@@ -62,8 +62,8 @@ class RealsenseController extends GetxController {
     await cam?.close();
   }
 
-  void enableStreaming() async {
-    await cam?.enableStream();
+  Future<bool> enableStreaming() async {
+    return await cam?.enableStream() ?? false;
   }
 
   void disableStreaming() async {

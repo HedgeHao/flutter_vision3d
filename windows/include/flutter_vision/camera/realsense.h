@@ -131,7 +131,15 @@ public:
     if (*enable)
     {
       cfg.enable_all_streams();
-      profile = pipeline->start(cfg);
+      try
+      {
+        profile = pipeline->start(cfg);
+      }
+      catch (rs2::error &e)
+      {
+        std::cout << "[Realsense SDK error]" << e.what() << std::endl;
+        return -1;
+      }
     }
     else
     {
@@ -142,10 +150,12 @@ public:
       }
       catch (rs2::wrong_api_call_sequence_error &e)
       {
+        std::cout << "[Realsense SDK Error]" << e.what() << std::endl;
+        return -1;
       }
     }
 
-    return -1;
+    return 0;
   }
 
   void readVideoFeed()
