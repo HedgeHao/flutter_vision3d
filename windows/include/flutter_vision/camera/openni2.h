@@ -354,7 +354,8 @@ public:
 
     bool getSerialNumber(std::string &sn)
     {
-        if(device == nullptr) return false;
+        if (device == nullptr)
+            return false;
 
         char s[32];
         device->getProperty(openni::DEVICE_PROPERTY_SERIAL_NUMBER, &s);
@@ -363,7 +364,7 @@ public:
         return true;
     }
 
-    void loadPresetParameters(std::string &path){}
+    void loadPresetParameters(std::string &path) {}
 
 private:
     VideoStream vsDepth;
@@ -490,6 +491,9 @@ private:
 
         while (videoStart)
         {
+            if (pauseStream)
+                continue;
+
             rgbNewFrame = false;
             depthNewFrame = false;
             irNewFrame = false;
