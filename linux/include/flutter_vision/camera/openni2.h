@@ -16,6 +16,13 @@ public:
   int readVideoFeed() { return NOT_SUPPORT; }
   int configure(int prop, std::vector<float> &value) { return NOT_SUPPORT; }
   int getConfiguration(int prop) { return NOT_SUPPORT; }
+  void getIntrinsic(int index, double &fx, double &fy, double &cx, double &cy){};
+  bool enableImageRegistration(bool enable) { return NOT_SUPPORT; };
+  void getAvailableVideoModes(int index, std::vector<std::string> &){};
+  void getCurrentVideoMode(int index, std::string &mode){};
+  bool setVideoMode(int index, int mode) { return NOT_SUPPORT; };
+  bool getSerialNumber(std::string &sn) { return NOT_SUPPORT; };
+  void loadPresetParameters(std::string &path) {}
 
 private:
   int _readVideoFeed() { return NOT_SUPPORT; }
@@ -378,6 +385,8 @@ public:
     return true;
   }
 
+  void loadPresetParameters(std::string &path) {}
+
 private:
   VideoStream vsDepth;
   VideoStream vsColor;
@@ -506,6 +515,9 @@ private:
       rgbNewFrame = false;
       depthNewFrame = false;
       irNewFrame = false;
+
+      if (pauseStream)
+        continue;
 
       if (niRgbAvailable && enableRgb && vsColor.isValid())
       {

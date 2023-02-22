@@ -26,6 +26,7 @@ private:
 #else
 
 #include <librealsense2/rs.hpp>
+#include <librealsense2/rs_advanced_mode.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -45,11 +46,15 @@ enum RsVideoIndex
 enum RsConfiguration
 {
   THRESHOLD_FILTER = 0,
+  FRAME_SYNC_COLOR_FILTER = 1,
+  FRAME_SYNC_DEPTH_FILTER = 2,
 };
 
 enum RsFilterType
 {
-  THRESHOLD = 0
+  THRESHOLD = 0,
+  FRAME_SYNC_COLOR = 1,
+  FRAME_SYNC_DEPTH = 2,
 };
 
 class RsFilter
@@ -150,7 +155,15 @@ public:
     if (*enable)
     {
       cfg.enable_all_streams();
-      pipeline->start(cfg);
+      try
+      {
+        profile = pipeline->start(cfg);
+      }
+      catch (rs2::error &e)
+      {
+        std::cout << "[Realsense SDK error]" << e.what() << std::endl;
+        return -1;
+      }
     }
     else
     {
@@ -161,6 +174,8 @@ public:
       }
       catch (rs2::wrong_api_call_sequence_error &e)
       {
+        std::cout << "[Realsense SDK Error]" << e.what() << std::endl;
+        return -2;
       }
     }
 
@@ -192,8 +207,48 @@ public:
       RsFilter f(RsFilterType::THRESHOLD, new rs2::threshold_filter(value[0], value[1]));
       filters.push_back(f);
     }
+    else if (prop == RsConfiguration::FRAME_SYNC_COLOR_FILTER)
+    {
+      for (int i = 0; i < filters.size(); i++)
+      {
+        if (filters[i].type == RsFilterType::FRAME_SYNC_COLOR)
+        {
+          if (value[0] == 0)
+          {
+            filters.erase(filters.begin() + i);
+          }
+          return 0;
+        }
+      }
 
-    return -1;
+      if (value[0] == 1)
+      {
+        filters.push_back(RsFilter(RsFilterType::FRAME_SYNC_COLOR, new rs2::align(RS2_STREAM_COLOR)));
+        return 0;
+      }
+    }
+    else if (prop == RsConfiguration::FRAME_SYNC_DEPTH_FILTER)
+    {
+      for (int i = 0; i < filters.size(); i++)
+      {
+        if (filters[i].type == RsFilterType::FRAME_SYNC_DEPTH)
+        {
+          if (value[0] == 0)
+          {
+            filters.erase(filters.begin() + i);
+          }
+          return 0;
+        }
+      }
+
+      if (value[0] == 1)
+      {
+        filters.push_back(RsFilter(RsFilterType::FRAME_SYNC_DEPTH, new rs2::align(RS2_STREAM_DEPTH)));
+        return 0;
+      }
+    }
+
+    return 01;
   }
 
   int getConfiguration(int prop) { return 0; }
@@ -211,8 +266,14 @@ public:
     return true;
   }
 
+  void loadPresetParameters(std::string &path)
+  {
+    profile.get_device().as<rs400::advanced_mode>().load_json(path);
+  }
+
 private:
   rs2::config cfg;
+  rs2::pipeline_profile profile;
   unsigned int timeout = 1500;
   bool isRgbEnable = false, isDepthEnable = false, isIrEnable = false;
   rs2::pointcloud rsPointcloud;

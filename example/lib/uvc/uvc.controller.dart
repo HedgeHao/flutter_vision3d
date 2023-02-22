@@ -62,8 +62,4 @@ class UvcControllerDevice extends GetxController {
     cvMatPointer = await cam?.getOpenCVMat(1) ?? 0;
     update();
   }
-
-  void test() {
-    cam?.test(cvMatPointer);
-  }
 }

@@ -86,6 +86,8 @@ public:
   // TODO: Use USB library to do this if needed
   bool getSerialNumber(std::string &sn) { return true; }
 
+  void loadPresetParameters(std::string &path) {}
+
 private:
   int uvcIndex = -1;
   cv::VideoCapture *cap;

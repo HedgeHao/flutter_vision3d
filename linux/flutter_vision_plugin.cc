@@ -240,15 +240,16 @@ static void flutter_vision_plugin_handle_method_call(
     bool enable = FL_ARG_BOOL(args, "enable");
 
     FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    int ret = -1;
     if (cam)
     {
-      cam->configVideoStream(videoModeIndex, &enable);
+      ret = cam->configVideoStream(videoModeIndex, &enable);
       if (enable)
       {
         cam->readVideoFeed();
       }
     }
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(enable)));
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(ret)));
   }
   else if (strcmp(method, "fvGetOpenCVMat") == 0)
   {
@@ -557,6 +558,18 @@ static void flutter_vision_plugin_handle_method_call(
     }
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(ret)));
+  }
+  else if (strcmp(method, "rsLoadPresetParameters") == 0)
+  {
+    const char *serial = FL_ARG_STRING(args, "serial");
+    const char *path = FL_ARG_STRING(args, "path");
+
+    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    if (cam)
+    {
+      std::string pathStr = std::string(serial);
+      cam->loadPresetParameters(pathStr);
+    }
   }
   else if (strcmp(method, "fvGetIntrinsic") == 0)
   {

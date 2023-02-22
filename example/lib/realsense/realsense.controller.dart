@@ -26,6 +26,7 @@ class RealsenseController extends GetxController {
   List<DropdownMenuItem<int>> items = [];
   double rangeFilterValueMin = 0.1;
   set minRange(double v) {
+    if (cam == null) return;
     if (v > rangeFilterValueMax) return;
     rangeFilterValueMin = v;
     cam!.configure(RealsenseConfiguration.THRESHOLD_FILTER.index, [rangeFilterValueMin, rangeFilterValueMax]);
@@ -34,6 +35,7 @@ class RealsenseController extends GetxController {
 
   double rangeFilterValueMax = 4.0;
   set maxRange(double v) {
+    if (cam == null) return;
     if (v < rangeFilterValueMin) return;
     rangeFilterValueMax = v;
     cam!.configure(RealsenseConfiguration.THRESHOLD_FILTER.index, [rangeFilterValueMin, rangeFilterValueMax]);
