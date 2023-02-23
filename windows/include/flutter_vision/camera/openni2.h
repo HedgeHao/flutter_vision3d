@@ -494,6 +494,8 @@ private:
             if (pauseStream)
                 continue;
 
+            videoFeedProcessing = true;
+
             rgbNewFrame = false;
             depthNewFrame = false;
             irNewFrame = false;
@@ -537,6 +539,7 @@ private:
             }
 
             flChannel->InvokeMethod("onNiFrame", nullptr, nullptr);
+            videoFeedProcessing = false;
         }
     }
 };

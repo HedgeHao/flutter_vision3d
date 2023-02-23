@@ -259,9 +259,13 @@ private:
       if (pauseStream)
         continue;
 
+      videoFeedProcessing = true;
+
       getCurrentTime(&now);
-      if (now - tsRs < 32)
+      if (now - tsRs < 32){
+        videoFeedProcessing = false;
         continue;
+      }
       tsRs = now;
 
       try
@@ -281,21 +285,21 @@ private:
 
         if (isRgbEnable && rgbFrame)
         {
-          rgbTexture->cvImage = frame_to_mat(rgbFrame);
+          frame_to_mat(rgbFrame, rgbTexture->cvImage);
           rgbTexture->pipeline->run(rgbTexture->cvImage, flRegistrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer, models, flChannel);
           rgbTexture->setPixelBuffer();
         }
 
         if (isDepthEnable && depthFrame)
         {
-          depthTexture->cvImage = frame_to_mat(depthFrame);
+          frame_to_mat(depthFrame, depthTexture->cvImage);
           depthTexture->pipeline->run(depthTexture->cvImage, flRegistrar, depthTexture->textureId, depthTexture->videoWidth, depthTexture->videoHeight, depthTexture->buffer, models, flChannel);
           depthTexture->setPixelBuffer();
         }
 
         if (isIrEnable && irFrame)
         {
-          irTexture->cvImage = frame_to_mat(irFrame);
+          frame_to_mat(irFrame, irTexture->cvImage);
           irTexture->pipeline->run(irTexture->cvImage, flRegistrar, irTexture->textureId, irTexture->videoWidth, irTexture->videoHeight, irTexture->buffer, models, flChannel);
           irTexture->setPixelBuffer();
         }
@@ -316,10 +320,12 @@ private:
         videoStart = false;
         break;
       }
+
+      videoFeedProcessing = false;
     }
   }
 
-  static cv::Mat frame_to_mat(const rs2::frame &f)
+  static void frame_to_mat(const rs2::frame &f, cv::Mat &frame)
   {
     using namespace cv;
     using namespace rs2;
@@ -332,29 +338,33 @@ private:
 
     if (f.get_profile().format() == RS2_FORMAT_BGR8)
     {
-      return Mat(Size(w, h), CV_8UC3, (void *)f.get_data(), Mat::AUTO_STEP);
+      Mat(Size(w, h), CV_8UC3, (void *)f.get_data(), Mat::AUTO_STEP).copyTo(frame);
     }
     else if (f.get_profile().format() == RS2_FORMAT_RGB8)
     {
       auto r_rgb = Mat(Size(w, h), CV_8UC3, (void *)f.get_data(), Mat::AUTO_STEP);
       Mat r_bgr;
       cvtColor(r_rgb, r_bgr, COLOR_RGB2BGR);
-      return r_bgr;
+      r_bgr.copyTo(frame);
     }
     else if (f.get_profile().format() == RS2_FORMAT_Z16)
     {
-      return Mat(Size(w, h), CV_16UC1, (void *)f.get_data(), Mat::AUTO_STEP);
+      Mat(Size(w, h), CV_16UC1, (void *)f.get_data(), Mat::AUTO_STEP).copyTo(frame);
     }
     else if (f.get_profile().format() == RS2_FORMAT_Y8)
     {
-      return Mat(Size(w, h), CV_8UC1, (void *)f.get_data(), Mat::AUTO_STEP);
+      Mat(Size(w, h), CV_8UC1, (void *)f.get_data(), Mat::AUTO_STEP).copyTo(frame);
     }
     else if (f.get_profile().format() == RS2_FORMAT_DISPARITY32)
     {
-      return Mat(Size(w, h), CV_32FC1, (void *)f.get_data(), Mat::AUTO_STEP);
+      Mat(Size(w, h), CV_32FC1, (void *)f.get_data(), Mat::AUTO_STEP).copyTo(frame);
+    }
+    else
+    {
+      throw std::runtime_error("Frame format is not supported yet!");
     }
 
-    throw std::runtime_error("Frame format is not supported yet!");
+    return;
   }
 };
 

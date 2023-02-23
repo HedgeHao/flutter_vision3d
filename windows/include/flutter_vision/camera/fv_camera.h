@@ -32,6 +32,7 @@ public:
     bool enablePointCloud = false;
     bool pauseStream = false;
     int type;
+    bool videoFeedProcessing = false;
 
     FvCamera() {}
 
@@ -122,6 +123,11 @@ public:
     void pause(bool p)
     {
         pauseStream = p;
+
+        // [HedgeHao] Wait for video feed loop finish, or memory leak will happened.
+        if(p){
+            while(videoFeedProcessing);
+        }
     }
 
     virtual void camInit() = 0;
