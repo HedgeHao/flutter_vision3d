@@ -36,7 +36,7 @@ enum CameraType
 namespace
 {
   template <typename T>
-  void parseDartArugment(const flutter::EncodableMap *arguments, const char *name, T *value)
+  void parseDartArgument(const flutter::EncodableMap *arguments, const char *name, T *value)
   {
     auto valueIt = arguments->find(flutter::EncodableValue(name));
     if (valueIt != arguments->end())
@@ -137,10 +137,10 @@ namespace
     else if (method_call.method_name().compare("ni2GetAvailableVideoModes") == 0)
     {
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       int index;
-      parseDartArugment<int>(arguments, "index", &index);
+      parseDartArgument<int>(arguments, "index", &index);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
 
@@ -161,10 +161,10 @@ namespace
     else if (method_call.method_name().compare("ni2GetCurrentVideoMode") == 0)
     {
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       int index;
-      parseDartArugment<int>(arguments, "index", &index);
+      parseDartArgument<int>(arguments, "index", &index);
 
       std::string mode = "";
 
@@ -182,13 +182,13 @@ namespace
     else if (method_call.method_name().compare("ni2SetVideoMode") == 0)
     {
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       int index;
-      parseDartArugment<int>(arguments, "index", &index);
+      parseDartArgument<int>(arguments, "index", &index);
 
       int mode;
-      parseDartArugment<int>(arguments, "mode", &mode);
+      parseDartArgument<int>(arguments, "mode", &mode);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
 
@@ -205,9 +205,9 @@ namespace
     else if (method_call.method_name().compare("fvCameraOpen") == 0)
     {
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
       int cameraType;
-      parseDartArugment<int>(arguments, "cameraType", &cameraType);
+      parseDartArgument<int>(arguments, "cameraType", &cameraType);
 
       flutter::EncodableMap map = flutter::EncodableMap();
       FvCamera *cam;
@@ -252,7 +252,7 @@ namespace
     else if (method_call.method_name().compare("fvCameraClose") == 0)
     {
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
       int ret = -1;
@@ -273,16 +273,16 @@ namespace
     else if (method_call.method_name().compare("fvCameraConfigVideoStream") == 0)
     {
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       int cameraType;
-      parseDartArugment<int>(arguments, "cameraType", &cameraType);
+      parseDartArgument<int>(arguments, "cameraType", &cameraType);
 
       int videoModeIndex;
-      parseDartArugment<int>(arguments, "videoModeIndex", &videoModeIndex);
+      parseDartArgument<int>(arguments, "videoModeIndex", &videoModeIndex);
 
       bool enable;
-      parseDartArugment<bool>(arguments, "enable", &enable);
+      parseDartArgument<bool>(arguments, "enable", &enable);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
       if (cam)
@@ -305,10 +305,10 @@ namespace
     else if (method_call.method_name().compare("fvGetOpenCVMat") == 0)
     {
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       int index;
-      parseDartArugment<int>(arguments, "index", &index);
+      parseDartArgument<int>(arguments, "index", &index);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
       if (cam)
@@ -323,10 +323,10 @@ namespace
     else if (method_call.method_name().compare("fvPauseStream") == 0)
     {
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       bool pause;
-      parseDartArugment<bool>(arguments, "pause", &pause);
+      parseDartArgument<bool>(arguments, "pause", &pause);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
       if (cam)
@@ -341,7 +341,7 @@ namespace
     else if (method_call.method_name().compare("fvGetSerialNumber") == 0)
     {
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
       if (cam)
@@ -358,13 +358,13 @@ namespace
     else if (method_call.method_name().compare("ni2SetVideoSize") == 0)
     {
       int videoIndex;
-      parseDartArugment<int>(arguments, "videoIndex", &videoIndex);
+      parseDartArgument<int>(arguments, "videoIndex", &videoIndex);
 
       int width;
-      parseDartArugment<int>(arguments, "width", &width);
+      parseDartArgument<int>(arguments, "width", &width);
 
       int height;
-      parseDartArugment<int>(arguments, "height", &height);
+      parseDartArgument<int>(arguments, "height", &height);
 
       // TODO: implement
 
@@ -389,9 +389,9 @@ namespace
     else if (method_call.method_name().compare("openglSetCamPosition") == 0)
     {
       double x, y, z;
-      parseDartArugment<double>(arguments, "x", &x);
-      parseDartArugment<double>(arguments, "y", &y);
-      parseDartArugment<double>(arguments, "z", &z);
+      parseDartArgument<double>(arguments, "x", &x);
+      parseDartArgument<double>(arguments, "y", &y);
+      parseDartArgument<double>(arguments, "z", &z);
 
       glfl->setCamPosition(x, y, z);
       glfl->renderManually();
@@ -401,8 +401,8 @@ namespace
     else if (method_call.method_name().compare("openglSetCamAngle") == 0)
     {
       double yaw, pitch;
-      parseDartArugment<double>(arguments, "yaw", &yaw);
-      parseDartArugment<double>(arguments, "pitch", &pitch);
+      parseDartArgument<double>(arguments, "yaw", &yaw);
+      parseDartArgument<double>(arguments, "pitch", &pitch);
 
       glfl->setYawPitch(yaw, pitch);
       glfl->renderManually();
@@ -412,7 +412,7 @@ namespace
     else if (method_call.method_name().compare("openglSetCamFov") == 0)
     {
       double fov;
-      parseDartArugment<double>(arguments, "fov", &fov);
+      parseDartArgument<double>(arguments, "fov", &fov);
 
       glfl->setFov(fov);
       glfl->renderManually();
@@ -429,10 +429,10 @@ namespace
     else if (method_call.method_name().compare("fvCameraEnablePointCloud") == 0)
     {
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       bool enable = false;
-      parseDartArugment<bool>(arguments, "enable", &enable);
+      parseDartArgument<bool>(arguments, "enable", &enable);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
       int ret = -1;
@@ -446,31 +446,31 @@ namespace
     else if (method_call.method_name().compare("pipelineAdd") == 0)
     {
       int index = -1;
-      parseDartArugment<int>(arguments, "index", &index);
+      parseDartArgument<int>(arguments, "index", &index);
 
       int funcIndex = -1;
-      parseDartArugment<int>(arguments, "funcIndex", &funcIndex);
+      parseDartArgument<int>(arguments, "funcIndex", &funcIndex);
 
       int len = 0;
-      parseDartArugment<int>(arguments, "len", &len);
+      parseDartArgument<int>(arguments, "len", &len);
 
       std::vector<uint8_t> params{};
       if (len > 0)
       {
-        parseDartArugment<std::vector<uint8_t>>(arguments, "params", &params);
+        parseDartArgument<std::vector<uint8_t>>(arguments, "params", &params);
       }
 
       int insertAt = -1;
-      parseDartArugment<int>(arguments, "at", &insertAt);
+      parseDartArgument<int>(arguments, "at", &insertAt);
 
       int interval = 0;
-      parseDartArugment<int>(arguments, "interval", &interval);
+      parseDartArgument<int>(arguments, "interval", &interval);
 
       bool append = false;
-      parseDartArugment<bool>(arguments, "append", &append);
+      parseDartArgument<bool>(arguments, "append", &append);
 
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
       if (cam != nullptr)
@@ -494,16 +494,16 @@ namespace
     else if (method_call.method_name().compare("pipelineRun") == 0)
     {
       int index = -1;
-      parseDartArugment<int>(arguments, "index", &index);
+      parseDartArgument<int>(arguments, "index", &index);
 
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       int from = 0;
-      parseDartArugment<int>(arguments, "from", &from);
+      parseDartArgument<int>(arguments, "from", &from);
 
       int to = -1;
-      parseDartArugment<int>(arguments, "to", &to);
+      parseDartArgument<int>(arguments, "to", &to);
 
       int ret = 0;
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
@@ -531,10 +531,10 @@ namespace
     else if (method_call.method_name().compare("pipelineClear") == 0)
     {
       int index = -1;
-      parseDartArugment<int>(arguments, "index", &index);
+      parseDartArgument<int>(arguments, "index", &index);
 
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
       if (cam)
@@ -558,10 +558,10 @@ namespace
     else if (method_call.method_name().compare("pipelineInfo") == 0)
     {
       int index = -1;
-      parseDartArugment<int>(arguments, "index", &index);
+      parseDartArgument<int>(arguments, "index", &index);
 
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       std::string info;
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
@@ -586,10 +586,10 @@ namespace
     else if (method_call.method_name().compare("pipelineError") == 0)
     {
       int index = -1;
-      parseDartArugment<int>(arguments, "index", &index);
+      parseDartArgument<int>(arguments, "index", &index);
 
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       std::string error;
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
@@ -614,13 +614,13 @@ namespace
     else if (method_call.method_name().compare("fvCameraConfig") == 0)
     {
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       int prop = 0;
-      parseDartArugment<int>(arguments, "prop", &prop);
+      parseDartArgument<int>(arguments, "prop", &prop);
 
       std::vector<float> value{};
-      parseDartArugment<std::vector<float>>(arguments, "value", &value);
+      parseDartArgument<std::vector<float>>(arguments, "value", &value);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
       int ret = -1;
@@ -635,10 +635,10 @@ namespace
     else if (method_call.method_name().compare("fvCameraGetConfiguration") == 0)
     {
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       int prop = 0;
-      parseDartArugment<int>(arguments, "prop", &prop);
+      parseDartArgument<int>(arguments, "prop", &prop);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
       int ret = -1;
@@ -651,10 +651,10 @@ namespace
     }
     else if(method_call.method_name().compare("rsLoadPresetParameters") == 0){
         std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
         std::string path;
-      parseDartArugment<std::string>(arguments, "path", &serial);
+      parseDartArgument<std::string>(arguments, "path", &serial);
 
        FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
        if(cam){
@@ -666,10 +666,10 @@ namespace
     else if (method_call.method_name().compare("fvGetIntrinsic") == 0)
     {
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       int index = -1;
-      parseDartArugment<int>(arguments, "index", &index);
+      parseDartArgument<int>(arguments, "index", &index);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
       flutter::EncodableMap map = flutter::EncodableMap();
@@ -689,10 +689,10 @@ namespace
     else if (method_call.method_name().compare("fvEnableRegistration") == 0)
     {
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       bool enable;
-      parseDartArugment<bool>(arguments, "enable", &enable);
+      parseDartArgument<bool>(arguments, "enable", &enable);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
       bool ret = false;
@@ -706,7 +706,7 @@ namespace
     else if (method_call.method_name().compare("tfliteCreateModel") == 0)
     {
       std::string path;
-      parseDartArugment<std::string>(arguments, "modelPath", &path);
+      parseDartArgument<std::string>(arguments, "modelPath", &path);
 
       TFLiteModel *m = new TFLiteModel(path.c_str());
       this->models.push_back(m);
@@ -716,7 +716,7 @@ namespace
     else if (method_call.method_name().compare("tfliteGetModelInfo") == 0)
     {
       int index = 0;
-      parseDartArugment<int>(arguments, "index", &index);
+      parseDartArgument<int>(arguments, "index", &index);
 
       TFLiteModel *m = this->models[index];
 
@@ -729,10 +729,10 @@ namespace
     else if (method_call.method_name().compare("tfliteGetTensorOutput") == 0)
     {
       int index = 0;
-      parseDartArugment<int>(arguments, "tensorIndex", &index);
+      parseDartArgument<int>(arguments, "tensorIndex", &index);
 
       std::vector<int32_t> size;
-      parseDartArugment<std::vector<int32_t>>(arguments, "size", &size);
+      parseDartArgument<std::vector<int32_t>>(arguments, "size", &size);
 
       int outputSize = 1;
       for (int i = 0; i < size.size(); i++)
@@ -752,7 +752,7 @@ namespace
     else if (method_call.method_name().compare("_float2uint8") == 0)
     {
       double vD = 0.0f;
-      parseDartArugment<double>(arguments, "value", &vD);
+      parseDartArgument<double>(arguments, "value", &vD);
       float v = (float)vD;
 
       flutter::EncodableList fl = flutter::EncodableList();
@@ -766,16 +766,16 @@ namespace
     else if (method_call.method_name().compare("fvCameraScreenshot") == 0)
     {
       std::string serial;
-      parseDartArugment<std::string>(arguments, "serial", &serial);
+      parseDartArgument<std::string>(arguments, "serial", &serial);
 
       int index = 0;
-      parseDartArugment<int>(arguments, "index", &index);
+      parseDartArgument<int>(arguments, "index", &index);
 
       std::string path;
-      parseDartArugment<std::string>(arguments, "path", &path);
+      parseDartArgument<std::string>(arguments, "path", &path);
 
       int cvtCode = 0;
-      parseDartArugment<int>(arguments, "cvtCode", &cvtCode);
+      parseDartArgument<int>(arguments, "cvtCode", &cvtCode);
 
       bool ret = false;
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
