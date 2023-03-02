@@ -124,9 +124,13 @@ public:
     {
         pauseStream = p;
 
-        // [HedgeHao] Wait for video feed loop finish, or memory leak will happened.
+        // [HedgeHao] 
+        // Wait for video feed loop finish, or memory leak will happened.
+        // Empty while loop is not working. Must do something inside. DKW.
         if(p){
-            while(videoFeedProcessing);
+            while(videoFeedProcessing){
+                std::cout << "";
+            }
         }
     }
 
