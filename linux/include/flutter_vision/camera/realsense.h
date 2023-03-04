@@ -288,9 +288,14 @@ private:
       if (pauseStream)
         continue;
 
+      videoFeedProcessing = true;
+
       getCurrentTime(&now);
       if (now - tsRs < 32)
+      {
+        videoFeedProcessing = false;
         continue;
+      }
       tsRs = now;
 
       try
@@ -343,6 +348,8 @@ private:
         videoStart = false;
         break;
       }
+
+      videoFeedProcessing = false;
     }
     return 0;
   }

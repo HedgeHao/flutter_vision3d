@@ -97,6 +97,22 @@ class RealsenseView extends GetView<RealsenseController> {
                         child: const Text('stop')),
                   ],
                 ),
+                Row(
+                  children: [
+                    const Text('Video Render:'),
+                    const SizedBox(width: 10),
+                    TextButton(
+                        onPressed: () async {
+                          await controller.videoPause(true);
+                        },
+                        child: const Text('pause')),
+                    TextButton(
+                        onPressed: () async {
+                          await controller.videoPause(false);
+                        },
+                        child: const Text('resume')),
+                  ],
+                ),
                 const Text('Pipelines:'),
                 Column(children: [
                   Row(children: [

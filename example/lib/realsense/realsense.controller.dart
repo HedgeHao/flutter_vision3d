@@ -72,6 +72,10 @@ class RealsenseController extends GetxController {
     await cam?.disableStream();
   }
 
+  Future<void> videoPause(bool pause) async {
+    await cam?.pauseStream(pause);
+  }
+
   void pipelineRGB() async {
     FvPipeline uvcPipeline = cam!.rgbPipeline;
     await uvcPipeline.clear();

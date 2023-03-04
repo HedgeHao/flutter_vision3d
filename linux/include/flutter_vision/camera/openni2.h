@@ -519,6 +519,8 @@ private:
       if (pauseStream)
         continue;
 
+      videoFeedProcessing = true;
+
       if (niRgbAvailable && enableRgb && vsColor.isValid())
       {
         if (vsColor.readFrame(&rgbFrame) == STATUS_OK)
@@ -555,6 +557,7 @@ private:
       }
 
       fl_method_channel_invoke_method(flChannel, "onNiFrame", nullptr, nullptr, nullptr, NULL);
+      videoFeedProcessing = false;
     }
 
     return 0;
