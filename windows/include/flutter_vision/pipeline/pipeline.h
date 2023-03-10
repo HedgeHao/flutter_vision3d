@@ -198,8 +198,8 @@ public:
 
     Pipeline()
     {
-        img = cv::Mat(1, 1, CV_8UC4, cv::Scalar(255, 0, 0, 255));
-        imgPtr = &img;
+        // img = cv::Mat(1, 1, CV_8UC4, cv::Scalar(255, 0, 0, 255));
+        // imgPtr = &img;
     }
 
     Pipeline(cv::Mat *m)
@@ -239,7 +239,7 @@ public:
         }
     }
 
-    int runOnce(flutter::TextureRegistrar *registrar, int64_t &textureId, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel, int from = 0, int to = -1)
+    int runOnce(cv::Mat &img, flutter::TextureRegistrar *registrar, int64_t &textureId, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel, int from = 0, int to = -1)
     {
         if (to == -1 || to >= funcs.size())
             to = funcs.size();
@@ -355,6 +355,6 @@ private:
     std::string screenshotSavePath;
     int screenshotCvtColor = -1;
     cv::Mat *imgPtr;
-    cv::Mat img;
+    // cv::Mat img;
 };
 #endif

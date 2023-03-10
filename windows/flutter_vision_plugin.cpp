@@ -18,6 +18,7 @@
 #include "include/flutter_vision/camera/openni2.h"
 #include "include/flutter_vision/camera/dummy.h"
 #include "include/flutter_vision/camera/uvc.h"
+#include "include/flutter_vision/opencv_barcode.hpp"
 
 #include "include/flutter_vision/opengl/opengl.h"
 
@@ -69,6 +70,8 @@ namespace
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
     flutter::TextureRegistrar *textureRegistrar;
     std::unique_ptr<FvTexture> uvcTexture;
+
+    std::unique_ptr<CVBarCodeDetector> barcodeDetector = std::make_unique<CVBarCodeDetector>();
   };
 
   // static
@@ -288,7 +291,8 @@ namespace
       if (cam)
       {
         int ret = cam->configVideoStream(videoModeIndex, &enable);
-        if(ret != 0){
+        if (ret != 0)
+        {
           result->Success(flutter::EncodableValue(false));
           return;
         }
@@ -511,17 +515,17 @@ namespace
       {
         if (index == VideoIndex::RGB)
         {
-          ret = cam->rgbTexture->pipeline->runOnce(textureRegistrar, cam->rgbTexture->textureId, cam->rgbTexture->videoWidth, cam->rgbTexture->videoHeight, cam->rgbTexture->buffer, &models, flChannel, from, to);
+          ret = cam->rgbTexture->pipeline->runOnce(cam->rgbTexture->cvImage, textureRegistrar, cam->rgbTexture->textureId, cam->rgbTexture->videoWidth, cam->rgbTexture->videoHeight, cam->rgbTexture->buffer, &models, flChannel, from, to);
           cam->rgbTexture->setPixelBuffer();
         }
         else if (index == VideoIndex::Depth)
         {
-          ret = cam->depthTexture->pipeline->runOnce(textureRegistrar, cam->depthTexture->textureId, cam->depthTexture->videoWidth, cam->depthTexture->videoHeight, cam->depthTexture->buffer, &models, flChannel, from, to);
+          ret = cam->depthTexture->pipeline->runOnce(cam->depthTexture->cvImage, textureRegistrar, cam->depthTexture->textureId, cam->depthTexture->videoWidth, cam->depthTexture->videoHeight, cam->depthTexture->buffer, &models, flChannel, from, to);
           cam->depthTexture->setPixelBuffer();
         }
         else if (index == VideoIndex::IR)
         {
-          ret = cam->irTexture->pipeline->runOnce(textureRegistrar, cam->irTexture->textureId, cam->irTexture->videoWidth, cam->irTexture->videoHeight, cam->irTexture->buffer, &models, flChannel, from, to);
+          ret = cam->irTexture->pipeline->runOnce(cam->irTexture->cvImage, textureRegistrar, cam->irTexture->textureId, cam->irTexture->videoWidth, cam->irTexture->videoHeight, cam->irTexture->buffer, &models, flChannel, from, to);
           cam->irTexture->setPixelBuffer();
         }
       }
@@ -649,19 +653,21 @@ namespace
 
       result->Success(flutter::EncodableValue(ret));
     }
-    else if(method_call.method_name().compare("rsLoadPresetParameters") == 0){
-        std::string serial;
+    else if (method_call.method_name().compare("rsLoadPresetParameters") == 0)
+    {
+      std::string serial;
       parseDartArgument<std::string>(arguments, "serial", &serial);
 
-        std::string path;
+      std::string path;
       parseDartArgument<std::string>(arguments, "path", &serial);
 
-       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
-       if(cam){
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      if (cam)
+      {
         cam->loadPresetParameters(path);
-       }
+      }
 
-       result->Success(flutter::EncodableValue(nullptr));
+      result->Success(flutter::EncodableValue(nullptr));
     }
     else if (method_call.method_name().compare("fvGetIntrinsic") == 0)
     {
@@ -748,6 +754,65 @@ namespace
       }
 
       result->Success(fl);
+    }
+    else if (method_call.method_name().compare("cvBarcodeInit") == 0)
+    {
+      std::string prototxt;
+      parseDartArgument<std::string>(arguments, "prototxt", &prototxt);
+
+      std::string model;
+      parseDartArgument<std::string>(arguments, "model", &model);
+
+      barcodeDetector->init(prototxt, model);
+      result->Success(flutter::EncodableValue(true));
+    }
+    else if (method_call.method_name().compare("cvBarcodeScan") == 0)
+    {
+      int64_t imagePointer;
+      parseDartArgument<int64_t>(arguments, "imagePointer", &imagePointer);
+      std::uintptr_t pointer = imagePointer;
+
+      cv::Mat *mat = (cv::Mat *)pointer;
+      if (mat->empty())
+      {
+        result->Success(flutter::EncodableValue(-5));
+        return;
+
+      }
+
+      cv::cvtColor(*mat, *mat, COLOR_RGBA2BGR);
+      int n = barcodeDetector->detect(*mat);
+
+      if (n <= 0)
+      {
+        result->Success(flutter::EncodableValue(n));
+        return;
+      }
+
+      if (!barcodeDetector->decode(*mat))
+      {
+        result->Success(flutter::EncodableValue(-2));
+        return;
+      }
+
+      flutter::EncodableList list = flutter::EncodableList();
+
+      for (int i = 0; i < barcodeDetector->decode_info.size(); i++)
+      {
+        flutter::EncodableMap map = flutter::EncodableMap();
+        map[flutter::EncodableValue("px1")] = barcodeDetector->corners[i * 4].x;
+        map[flutter::EncodableValue("py1")] = barcodeDetector->corners[i * 4].y;
+        map[flutter::EncodableValue("px2")] = barcodeDetector->corners[i * 4 + 1].x;
+        map[flutter::EncodableValue("py2")] = barcodeDetector->corners[i * 4 + 1].y;
+        map[flutter::EncodableValue("px3")] = barcodeDetector->corners[i * 4 + 2].x;
+        map[flutter::EncodableValue("py3")] = barcodeDetector->corners[i * 4 + 2].y;
+        map[flutter::EncodableValue("px4")] = barcodeDetector->corners[i * 4 + 3].x;
+        map[flutter::EncodableValue("py4")] = barcodeDetector->corners[i * 4 + 3].y;
+        map[flutter::EncodableValue("data")] = barcodeDetector->decode_info[i];
+        list.push_back(map);
+      }
+
+      result->Success(flutter::EncodableValue(list));
     }
     else if (method_call.method_name().compare("_float2uint8") == 0)
     {

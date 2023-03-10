@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'dart:math';
+import 'package:path/path.dart';
 
 import 'package:flutter_vision/camera/camera.dart';
 import 'package:flutter_vision/camera/dummy.dart';
 import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
+import 'package:flutter_vision/model.dart';
 import 'package:get/get.dart';
 
 class OpencvController extends GetxController {
@@ -169,5 +172,18 @@ class OpencvController extends GetxController {
     }
 
     update();
+  }
+
+  Future<List<OpenCVBarcodeResult>> getBarcode() async {
+    await _loadImage();
+
+    String assetFolder = join(File(Platform.resolvedExecutable).parent.absolute.path, 'data', 'flutter_assets', 'assets');
+
+    bool ret = await FlutterVision.barcodeInit("$assetFolder/barcode_sr.prototxt", '$assetFolder/barcode_sr.caffemodel');
+
+    if (!ret) return [];
+
+    int pointer = await processCam!.getOpenCVMat(1);
+    return await FlutterVision.barcodeDecode(pointer);
   }
 }

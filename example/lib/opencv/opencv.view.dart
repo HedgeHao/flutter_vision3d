@@ -13,6 +13,7 @@ class OpencvView extends GetView<OpencvController> {
   @override
   Widget build(BuildContext context) {
     ctl.text = join(File(Platform.resolvedExecutable).parent.absolute.path, 'data', 'flutter_assets', 'assets', 'flutter_logo.png');
+    ctl.text = 'C:/Users/Acer/Desktop/barcode.jpg';
     controller.imgPath = ctl.text;
 
     Size size = MediaQuery.of(context).size;
@@ -118,6 +119,15 @@ class OpencvView extends GetView<OpencvController> {
                         },
                         child: const Text('GetError')),
                     const Text(': Get error message when running pipeline'),
+                  ]),
+                  Row(children: [
+                    TextButton(
+                        onPressed: () async {
+                          var barcodes = await controller.getBarcode();
+                          print(barcodes.map((e) => e.data));
+                        },
+                        child: const Text('Barcode')),
+                    const Text(': Decode barcode from image'),
                   ]),
                 ]),
               ],

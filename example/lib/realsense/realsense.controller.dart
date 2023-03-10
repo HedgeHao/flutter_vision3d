@@ -89,7 +89,7 @@ class RealsenseController extends GetxController {
     FvPipeline depthPipeline = cam!.depthPipeline;
     await depthPipeline.clear();
     await depthPipeline.convertTo(OpenCV.CV_8U, 255.0 / 1024.0);
-    await depthPipeline.applyColorMap(Random().nextInt(20));
+    await depthPipeline.applyColorMap(Random().nextInt(11));
     await depthPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
     await depthPipeline.show();
 

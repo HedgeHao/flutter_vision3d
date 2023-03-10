@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_vision/constants.dart';
+import 'package:flutter_vision/model.dart';
 
 enum CameraType { OPENNI, REALSENSE, DUMMY, UVC }
 
@@ -127,6 +128,26 @@ class FlutterVision {
 
   static Future<void> cameraOpen(int index) async {
     return await channel.invokeMethod('cameraOpen', {'index': index});
+  }
+
+  static Future<bool> barcodeInit(String prototxt, String model) async {
+    print(prototxt);
+    print(model);
+    if (!File(prototxt).existsSync() || !File(model).existsSync()) return false;
+
+    return await channel.invokeMethod('cvBarcodeInit', {'prototxt': prototxt, 'model': model});
+  }
+
+  static Future<List<OpenCVBarcodeResult>> barcodeDecode(int imagePointer) async {
+    List<OpenCVBarcodeResult> result = <OpenCVBarcodeResult>[];
+
+    try {
+      List<Object?> list = await channel.invokeMethod('cvBarcodeScan', {'imagePointer': imagePointer});
+
+      result.addAll(list.map((e) => OpenCVBarcodeResult.fromJson(e as Map<dynamic, dynamic>)));
+    } catch (e) {}
+
+    return result;
   }
 }
 
