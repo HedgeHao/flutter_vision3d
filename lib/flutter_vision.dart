@@ -9,6 +9,8 @@ import 'package:flutter_vision/model.dart';
 
 enum CameraType { OPENNI, REALSENSE, DUMMY, UVC }
 
+enum BarcodeDecoder { OPENCV, ZXING }
+
 class StreamIndex {
   static const RGB = 1;
   static const DEPTH = 2;
@@ -138,11 +140,11 @@ class FlutterVision {
     return await channel.invokeMethod('cvBarcodeInit', {'prototxt': prototxt, 'model': model});
   }
 
-  static Future<List<OpenCVBarcodeResult>> barcodeDecode(int imagePointer) async {
+  static Future<List<OpenCVBarcodeResult>> barcodeDecode(int imagePointer, {BarcodeDecoder decoder = BarcodeDecoder.ZXING}) async {
     List<OpenCVBarcodeResult> result = <OpenCVBarcodeResult>[];
 
     try {
-      List<Object?> list = await channel.invokeMethod('cvBarcodeScan', {'imagePointer': imagePointer});
+      List<Object?> list = await channel.invokeMethod(decoder == BarcodeDecoder.OPENCV ? 'cvBarcodeScan' : 'zxingBarcodeScan', {'imagePointer': imagePointer});
 
       result.addAll(list.map((e) => OpenCVBarcodeResult.fromJson(e as Map<dynamic, dynamic>)));
     } catch (e) {}

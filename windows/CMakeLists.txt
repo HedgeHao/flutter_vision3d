@@ -17,6 +17,7 @@ include_directories(
   "$ENV{FLUTTER_VISION_DEP}/realsense2/include"
   "$ENV{FLUTTER_VISION_DEP}/opengl/include"
   "$ENV{FLUTTER_VISION_DEP}/tensorflowlite/include/"
+  "$ENV{FLUTTER_VISION_DEP}/zxing/include/"
 	"$ENV{OPENNI2_INCLUDE64}"
   "${PROJECT_SOURCE_DIR}/include/"
 )
@@ -42,10 +43,12 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
   "$ENV{FLUTTER_VISION_DEP}/tensorflowlite/lib/tensorflowlite.dll.if.lib"
   "$ENV{FLUTTER_VISION_DEP}/opengl/lib/glew32.lib"
   "$ENV{FLUTTER_VISION_DEP}/opengl/lib/glfw3.lib"
+  "$ENV{FLUTTER_VISION_DEP}/zxing/lib/ZXingd.lib"
   "$ENV{OPENNI2_LIB64}/OpenNI2.lib"
   ${OpenCV_LIBS}
   opengl32
   "$ENV{FLUTTER_VISION_DEP}/handler/build/flutterVisionHandler.lib"
+
 )
 
 # List of absolute paths to libraries that should be bundled with the plugin

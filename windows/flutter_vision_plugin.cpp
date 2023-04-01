@@ -18,7 +18,8 @@
 #include "include/flutter_vision/camera/openni2.h"
 #include "include/flutter_vision/camera/dummy.h"
 #include "include/flutter_vision/camera/uvc.h"
-#include "include/flutter_vision/opencv_barcode.hpp"
+#include "include/flutter_vision/barcode_scanner/opencv_barcode.hpp"
+#include "include/flutter_vision/barcode_scanner/zxing.hpp"
 
 #include "include/flutter_vision/opengl/opengl.h"
 
@@ -777,7 +778,6 @@ namespace
       {
         result->Success(flutter::EncodableValue(-5));
         return;
-
       }
 
       cv::cvtColor(*mat, *mat, COLOR_RGBA2BGR);
@@ -809,6 +809,45 @@ namespace
         map[flutter::EncodableValue("px4")] = barcodeDetector->corners[i * 4 + 3].x;
         map[flutter::EncodableValue("py4")] = barcodeDetector->corners[i * 4 + 3].y;
         map[flutter::EncodableValue("data")] = barcodeDetector->decode_info[i];
+        list.push_back(map);
+      }
+
+      result->Success(flutter::EncodableValue(list));
+    }
+    else if (method_call.method_name().compare("zxingBarcodeScan") == 0)
+    {
+      int64_t imagePointer;
+      parseDartArgument<int64_t>(arguments, "imagePointer", &imagePointer);
+      std::uintptr_t pointer = imagePointer;
+
+      cv::Mat *mat = (cv::Mat *)pointer;
+      if (mat->empty())
+      {
+        result->Success(flutter::EncodableValue(-5));
+        return;
+      }
+
+      cv::cvtColor(*mat, *mat, COLOR_RGBA2BGR);
+
+      ZXing::Results ret = ZXing::ReadBarcodes(*mat);
+
+      auto zx2cv = [](ZXing::PointI p)
+      { return cv::Point(p.x, p.y); };
+
+      flutter::EncodableList list = flutter::EncodableList();
+      for (int i = 0; i < ret.size(); i++)
+      {
+        auto pos = ret[i].position();
+        flutter::EncodableMap map = flutter::EncodableMap();
+        map[flutter::EncodableValue("px1")] = pos[0].x;
+        map[flutter::EncodableValue("py1")] = pos[0].y;
+        map[flutter::EncodableValue("px2")] = pos[1].x;
+        map[flutter::EncodableValue("py2")] = pos[1].y;
+        map[flutter::EncodableValue("px3")] = pos[2].x;
+        map[flutter::EncodableValue("py3")] = pos[2].y;
+        map[flutter::EncodableValue("px4")] = pos[3].x;
+        map[flutter::EncodableValue("py4")] = pos[3].y;
+        map[flutter::EncodableValue("data")] = ret[i].text();
         list.push_back(map);
       }
 

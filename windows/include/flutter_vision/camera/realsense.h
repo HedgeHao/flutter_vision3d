@@ -133,12 +133,20 @@ public:
       cfg.enable_all_streams();
       try
       {
+        std::cout << "++++" << std::endl;
+        std::cout << cfg.can_resolve(*pipeline) << std::endl;
         profile = pipeline->start(cfg);
+        std::cout << "----" << std::endl;
       }
       catch (rs2::error &e)
       {
         std::cout << "[Realsense SDK error]" << e.what() << std::endl;
         return -1;
+      }
+      catch (...)
+      {
+        std::cout << "Unhandled Error" << std::endl;
+        return -2;
       }
     }
     else
@@ -262,7 +270,8 @@ private:
       videoFeedProcessing = true;
 
       getCurrentTime(&now);
-      if (now - tsRs < 32){
+      if (now - tsRs < 32)
+      {
         videoFeedProcessing = false;
         continue;
       }
