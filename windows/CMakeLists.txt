@@ -43,12 +43,12 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
   "$ENV{FLUTTER_VISION_DEP}/tensorflowlite/lib/tensorflowlite.dll.if.lib"
   "$ENV{FLUTTER_VISION_DEP}/opengl/lib/glew32.lib"
   "$ENV{FLUTTER_VISION_DEP}/opengl/lib/glfw3.lib"
-  "$ENV{FLUTTER_VISION_DEP}/zxing/lib/ZXingd.lib"
+  optimized "$ENV{FLUTTER_VISION_DEP}/zxing/lib/ZXing.lib"
+  debug "$ENV{FLUTTER_VISION_DEP}/zxing/lib/ZXingd.lib"
   "$ENV{OPENNI2_LIB64}/OpenNI2.lib"
   ${OpenCV_LIBS}
   opengl32
   "$ENV{FLUTTER_VISION_DEP}/handler/build/flutterVisionHandler.lib"
-
 )
 
 # List of absolute paths to libraries that should be bundled with the plugin
