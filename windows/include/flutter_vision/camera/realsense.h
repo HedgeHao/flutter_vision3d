@@ -133,10 +133,7 @@ public:
       cfg.enable_all_streams();
       try
       {
-        std::cout << "++++" << std::endl;
-        std::cout << cfg.can_resolve(*pipeline) << std::endl;
         profile = pipeline->start(cfg);
-        std::cout << "----" << std::endl;
       }
       catch (rs2::error &e)
       {

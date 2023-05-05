@@ -95,8 +95,19 @@ class OpenNIController extends GetxController {
     FvPipeline irPipeline = cam!.irPipeline;
     await irPipeline.clear();
     await irPipeline.convertTo(OpenCV.CV_8U, 255.0 / 1024.0);
+    // await irPipeline.threshold(50, 255, type: OpenCV.THRESH_TOZERO_INV);
+    // await irPipeline.normalize(0, 255, normType: OpenCV.NORM_MINMAX);
     await irPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
     await irPipeline.show();
+
+    update([BUILDER_TEXTURE]);
+  }
+
+  void test() async {
+    FvPipeline irPipeline = cam!.irPipeline;
+    await irPipeline.threshold(170, 255, type: OpenCV.THRESH_TOZERO, at: 1, append: false);
+    await irPipeline.normalize(127, 255, normType: OpenCV.NORM_MINMAX, at: 2, append: false);
+    print(await irPipeline.info());
   }
 
   void selectDevice(int selectIndex) {

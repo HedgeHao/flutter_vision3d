@@ -169,6 +169,8 @@ const _FUNC_SET_INPUT_TENSOR = 11;
 const _FUNC_INFERENCE = 12;
 
 const _FUNC_CUSTOM_HANDLER = 13;
+const _FUNC_CV_NORMALIZE = 14;
+const _FUNC_CV_THRESHOLD = 15;
 
 // TODO: check method can be added to that pipeline
 class FvPipeline {
@@ -391,6 +393,42 @@ class FvPipeline {
       'funcIndex': _FUNC_CUSTOM_HANDLER,
       'params': Uint8List.fromList([size >> 8, size & 0xff]),
       'len': 2,
+      'at': at ?? -1,
+      'interval': interval ?? 0,
+      'serial': serial,
+      'append': append ?? false,
+    });
+  }
+
+  Future<void> normalize(double alpha, double beta, {int? normType, int? dType, int? at, int? interval, bool? append}) async {
+    List<Object?> alphaList = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': alpha});
+    Uint8List alphaBytes = Uint8List.fromList(alphaList.map((e) => e as int).toList());
+    List<Object?> betaList = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': beta});
+    Uint8List betaBytes = Uint8List.fromList(betaList.map((e) => e as int).toList());
+
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+      'index': index,
+      'funcIndex': _FUNC_CV_NORMALIZE,
+      'params': Uint8List.fromList([...alphaBytes, ...betaBytes, normType ?? OpenCV.NORM_MINMAX, dType ?? -1]),
+      'len': 10,
+      'at': at ?? -1,
+      'interval': interval ?? 0,
+      'serial': serial,
+      'append': append ?? false,
+    });
+  }
+
+  Future<void> threshold(double threshold, double max, {int? type, int? at, int? interval, bool? append}) async {
+    List<Object?> thresholdList = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': threshold});
+    Uint8List thresholdBytes = Uint8List.fromList(thresholdList.map((e) => e as int).toList());
+    List<Object?> maxList = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': max});
+    Uint8List maxBytes = Uint8List.fromList(maxList.map((e) => e as int).toList());
+
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+      'index': index,
+      'funcIndex': _FUNC_CV_THRESHOLD,
+      'params': Uint8List.fromList([...thresholdBytes, ...maxBytes, type ?? OpenCV.THRESH_BINARY]),
+      'len': 9,
       'at': at ?? -1,
       'interval': interval ?? 0,
       'serial': serial,

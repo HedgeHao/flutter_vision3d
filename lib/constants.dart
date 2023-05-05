@@ -372,4 +372,25 @@ class OpenCV {
   static const CAP_MODE_RGB = 1;
   static const CAP_MODE_GRAY = 2;
   static const CAP_MODE_YUYV = 3;
+
+  /* Threshold mode */
+  static const THRESH_BINARY = 0;
+  static const THRESH_BINARY_INV = 1;
+  static const THRESH_TRUNC = 2;
+  static const THRESH_TOZERO = 3;
+  static const THRESH_TOZERO_INV = 4;
+  static const THRESH_MASK = 7;
+  static const THRESH_OTSU = 8;
+  static const THRESH_TRIANGLE = 1;
+
+  /* Normalize modes */
+  static const NORM_INF = 1;
+  static const NORM_L1 = 2;
+  static const NORM_L2 = 4;
+  static const NORM_L2SQR = 5;
+  static const NORM_HAMMING = 6;
+  static const NORM_HAMMING2 = 7;
+  static const NORM_TYPE_MASK = 7;
+  static const NORM_RELATIVE = 8;
+  static const NORM_MINMAX = 32;
 }

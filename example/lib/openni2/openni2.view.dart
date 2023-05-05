@@ -288,7 +288,12 @@ class OpenNIView extends GetView<OpenNIController> {
                       quarterTurns: 2,
                     )
                   : const SizedBox(),
-            )
+            ),
+            TextButton(
+                onPressed: () {
+                  controller.test();
+                },
+                child: const Text('Test'))
           ],
         ))
       ]),

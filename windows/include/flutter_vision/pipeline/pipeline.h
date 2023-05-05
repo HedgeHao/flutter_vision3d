@@ -174,6 +174,25 @@ void PipelineFuncCustomHandler(cv::Mat &img, std::vector<uint8_t> params, flutte
     flChannel->InvokeMethod("onHandled", std::move(test), nullptr);
 }
 
+void PipelineFuncOpencvNormalize(cv::Mat &img, std::vector<uint8_t> params, flutter::TextureRegistrar *registrar, int64_t &textureId, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel)
+{
+    float alpha = *reinterpret_cast<float *>(&params[0]);
+    float beta = *reinterpret_cast<float *>(&params[4]);
+    uint8_t normType = params[8];
+    uint8_t dType = params[9];
+
+    cv::normalize(img, img, alpha, beta, normType, -1);
+}
+
+void PipelineFuncOpencvThreshold(cv::Mat &img, std::vector<uint8_t> params, flutter::TextureRegistrar *registrar, int64_t &textureId, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel)
+{
+    float threshold = *reinterpret_cast<float *>(&params[0]);
+    float max = *reinterpret_cast<float *>(&params[4]);
+    uint8_t type = params[8];
+
+    cv::threshold(img, img, threshold, max, type);
+}
+
 const FuncDef pipelineFuncs[] = {
     {0, "test", 0, 0, PipelineFuncTest},
     {1, "cvtColor", 0, 0, PipelineFuncOpencvCvtColor},
@@ -189,6 +208,8 @@ const FuncDef pipelineFuncs[] = {
     {11, "tfSetTenorInput", 0, 0, PipelineFuncTfSetInputTensor},
     {12, "tfInference", 0, 0, PipelineFuncTfInference},
     {13, "PipelineFuncCustomHandler", 0, 0, PipelineFuncCustomHandler},
+    {14, "cvNormalized", 0, 0, PipelineFuncOpencvNormalize},
+    {15, "cvThreshold", 0, 0, PipelineFuncOpencvThreshold},
 };
 
 class Pipeline
