@@ -11,6 +11,7 @@
 #include "include/flutter_vision/camera/openni2.h"
 #include "include/flutter_vision/camera/dummy.h"
 #include "include/flutter_vision/camera/uvc.h"
+#include "include/flutter_vision/camera/ros2.h"
 #include "include/flutter_vision/fv_texture.h"
 
 #include <cstring>
@@ -33,6 +34,7 @@ enum CameraType
   REALSENSE = 1,
   DUMMY = 2,
   UVC = 3,
+  ROS = 4,
 };
 
 RealsenseCam *findRsCam(const char *serial, std::vector<RealsenseCam *> *cams)
@@ -61,7 +63,7 @@ struct _FlutterVisionPlugin
 
   std::vector<TFLiteModel *> models{};
   std::vector<Pipeline *> pipelines{};
-  std::vector<FvCamera *> cams{};
+  std::vector<std::shared_ptr<FvCamera>> cams{};
 };
 
 G_DEFINE_TYPE(FlutterVisionPlugin, flutter_vision_plugin, g_object_get_type())
@@ -115,7 +117,7 @@ static void flutter_vision_plugin_handle_method_call(
 
     auto flList = fl_value_new_list();
 
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     if (cam != nullptr)
     {
       std::vector<std::string> modes;
@@ -140,7 +142,7 @@ static void flutter_vision_plugin_handle_method_call(
 
     std::string mode = "";
 
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     if (cam != nullptr)
     {
       cam->getCurrentVideoMode(index, mode);
@@ -158,7 +160,7 @@ static void flutter_vision_plugin_handle_method_call(
     const int index = FL_ARG_INT(args, "index");
     const int mode = FL_ARG_INT(args, "mode");
 
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     bool ret = false;
     if (cam != nullptr)
     {
@@ -175,22 +177,26 @@ static void flutter_vision_plugin_handle_method_call(
     const int cameraType = FL_ARG_INT(args, "cameraType");
 
     auto m = fl_value_new_map();
-    FvCamera *cam = nullptr;
+    std::shared_ptr<FvCamera> cam = nullptr;
     if (cameraType == CameraType::OPENNI)
     {
-      cam = new OpenniCam(serial);
+      cam = std::make_shared<OpenniCam>(serial);
     }
     else if (cameraType == CameraType::REALSENSE)
     {
-      cam = new RealsenseCam(serial);
+      cam = std::make_shared<RealsenseCam>(serial);
     }
     else if (cameraType == CameraType::DUMMY)
     {
-      cam = new DummyCam(serial);
+      cam = std::make_shared<DummyCam>(serial);
     }
     else if (cameraType == CameraType::UVC)
     {
-      cam = new UvcCam(serial);
+      cam = std::make_shared<UvcCam>(serial);
+    }
+    else if (cameraType == CameraType::ROS)
+    {
+      cam = std::make_shared<RosCamera>(serial);
     }
 
     cam->type = cameraType;
@@ -217,7 +223,7 @@ static void flutter_vision_plugin_handle_method_call(
   else if (strcmp(method, "fvCameraClose") == 0)
   {
     const char *serial = FL_ARG_STRING(args, "serial");
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     int ret = -1;
     if (cam != nullptr)
     {
@@ -225,7 +231,7 @@ static void flutter_vision_plugin_handle_method_call(
 
       FvCamera::removeCam(serial, &self->cams);
     }
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(ret)));
   }
   else if (strcmp(method, "fvCameraIsConnected") == 0)
   {
@@ -239,7 +245,7 @@ static void flutter_vision_plugin_handle_method_call(
     int videoModeIndex = FL_ARG_INT(args, "videoModeIndex");
     bool enable = FL_ARG_BOOL(args, "enable");
 
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     int ret = -1;
     if (cam)
     {
@@ -257,7 +263,7 @@ static void flutter_vision_plugin_handle_method_call(
     const int index = FL_ARG_INT(args, "index");
 
     int64_t pointer = 0;
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     if (cam)
     {
       pointer = cam->getOpenCVMat(index);
@@ -270,7 +276,7 @@ static void flutter_vision_plugin_handle_method_call(
     const char *serial = FL_ARG_STRING(args, "serial");
     const bool pause = FL_ARG_BOOL(args, "pause");
 
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     bool ret = false;
     if (cam)
     {
@@ -284,12 +290,14 @@ static void flutter_vision_plugin_handle_method_call(
   {
     const char *serial = FL_ARG_STRING(args, "serial");
 
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     bool ret = false;
     std::string sn = "";
     if (cam)
     {
       ret = cam->getSerialNumber(sn);
+      if (!ret)
+        sn = "";
     }
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_string(sn.c_str())));
@@ -358,14 +366,14 @@ static void flutter_vision_plugin_handle_method_call(
     const char *serial = FL_ARG_STRING(args, "serial");
     const bool enable = FL_ARG_BOOL(args, "enable");
 
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     int ret = -1;
     if (cam != nullptr)
     {
       ret = cam->enablePointCloud = enable;
     }
 
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(ret)));
   }
   else if (strcmp(method, "pipelineAdd") == 0)
   {
@@ -400,7 +408,7 @@ static void flutter_vision_plugin_handle_method_call(
     if (valueAppend != nullptr && fl_value_get_type(valueAppend) != FL_VALUE_TYPE_NULL)
       append = fl_value_get_bool(valueAppend);
 
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     if (cam != nullptr)
     {
       if (index == VideoIndex::RGB)
@@ -435,7 +443,7 @@ static void flutter_vision_plugin_handle_method_call(
       to = fl_value_get_int(valueTo);
 
     int ret = 0;
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     if (cam)
     {
       if (index == VideoIndex::RGB)
@@ -459,7 +467,7 @@ static void flutter_vision_plugin_handle_method_call(
     const char *serial = FL_ARG_STRING(args, "serial");
     const int index = FL_ARG_INT(args, "index");
 
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     if (cam)
     {
       if (index == VideoIndex::RGB)
@@ -484,7 +492,7 @@ static void flutter_vision_plugin_handle_method_call(
     const int index = FL_ARG_INT(args, "index");
 
     std::string info;
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     if (cam)
     {
       if (index == VideoIndex::RGB)
@@ -509,7 +517,7 @@ static void flutter_vision_plugin_handle_method_call(
     const int index = FL_ARG_INT(args, "index");
 
     std::string error;
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     if (cam)
     {
       if (index == VideoIndex::RGB)
@@ -536,7 +544,7 @@ static void flutter_vision_plugin_handle_method_call(
     const float *value = fl_value_get_float32_list(flValue);
     const int len = fl_value_get_length(flValue);
 
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     int ret = -1;
     if (cam)
     {
@@ -550,7 +558,7 @@ static void flutter_vision_plugin_handle_method_call(
     const char *serial = FL_ARG_STRING(args, "serial");
     const int prop = FL_ARG_INT(args, "prop");
 
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     int ret = -1;
     if (cam)
     {
@@ -564,7 +572,7 @@ static void flutter_vision_plugin_handle_method_call(
     const char *serial = FL_ARG_STRING(args, "serial");
     const char *path = FL_ARG_STRING(args, "path");
 
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     if (cam)
     {
       std::string pathStr = std::string(serial);
@@ -577,7 +585,7 @@ static void flutter_vision_plugin_handle_method_call(
     const char *serial = FL_ARG_STRING(args, "serial");
     const int index = FL_ARG_INT(args, "index");
 
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     double fx = 0.0, fy = 0.0, cx = 0.0, cy = 0.0;
 
     FlValue *map = fl_value_new_map();
@@ -650,7 +658,7 @@ static void flutter_vision_plugin_handle_method_call(
     const int cvtCode = FL_ARG_INT(args, "cvtCode");
 
     bool ret = false;
-    FvCamera *cam = FvCamera::findCam(serial, &self->cams);
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     if (cam != nullptr)
     {
       if (index == VideoIndex::RGB)
@@ -687,6 +695,9 @@ static void flutter_vision_plugin_dispose(GObject *object)
 static void flutter_vision_plugin_class_init(FlutterVisionPluginClass *klass)
 {
   G_OBJECT_CLASS(klass)->dispose = flutter_vision_plugin_dispose;
+
+  char *argv[] = {strdup("/")};
+  rclcpp::init(1, argv);
 }
 
 static void flutter_vision_plugin_init(FlutterVisionPlugin *self) {}

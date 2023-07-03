@@ -13,6 +13,8 @@ import 'package:flutter_vision_example/openni2/openni2.binding.dart';
 import 'package:flutter_vision_example/openni2/openni2.view.dart';
 import 'package:flutter_vision_example/realsense/realsense.binding.dart';
 import 'package:flutter_vision_example/realsense/realsense.view.dart';
+import 'package:flutter_vision_example/ros/ros.binding.dart';
+import 'package:flutter_vision_example/ros/ros.view.dart';
 import 'package:flutter_vision_example/route.dart';
 import 'package:flutter_vision_example/uvc/uvc.binding.dart';
 import 'package:flutter_vision_example/uvc/uvc.view.dart';
@@ -46,6 +48,7 @@ class AppPages {
       page: () => const HomeView(),
       children: [
         GetPage(name: AppRoutes.uvc, page: () => const UvcView(), binding: UvcBinding()),
+        GetPage(name: AppRoutes.ros, page: () => const RosView(), binding: RosBinding()),
         GetPage(name: AppRoutes.realsense, page: () => const RealsenseView(), binding: RealsenseBinding()),
         GetPage(name: AppRoutes.openni, page: () => const OpenNIView(), binding: OpenNIBinding()),
         GetPage(name: AppRoutes.fr, page: () => const FaceRecognizerView(), binding: FaceRecognizerBinding()),
@@ -87,6 +90,11 @@ class HomeView extends StatelessWidget {
             title: const Text('OpenNI'),
             subtitle: const Text('OpenNI'),
             onTap: () => Get.toNamed(AppRoutes.join([AppRoutes.home, AppRoutes.openni])),
+          ),
+          ListTile(
+            title: const Text('ROS Viewer'),
+            subtitle: const Text('ROS Viewer'),
+            onTap: () => Get.toNamed(AppRoutes.join([AppRoutes.home, AppRoutes.ros])),
           ),
           const Divider(),
           const ListTile(

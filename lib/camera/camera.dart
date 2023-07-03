@@ -1,10 +1,11 @@
 import 'dart:typed_data';
 
-import 'package:flutter_vision/flutter_vision.dart';
-import 'package:flutter_vision/camera/uvc.dart';
 import 'package:flutter_vision/camera/dummy.dart';
 import 'package:flutter_vision/camera/openni.dart';
 import 'package:flutter_vision/camera/realsense.dart';
+import 'package:flutter_vision/camera/ros_camera.dart';
+import 'package:flutter_vision/camera/uvc.dart';
+import 'package:flutter_vision/flutter_vision.dart';
 
 class FvCamera {
   late final CameraType cameraType;
@@ -35,6 +36,8 @@ class FvCamera {
         return DummyCamera(flResult);
       } else if (type == CameraType.UVC) {
         return UvcCamera(flResult);
+      } else if (type == CameraType.ROS) {
+        return RosCamera(flResult);
       }
     }
 

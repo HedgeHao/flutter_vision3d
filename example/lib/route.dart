@@ -3,6 +3,7 @@ abstract class AppRoutes {
   static const openni = '/openni';
   static const realsense = '/realsense';
   static const uvc = '/uvc';
+  static const ros = '/ros';
   static const fr = '/fr';
   static const efficientNet = '/efficient_net';
   static const handDetection = '/hand_detection';

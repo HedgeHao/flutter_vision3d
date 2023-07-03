@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/model.dart';
 
-enum CameraType { OPENNI, REALSENSE, DUMMY, UVC }
+enum CameraType { OPENNI, REALSENSE, DUMMY, UVC, ROS }
 
 enum BarcodeDecoder { OPENCV, ZXING }
 

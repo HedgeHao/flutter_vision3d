@@ -41,7 +41,7 @@ public:
     serial = std::string(s);
   }
 
-  static FvCamera *findCam(const char *serial, std::vector<FvCamera *> *cams)
+  static std::shared_ptr<FvCamera> findCam(const char *serial, std::vector<std::shared_ptr<FvCamera>> *cams)
   {
     for (auto c : *cams)
     {
@@ -54,7 +54,7 @@ public:
     return nullptr;
   }
 
-  static bool removeCam(const char *serial, std::vector<FvCamera *> *cams)
+  static bool removeCam(const char *serial, std::vector<std::shared_ptr<FvCamera>> *cams)
   {
     for (int i = 0; i < cams->size(); i++)
     {
@@ -170,6 +170,7 @@ public:
   virtual bool setVideoMode(int index, int mode) = 0;
   virtual bool getSerialNumber(std::string &sn) = 0;
   virtual void loadPresetParameters(std::string &path) = 0;
+  virtual ~FvCamera() = default;
 
 private:
   virtual int _readVideoFeed() = 0;

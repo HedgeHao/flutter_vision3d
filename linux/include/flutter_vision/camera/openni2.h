@@ -505,7 +505,7 @@ private:
 
     bool rgbNewFrame = false;
     bool depthNewFrame = false;
-    bool irNewFrame = false;
+    // bool irNewFrame = false;
 
     if (!(videoStart))
       return -1;
@@ -514,7 +514,7 @@ private:
     {
       rgbNewFrame = false;
       depthNewFrame = false;
-      irNewFrame = false;
+      // irNewFrame = false;
 
       if (pauseStream)
         continue;
@@ -547,7 +547,7 @@ private:
         {
           irTexture->cvImage = cv::Mat(irFrame.getHeight(), irFrame.getWidth(), CV_16UC1, (void *)irFrame.getData());
           irTexture->pipeline->run(irTexture->cvImage, *flRegistrar, *FL_TEXTURE(irTexture), irTexture->video_width, irTexture->video_height, irTexture->buffer, models, flChannel);
-          irNewFrame = true;
+          // irNewFrame = true;
         }
       }
 
