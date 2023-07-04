@@ -39,9 +39,9 @@ class RosControllerDevice extends GetxController {
   void pipelineDisplay() async {
     if (cam == null) return;
 
-    FvPipeline uvcPipeline = cam!.rgbPipeline;
-    await uvcPipeline.clear();
-    await uvcPipeline.show();
+    FvPipeline rosPipeline = cam!.rgbPipeline;
+    await rosPipeline.clear();
+    await rosPipeline.show();
   }
 
   Future<void> deconstruct() async {

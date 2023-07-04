@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 set(PROJECT_NAME "flutter_vision")
 project(${PROJECT_NAME} LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "-Wno-error=deprecated-declarations -Wno-deprecated-declarations ")
 
 # This value is used when generating builds using this plugin, so it must
 # not be changed
@@ -81,51 +82,56 @@ else()
 endif()
 
 # ROS Packages
-# TODO: comment out /opt/ros/humble/include/rclcpp/rclcpp/any_subscription_callback.hpp:391
-include_directories(
-  "$ENV{AMENT_PREFIX_PATH}/include/rclcpp"
-  "$ENV{AMENT_PREFIX_PATH}/include/rcl"
-  "$ENV{AMENT_PREFIX_PATH}/include/rcutils"
-  "$ENV{AMENT_PREFIX_PATH}/include/rmw"
-  "$ENV{AMENT_PREFIX_PATH}/include/rcl_yaml_param_parser"
-  "$ENV{AMENT_PREFIX_PATH}/include/rosidl_runtime_c"
-  "$ENV{AMENT_PREFIX_PATH}/include/rosidl_typesupport_interface"
-  "$ENV{AMENT_PREFIX_PATH}/include/rcpputils"
-  "$ENV{AMENT_PREFIX_PATH}/include/builtin_interfaces"
-  "$ENV{AMENT_PREFIX_PATH}/include/rosidl_runtime_cpp"
-  "$ENV{AMENT_PREFIX_PATH}/include/tracetools"
-  "$ENV{AMENT_PREFIX_PATH}/include/rcl_interfaces"
-  "$ENV{AMENT_PREFIX_PATH}/include/libstatistics_collector"
-  "$ENV{AMENT_PREFIX_PATH}/include/statistics_msgs"
-  "$ENV{AMENT_PREFIX_PATH}/include/statistics_msgs"
-  "$ENV{AMENT_PREFIX_PATH}/include/sensor_msgs"
-  "$ENV{AMENT_PREFIX_PATH}/include/std_msgs"
-  "$ENV{AMENT_PREFIX_PATH}/include/cv_bridge"
-)
+if(DEFINED ENV{AMENT_PREFIX_PATH})
+  include_directories(
+    "$ENV{AMENT_PREFIX_PATH}/include/rclcpp"
+    "$ENV{AMENT_PREFIX_PATH}/include/rcl"
+    "$ENV{AMENT_PREFIX_PATH}/include/rcutils"
+    "$ENV{AMENT_PREFIX_PATH}/include/rmw"
+    "$ENV{AMENT_PREFIX_PATH}/include/rcl_yaml_param_parser"
+    "$ENV{AMENT_PREFIX_PATH}/include/rosidl_runtime_c"
+    "$ENV{AMENT_PREFIX_PATH}/include/rosidl_typesupport_interface"
+    "$ENV{AMENT_PREFIX_PATH}/include/rcpputils"
+    "$ENV{AMENT_PREFIX_PATH}/include/builtin_interfaces"
+    "$ENV{AMENT_PREFIX_PATH}/include/rosidl_runtime_cpp"
+    "$ENV{AMENT_PREFIX_PATH}/include/tracetools"
+    "$ENV{AMENT_PREFIX_PATH}/include/rcl_interfaces"
+    "$ENV{AMENT_PREFIX_PATH}/include/libstatistics_collector"
+    "$ENV{AMENT_PREFIX_PATH}/include/statistics_msgs"
+    "$ENV{AMENT_PREFIX_PATH}/include/statistics_msgs"
+    "$ENV{AMENT_PREFIX_PATH}/include/sensor_msgs"
+    "$ENV{AMENT_PREFIX_PATH}/include/std_msgs"
+    "$ENV{AMENT_PREFIX_PATH}/include/cv_bridge"
+  )
 
-target_link_libraries(${PLUGIN_NAME} PRIVATE
-  "$ENV{AMENT_PREFIX_PATH}/lib/librcl.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/librcl_action.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/librcl_yaml_param_parser.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/librclcpp_lifecycle.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/librcl_logging_spdlog.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/librcl.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/librcl_interfaces__rosidl_typesupport_introspection_c.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/librcl_interfaces__rosidl_generator_py.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/librcl_interfaces__rosidl_typesupport_fastrtps_c.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/librclcpp_action.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/librcl_interfaces__rosidl_typesupport_introspection_cpp.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/librcl_lifecycle.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/librcl_interfaces__rosidl_generator_c.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/librcl_interfaces__rosidl_typesupport_c.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/librcl_interfaces__rosidl_typesupport_cpp.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/librcl_interfaces__rosidl_typesupport_fastrtps_cpp.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/librcl_logging_interface.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/librclcpp.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/libsensor_msgs__rosidl_typesupport_cpp.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/libsensor_msgs__rosidl_typesupport_introspection_c.so"
-  "$ENV{AMENT_PREFIX_PATH}/lib/libstd_msgs__rosidl_typesupport_c.so"
-)
+  target_link_libraries(${PLUGIN_NAME} PRIVATE
+    "$ENV{AMENT_PREFIX_PATH}/lib/librcl.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/librcl_action.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/librcl_yaml_param_parser.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/librclcpp_lifecycle.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/librcl_logging_spdlog.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/librcl.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/librcl_interfaces__rosidl_typesupport_introspection_c.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/librcl_interfaces__rosidl_generator_py.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/librcl_interfaces__rosidl_typesupport_fastrtps_c.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/librclcpp_action.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/librcl_interfaces__rosidl_typesupport_introspection_cpp.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/librcl_lifecycle.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/librcl_interfaces__rosidl_generator_c.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/librcl_interfaces__rosidl_typesupport_c.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/librcl_interfaces__rosidl_typesupport_cpp.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/librcl_interfaces__rosidl_typesupport_fastrtps_cpp.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/librcl_logging_interface.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/librclcpp.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/libsensor_msgs__rosidl_typesupport_cpp.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/libsensor_msgs__rosidl_typesupport_introspection_c.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/libstd_msgs__rosidl_typesupport_c.so"
+    "$ENV{AMENT_PREFIX_PATH}/lib/libcv_bridge.so"
+  )
+else()
+  add_definitions(-DDISABLE_ROS)
+  message("BUILD WITHOUT ROS")
+endif()
 
 # List of absolute paths to libraries that should be bundled with the plugin
 set(flutter_vision_bundled_libraries

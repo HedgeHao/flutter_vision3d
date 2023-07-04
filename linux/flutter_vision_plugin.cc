@@ -570,7 +570,7 @@ static void flutter_vision_plugin_handle_method_call(
   else if (strcmp(method, "rsLoadPresetParameters") == 0)
   {
     const char *serial = FL_ARG_STRING(args, "serial");
-    const char *path = FL_ARG_STRING(args, "path");
+    // const char *path = FL_ARG_STRING(args, "path");
 
     std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     if (cam)
@@ -690,14 +690,20 @@ static void flutter_vision_plugin_handle_method_call(
 static void flutter_vision_plugin_dispose(GObject *object)
 {
   G_OBJECT_CLASS(flutter_vision_plugin_parent_class)->dispose(object);
+
+#ifndef DISABLE_ROS
+  rclcpp::shutdown();
+#endif
 }
 
 static void flutter_vision_plugin_class_init(FlutterVisionPluginClass *klass)
 {
   G_OBJECT_CLASS(klass)->dispose = flutter_vision_plugin_dispose;
 
+#ifndef DISABLE_ROS
   char *argv[] = {strdup("/")};
   rclcpp::init(1, argv);
+#endif
 }
 
 static void flutter_vision_plugin_init(FlutterVisionPlugin *self) {}
