@@ -171,6 +171,7 @@ const _FUNC_INFERENCE = 12;
 const _FUNC_CUSTOM_HANDLER = 13;
 const _FUNC_CV_NORMALIZE = 14;
 const _FUNC_CV_THRESHOLD = 15;
+const _FUNC_CV_RELU = 16;
 
 // TODO: check method can be added to that pipeline
 class FvPipeline {
@@ -429,6 +430,22 @@ class FvPipeline {
       'funcIndex': _FUNC_CV_THRESHOLD,
       'params': Uint8List.fromList([...thresholdBytes, ...maxBytes, type ?? OpenCV.THRESH_BINARY]),
       'len': 9,
+      'at': at ?? -1,
+      'interval': interval ?? 0,
+      'serial': serial,
+      'append': append ?? false,
+    });
+  }
+
+  Future<void> relu(double threshold, {int? at, int? interval, bool? append}) async {
+    List<Object?> thresholdList = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': threshold});
+    Uint8List thresholdBytes = Uint8List.fromList(thresholdList.map((e) => e as int).toList());
+
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+      'index': index,
+      'funcIndex': _FUNC_CV_RELU,
+      'params': Uint8List.fromList([...thresholdBytes]),
+      'len': 4,
       'at': at ?? -1,
       'interval': interval ?? 0,
       'serial': serial,

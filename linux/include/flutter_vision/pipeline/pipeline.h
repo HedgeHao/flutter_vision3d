@@ -179,6 +179,42 @@ void PipelineFuncCustomHandler(cv::Mat &img, std::vector<uint8_t> params, FlText
     fl_method_channel_invoke_method(flChannel, "onHandled", fl_value_new_float32_list(result, size), nullptr, nullptr, NULL);
 }
 
+void PipelineFuncOpencvNormalize(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+{
+    float alpha = *reinterpret_cast<float *>(&params[0]);
+    float beta = *reinterpret_cast<float *>(&params[4]);
+    uint8_t normType = params[8];
+    uint8_t dType = params[9];
+
+    cv::normalize(img, img, alpha, beta, normType, dType);
+}
+
+void PipelineFuncOpencvThreshold(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+{
+    float threshold = *reinterpret_cast<float *>(&params[0]);
+    float max = *reinterpret_cast<float *>(&params[4]);
+    uint8_t type = params[8];
+
+    cv::threshold(img, img, threshold, max, type);
+}
+
+void PipelineFuncOpencvRelu(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+{
+    float threshold = *reinterpret_cast<float *>(&params[0]);
+    uchar thresholdValueUchar = static_cast<uchar>(threshold * 255.0);
+    uchar *p;
+    for (int i = 0; i < img.rows; ++i)
+    {
+        p = img.ptr<uchar>(i);
+        for (int j = 0; j < img.cols; ++j)
+        {
+            if(p[j] < thresholdValueUchar){
+                p[j] = 0;
+            }
+        }
+    }
+}
+
 const FuncDef pipelineFuncs[] = {
     {0, "test", 0, 0, PipelineFuncTest},
     {1, "cvtColor", 0, 0, PipelineFuncOpencvCvtColor},
@@ -194,7 +230,9 @@ const FuncDef pipelineFuncs[] = {
     {11, "tfSetTenorInput", 0, 0, PipelineFuncTfSetInputTensor},
     {12, "tfInference", 0, 0, PipelineFuncTfInference},
     {13, "customHandler", 0, 0, PipelineFuncCustomHandler},
-};
+    {14, "cvNormalized", 0, 0, PipelineFuncOpencvNormalize},
+    {15, "cvThreshold", 0, 0, PipelineFuncOpencvThreshold},
+    {16, "relu", 0, 0, PipelineFuncOpencvRelu}};
 
 class Pipeline
 {

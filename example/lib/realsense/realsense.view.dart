@@ -173,6 +173,23 @@ class RealsenseView extends GetView<RealsenseController> {
                     GetBuilder<RealsenseController>(id: RealsenseController.BUILDER_SLIDER, builder: (controller) => Text(controller.rangeFilterValueMax.toStringAsFixed(1))),
                   ],
                 ),
+                const Text('Relu Threshold'),
+                Row(
+                  children: [
+                    const Text('Threshold:'),
+                    GetBuilder<RealsenseController>(
+                        id: RealsenseController.BUILDER_RELU_SLIDER,
+                        builder: (controller) => Slider(
+                              min: 0.0,
+                              max: 1.0,
+                              divisions: 50,
+                              value: controller.reluThresholdValue,
+                              onChanged: (double value) => controller.reluThreshold = value,
+                              onChangeEnd: (value) => controller.updateReluThreshold(value),
+                            )),
+                    GetBuilder<RealsenseController>(id: RealsenseController.BUILDER_RELU_SLIDER, builder: (controller) => Text(controller.reluThresholdValue.toStringAsFixed(2))),
+                  ],
+                ),
                 Row(
                   children: [
                     const Text('PointCloud:'),

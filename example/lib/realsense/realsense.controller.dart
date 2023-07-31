@@ -14,6 +14,7 @@ class RealsenseController extends GetxController {
   static const BUILDER_TEXTURE = 'BUILDER_TEXTURE';
   static const BUILDER_TEXTURE_OPENGL = 'BUILDER_TEXTURE_OPENGL';
   static const BUILDER_SLIDER = 'BUILDER_SLIDER';
+  static const BUILDER_RELU_SLIDER = 'BUILDER_RELU_SLIDER';
 
   RealsenseCamera? cam;
   String sn = '';
@@ -40,6 +41,17 @@ class RealsenseController extends GetxController {
     rangeFilterValueMax = v;
     cam!.configure(RealsenseConfiguration.THRESHOLD_FILTER.index, [rangeFilterValueMin, rangeFilterValueMax]);
     update([BUILDER_SLIDER]);
+  }
+
+  double reluThresholdValue = 1.0;
+  set reluThreshold(double v){
+    if(cam == null) return;
+    reluThresholdValue = v;
+    update([BUILDER_RELU_SLIDER]);
+  }
+  updateReluThreshold(double v) async {
+    FvPipeline depthPipeline = cam!.depthPipeline;
+    await depthPipeline.relu(v, at:1);
   }
 
   int selected = 0;
@@ -89,6 +101,7 @@ class RealsenseController extends GetxController {
     FvPipeline depthPipeline = cam!.depthPipeline;
     await depthPipeline.clear();
     await depthPipeline.convertTo(OpenCV.CV_8U, 255.0 / 1024.0);
+    await depthPipeline.relu(reluThresholdValue);
     await depthPipeline.applyColorMap(Random().nextInt(11));
     await depthPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
     await depthPipeline.show();
