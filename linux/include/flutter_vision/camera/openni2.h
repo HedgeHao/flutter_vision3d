@@ -510,6 +510,11 @@ private:
     if (!(videoStart))
       return -1;
 
+    // Get Depth resolution
+    auto m = vsDepth.getVideoMode();
+    depthWidth = m.getResolutionX();
+    depthHeight = m.getResolutionY();
+
     while (videoStart)
     {
       rgbNewFrame = false;
@@ -538,6 +543,8 @@ private:
           depthTexture->cvImage = cv::Mat(depthFrame.getHeight(), depthFrame.getWidth(), CV_16UC1, (void *)depthFrame.getData());
           depthTexture->pipeline->run(depthTexture->cvImage, *flRegistrar, *FL_TEXTURE(depthTexture), depthTexture->video_width, depthTexture->video_height, depthTexture->buffer, models, flChannel);
           depthNewFrame = true;
+
+          depthData = (uint16_t *)depthFrame.getData();
         }
       }
 
@@ -559,7 +566,6 @@ private:
       fl_method_channel_invoke_method(flChannel, "onNiFrame", nullptr, nullptr, nullptr, NULL);
       videoFeedProcessing = false;
     }
-
     return 0;
   }
 };

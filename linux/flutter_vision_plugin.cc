@@ -16,6 +16,7 @@
 
 #include <cstring>
 #include <memory>
+#include <glib/gmacros.h>
 
 #define FL_ARG_STRING(args, name) fl_value_get_string(fl_value_lookup_string(args, name))
 #define FL_ARG_INT(args, name) fl_value_get_int(fl_value_lookup_string(args, name))
@@ -64,6 +65,8 @@ struct _FlutterVisionPlugin
   std::vector<TFLiteModel *> models{};
   std::vector<Pipeline *> pipelines{};
   std::vector<std::shared_ptr<FvCamera>> cams{};
+
+  uint16_t *emptyUint16List = {};
 };
 
 G_DEFINE_TYPE(FlutterVisionPlugin, flutter_vision_plugin, g_object_get_type())
@@ -301,6 +304,53 @@ static void flutter_vision_plugin_handle_method_call(
     }
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_string(sn.c_str())));
+  }
+  else if (strcmp(method, "fvGetDepthData") == 0)
+  {
+    const char *serial = FL_ARG_STRING(args, "serial");
+
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
+
+    if (cam)
+    {
+      // 0: all, 1: index, 2: range
+      const int index = FL_ARG_INT(args, "index");
+      std::cout << "Get DepthData Index:" << index << std::endl;
+
+      FlValue *list;
+      uint16_t *data;
+      int *temp;
+      int length = 0;
+      if (index == 0)
+      {
+        data = cam->getDepthData();
+        length = cam->depthWidth * cam->depthHeight;
+
+        temp = new int[length];
+        for (int i = 0; i < length; i++)
+        {
+          temp[i] = data[i];
+        }
+      }
+      else if (index == 1)
+      {
+        const int x = FL_ARG_INT(args, "x");
+        const int y = FL_ARG_INT(args, "y");
+
+        data = cam->getDepthData();
+        length = 1;
+
+        temp = new int[1];
+        temp[0] = data[y * cam->depthHeight + x];
+      }
+      else
+      {
+        temp = new int[0];
+      }
+
+      list = fl_value_new_int32_list(temp, length);
+      response = FL_METHOD_RESPONSE(fl_method_success_response_new(list));
+    }
   }
   else if (strcmp(method, "ni2SetVideoSize") == 0)
   {

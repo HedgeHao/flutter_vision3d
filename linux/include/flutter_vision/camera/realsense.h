@@ -283,6 +283,14 @@ private:
   int _readVideoFeed()
   {
     int64_t now;
+
+    if (videoStart)
+    {
+      rs2::frameset frames = pipeline->wait_for_frames(timeout);
+      depthWidth = frames.get_depth_frame().get_width();
+      depthHeight = frames.get_depth_frame().get_height();
+    }
+
     while (videoStart)
     {
       if (pauseStream)
@@ -324,6 +332,9 @@ private:
         {
           depthTexture->cvImage = frame_to_mat(depthFrame);
           depthTexture->pipeline->run(depthTexture->cvImage, *flRegistrar, *FL_TEXTURE(depthTexture), depthTexture->video_width, depthTexture->video_height, depthTexture->buffer, models, flChannel);
+
+          depthData = (uint16_t *)(depthFrame.get_data());
+          ;
         }
 
         if (isIrEnable && irFrame)
