@@ -7,7 +7,7 @@ import 'package:flutter_vision/camera/ros_camera.dart';
 import 'package:flutter_vision/camera/uvc.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 
-enum DepthType {ALL, AT, RANGE}
+enum DepthType { ALL, AT, RANGE }
 
 class FvCamera {
   late final CameraType cameraType;
@@ -143,13 +143,14 @@ class FvCamera {
     return await FlutterVision.channel.invokeMethod('rsLoadPresetParameters', {'serial': serial, 'path': path});
   }
 
-  Future<List<int>> getDepthData(DepthType depthType, {int? x, int? y}) async {
-    if(depthType == DepthType.AT && (x == null || y == null))
-    {
+  Future<List<int>> getDepthData(DepthType depthType, {int? x, int? y, int? width, int? height}) async {
+    if (depthType == DepthType.AT && (x == null || y == null)) {
       throw Exception("coordinate not provide");
+    } else if (depthType == DepthType.RANGE && (x == null || y == null || width == null || height == null)) {
+      throw Exception("roi not provide");
     }
 
-    return await FlutterVision.channel.invokeMethod('fvGetDepthData', {'serial': serial, 'index':depthType.index, 'x': x, 'y': y});
+    return await FlutterVision.channel.invokeMethod('fvGetDepthData', {'serial': serial, 'index': depthType.index, 'x': x, 'y': y, 'roi_width': width, 'roi_height': height});
   }
 
   Future<void> test(int rgbPointer, int depthPointer, int irPointer) async {}

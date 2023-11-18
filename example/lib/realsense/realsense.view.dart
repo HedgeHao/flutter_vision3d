@@ -281,7 +281,8 @@ class RealsenseView extends GetView<RealsenseController> {
                       quarterTurns: 2,
                     )
                   : const SizedBox(),
-            )
+            ),
+            TextButton(onPressed: () => controller.test(), child: const Text('Test'))
           ],
         ))
       ]),

@@ -334,7 +334,6 @@ private:
           depthTexture->pipeline->run(depthTexture->cvImage, *flRegistrar, *FL_TEXTURE(depthTexture), depthTexture->video_width, depthTexture->video_height, depthTexture->buffer, models, flChannel);
 
           depthData = (uint16_t *)(depthFrame.get_data());
-          ;
         }
 
         if (isIrEnable && irFrame)

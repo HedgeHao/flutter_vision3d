@@ -327,6 +327,7 @@ static void flutter_vision_plugin_handle_method_call(
         length = cam->depthWidth * cam->depthHeight;
 
         temp = new int[length];
+        // TODO: change to efficient way
         for (int i = 0; i < length; i++)
         {
           temp[i] = data[i];
@@ -343,9 +344,39 @@ static void flutter_vision_plugin_handle_method_call(
         temp = new int[1];
         temp[0] = data[y * cam->depthHeight + x];
       }
+      else if (index == 2)
+      {
+        const int roi_x = FL_ARG_INT(args, "x");
+        const int roi_y = FL_ARG_INT(args, "y");
+        const int roi_width = FL_ARG_INT(args, "roi_width");
+        const int roi_height = FL_ARG_INT(args, "roi_height");
+
+        if (roi_x < 0 || roi_y < 0 || roi_x + roi_width > cam->depthWidth || roi_y + roi_height > cam->depthHeight)
+        {
+          // Wrong ROI
+          temp = new int[0];
+          temp[0] = -2;
+        }
+        else
+        {
+          data = cam->getDepthData();
+          length = roi_width * roi_height;
+          temp = new int[length];
+          int index = 0;
+          for (int y = roi_y; y < roi_y + roi_height; ++y)
+          {
+            for (int x = roi_x; x < roi_x + roi_width; ++x)
+            {
+              temp[index++] = data[y * cam->depthWidth + x];
+            }
+          }
+        }
+      }
       else
       {
+        // TODO: Workaround: put error code in return data. should throw error.
         temp = new int[0];
+        temp[0] = -1;
       }
 
       list = fl_value_new_int32_list(temp, length);

@@ -44,14 +44,15 @@ class RealsenseController extends GetxController {
   }
 
   double reluThresholdValue = 1.0;
-  set reluThreshold(double v){
-    if(cam == null) return;
+  set reluThreshold(double v) {
+    if (cam == null) return;
     reluThresholdValue = v;
     update([BUILDER_RELU_SLIDER]);
   }
+
   updateReluThreshold(double v) async {
     FvPipeline depthPipeline = cam!.depthPipeline;
-    await depthPipeline.relu(v, at:1);
+    await depthPipeline.relu(v, at: 1);
   }
 
   int selected = 0;
@@ -173,5 +174,10 @@ class RealsenseController extends GetxController {
     cy = param['cy']!;
 
     update();
+  }
+
+  Future<void> test() async {
+    var data = await cam?.getDepthData(DepthType.RANGE, x: 320, y: 240, width: 30, height: 1);
+    print(data);
   }
 }
