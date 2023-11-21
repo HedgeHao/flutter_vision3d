@@ -217,6 +217,19 @@ class RealsenseView extends GetView<RealsenseController> {
                     Row(children: [const Text('cy:'), const SizedBox(width: 8), Text(controller.cy.toStringAsFixed(6))]),
                   ]),
                 ),
+                Row(
+                  children: [
+                    const Text('Current Modes:'),
+                    TextButton(
+                        onPressed: () {
+                          controller.getCurrentVideoMode();
+                        },
+                        child: const Text('Update')),
+                  ],
+                ),
+                Row(children: [const Text('RGB:'), GetBuilder<RealsenseController>(builder: (controller) => Text(controller.currentModeRGB))]),
+                Row(children: [const Text('Depth:'), GetBuilder<RealsenseController>(builder: (controller) => Text(controller.currentModeDepth))]),
+                Row(children: [const Text('IR:'), GetBuilder<RealsenseController>(builder: (controller) => Text(controller.currentModeIR))]),
               ],
             )),
         Expanded(

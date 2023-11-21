@@ -17,6 +17,9 @@ class RealsenseController extends GetxController {
   static const BUILDER_RELU_SLIDER = 'BUILDER_RELU_SLIDER';
 
   RealsenseCamera? cam;
+  String currentModeRGB = '';
+  String currentModeDepth = '';
+  String currentModeIR = '';
   String sn = '';
   double fx = 0, fy = 0, cx = 0, cy = 0;
   int rgbTextureId = 0;
@@ -172,6 +175,19 @@ class RealsenseController extends GetxController {
     fy = param['fy']!;
     cx = param['cx']!;
     cy = param['cy']!;
+
+    update();
+  }
+
+  Future<void> getCurrentVideoMode() async {
+    if (cam == null) {
+      print('Camera is not connected');
+      return;
+    }
+
+    currentModeRGB = await cam!.getCurrentVideoMode(StreamIndex.RGB);
+    currentModeDepth = await cam!.getCurrentVideoMode(StreamIndex.DEPTH);
+    currentModeIR = await cam!.getCurrentVideoMode(StreamIndex.IR);
 
     update();
   }
