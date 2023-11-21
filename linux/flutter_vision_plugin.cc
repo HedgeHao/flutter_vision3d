@@ -315,7 +315,6 @@ static void flutter_vision_plugin_handle_method_call(
     {
       // 0: all, 1: index, 2: range
       const int index = FL_ARG_INT(args, "index");
-      std::cout << "Get DepthData Index:" << index << std::endl;
 
       FlValue *list;
       uint16_t *data;
