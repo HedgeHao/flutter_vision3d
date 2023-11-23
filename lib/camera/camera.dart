@@ -150,7 +150,10 @@ class FvCamera {
       throw Exception("roi not provide");
     }
 
-    return await FlutterVision.channel.invokeMethod('fvGetDepthData', {'serial': serial, 'index': depthType.index, 'x': x, 'y': y, 'roi_width': width, 'roi_height': height});
+    List<Object?> data = await FlutterVision.channel.invokeMethod('fvGetDepthData', {'serial': serial, 'index': depthType.index, 'x': x, 'y': y, 'roi_width': width, 'roi_height': height});
+    List<int> rData = data.map((e) => e as int).toList();
+
+    return rData;
   }
 
   Future<void> test(int rgbPointer, int depthPointer, int irPointer) async {}
