@@ -15,6 +15,7 @@ class RealsenseController extends GetxController {
   static const BUILDER_TEXTURE_OPENGL = 'BUILDER_TEXTURE_OPENGL';
   static const BUILDER_SLIDER = 'BUILDER_SLIDER';
   static const BUILDER_RELU_SLIDER = 'BUILDER_RELU_SLIDER';
+  static const BUILDER_DEPTH_FILTER = 'BUILDER_DEPTH_FILTER';
 
   RealsenseCamera? cam;
   String currentModeRGB = '';
@@ -27,6 +28,7 @@ class RealsenseController extends GetxController {
   int irTextureId = 0;
   int openglTextureId = 0;
   bool pointCloud = false;
+  bool depthFilter = false;
   List<DropdownMenuItem<int>> items = [];
   double rangeFilterValueMin = 0.1;
   set minRange(double v) {
@@ -72,6 +74,7 @@ class RealsenseController extends GetxController {
     }
 
     sn = await cam!.getSerialNumber();
+    await cam!.configure(RealsenseConfiguration.ALIGN_TO_COLOR.index, [1]);
 
     update();
   }
@@ -105,7 +108,7 @@ class RealsenseController extends GetxController {
     FvPipeline depthPipeline = cam!.depthPipeline;
     await depthPipeline.clear();
     await depthPipeline.convertTo(OpenCV.CV_8U, 255.0 / 1024.0);
-    await depthPipeline.relu(reluThresholdValue);
+    // await depthPipeline.relu(reluThresholdValue);
     await depthPipeline.applyColorMap(Random().nextInt(11));
     await depthPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
     await depthPipeline.show();
@@ -190,6 +193,18 @@ class RealsenseController extends GetxController {
     currentModeIR = await cam!.getCurrentVideoMode(StreamIndex.IR);
 
     update();
+  }
+
+  Future<void> enableDepthFilter(bool enable) async {
+    FvPipeline depthPipeline = cam!.depthPipeline;
+    depthFilter = enable;
+    if (enable) {
+      await depthPipeline.zeroDepthFilter(0, 5, at: 1, append: true);
+    } else {
+      await depthPipeline.removeAt(1);
+    }
+
+    update([BUILDER_DEPTH_FILTER]);
   }
 
   Future<void> test() async {

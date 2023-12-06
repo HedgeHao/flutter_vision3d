@@ -208,11 +208,50 @@ void PipelineFuncOpencvRelu(cv::Mat &img, std::vector<uint8_t> params, FlTexture
         p = img.ptr<uchar>(i);
         for (int j = 0; j < img.cols; ++j)
         {
-            if(p[j] < thresholdValueUchar){
+            if (p[j] < thresholdValueUchar)
+            {
                 p[j] = 0;
             }
         }
     }
+}
+
+void PipelineZeroDepthFilter(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+{
+    int threshold = params[0];
+
+    int halfRange = params[1] / 2;
+
+    cv::parallel_for_(cv::Range(halfRange, img.rows - halfRange), [&](const cv::Range &rowRange)
+                      {
+        for (int i = rowRange.start; i < rowRange.end; ++i)
+        {
+            for (int j = halfRange; j < img.cols - halfRange; ++j)
+            {
+                if (img.at<uchar>(i, j) <= threshold)
+                {
+                    int sum = 0;
+                    int count = 0;
+
+                    for (int x = -halfRange; x <= halfRange; ++x)
+                    {
+                        for (int y = -halfRange; y <= halfRange; ++y)
+                        {
+                            if (img.at<uchar>(i + x, j + y) != 0)
+                            {
+                                sum += img.at<uchar>(i + x, j + y);
+                                ++count;
+                            }
+                        }
+                    }
+
+                    if (count > 0)
+                    {
+                        img.at<uchar>(i, j) = sum / count;
+                    }
+                }
+            }
+        } });
 }
 
 const FuncDef pipelineFuncs[] = {
@@ -232,7 +271,9 @@ const FuncDef pipelineFuncs[] = {
     {13, "customHandler", 0, 0, PipelineFuncCustomHandler},
     {14, "cvNormalized", 0, 0, PipelineFuncOpencvNormalize},
     {15, "cvThreshold", 0, 0, PipelineFuncOpencvThreshold},
-    {16, "relu", 0, 0, PipelineFuncOpencvRelu}};
+    {16, "relu", 0, 0, PipelineFuncOpencvRelu},
+    {17, "zeroDepthFilter", 0, 0, PipelineZeroDepthFilter},
+};
 
 class Pipeline
 {
@@ -280,6 +321,12 @@ public:
             else
                 funcs.at(insertAt) = f;
         }
+    }
+
+    int removeAt(unsigned int index)
+    {
+        funcs.erase(funcs.begin() + index);
+        return 0;
     }
 
     int runOnce(FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel, int &from, int &to)

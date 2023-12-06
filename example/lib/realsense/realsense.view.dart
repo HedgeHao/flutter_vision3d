@@ -192,6 +192,17 @@ class RealsenseView extends GetView<RealsenseController> {
                 ),
                 Row(
                   children: [
+                    const Text('Depth Zero Filter'),
+                    GetBuilder<RealsenseController>(
+                        id: RealsenseController.BUILDER_DEPTH_FILTER,
+                        builder: (controller) => Switch(
+                              value: controller.depthFilter,
+                              onChanged: (value) => controller.enableDepthFilter(value),
+                            ))
+                  ],
+                ),
+                Row(
+                  children: [
                     const Text('PointCloud:'),
                     GetBuilder<RealsenseController>(
                         id: RealsenseController.BUILDER_TEXTURE_OPENGL,

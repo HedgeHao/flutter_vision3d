@@ -507,6 +507,32 @@ static void flutter_vision_plugin_handle_method_call(
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
+  else if (strcmp(method, "pipelineRemoveAt") == 0)
+  {
+    const char *serial = FL_ARG_STRING(args, "serial");
+    int index = FL_ARG_INT(args, "index");
+    int removeAt = FL_ARG_INT(args, "removeAt");
+
+    int ret = 0;
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
+    if (cam)
+    {
+      if (index == VideoIndex::RGB)
+      {
+        ret = cam->rgbTexture->pipeline->removeAt(removeAt);
+      }
+      else if (index == VideoIndex::Depth)
+      {
+        ret = cam->depthTexture->pipeline->removeAt(removeAt);
+      }
+      else if (index == VideoIndex::IR)
+      {
+        ret = cam->irTexture->pipeline->removeAt(removeAt);
+      }
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(ret)));
+  }
   else if (strcmp(method, "pipelineRun") == 0)
   {
     const char *serial = FL_ARG_STRING(args, "serial");

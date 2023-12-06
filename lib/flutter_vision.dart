@@ -173,6 +173,8 @@ const _FUNC_CV_NORMALIZE = 14;
 const _FUNC_CV_THRESHOLD = 15;
 const _FUNC_CV_RELU = 16;
 
+const _FUNC_CUSTOM_DEPTH_ZERO_FILTER = 17;
+
 // TODO: check method can be added to that pipeline
 class FvPipeline {
   static const RGB_FRAME = 1;
@@ -450,6 +452,27 @@ class FvPipeline {
       'interval': interval ?? 0,
       'serial': serial,
       'append': append ?? false,
+    });
+  }
+
+  Future<void> zeroDepthFilter(int threshold, int range, {int? at, int? interval, bool? append}) async {
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+      'index': index,
+      'funcIndex': _FUNC_CUSTOM_DEPTH_ZERO_FILTER,
+      'params': Uint8List.fromList([threshold, range]),
+      'len': 2,
+      'at': at ?? -1,
+      'interval': interval ?? 0,
+      'serial': serial,
+      'append': append ?? false,
+    });
+  }
+
+  Future<void> removeAt(int removeAt) async {
+    await FlutterVision.channel.invokeMethod('pipelineRemoveAt', {
+      'index': index,
+      'serial': serial,
+      'removeAt': removeAt,
     });
   }
 }

@@ -341,8 +341,7 @@ private:
         {
           for (RsFilter f : filters)
           {
-
-            frames = f.filter->as<rs2::threshold_filter>().process(frames);
+            frames = f.filter->process(frames);
           }
         }
 
