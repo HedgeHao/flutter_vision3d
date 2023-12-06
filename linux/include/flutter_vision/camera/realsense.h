@@ -248,13 +248,17 @@ public:
       }
     }
 
-    return 01;
+    return 0;
   }
 
   int getConfiguration(int prop) { return 0; }
 
-  // TODO: Not Implement
-  bool enableImageRegistration(bool enable) { return true; }
+  bool enableImageRegistration(bool enable)
+  {
+    std::vector<float> param = {enable ? 1.0f : 0.0f};
+    configure(RsConfiguration::FRAME_SYNC_COLOR_FILTER, param);
+    return true;
+  }
 
   void getAvailableVideoModes(int index, std::vector<std::string> &rModes) {}
   void getCurrentVideoMode(int index, std::string &mode)

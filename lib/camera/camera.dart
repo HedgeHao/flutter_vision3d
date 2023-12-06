@@ -115,7 +115,8 @@ class FvCamera {
   }
 
   Future<bool> enableRegistration(bool enable) async {
-    return await FlutterVision.channel.invokeMethod('fvEnableRegistration', {'enable': enable, 'serial': serial});
+    int ret = await FlutterVision.channel.invokeMethod('fvEnableRegistration', {'enable': enable, 'serial': serial});
+    return ret == 0;
   }
 
   Future<bool> pauseStream(bool pause) async {

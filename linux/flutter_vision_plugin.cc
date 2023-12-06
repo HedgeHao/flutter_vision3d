@@ -441,6 +441,20 @@ static void flutter_vision_plugin_handle_method_call(
     self->glfl->render();
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
+  else if (strcmp(method, "fvEnableRegistration") == 0)
+  {
+    const char *serial = FL_ARG_STRING(args, "serial");
+    const bool enable = FL_ARG_BOOL(args, "enable");
+
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
+    int ret = -1;
+    if (cam != nullptr)
+    {
+      ret = cam->enableImageRegistration(enable);
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(ret)));
+  }
   else if (strcmp(method, "fvCameraEnablePointCloud") == 0)
   {
     const char *serial = FL_ARG_STRING(args, "serial");

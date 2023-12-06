@@ -74,7 +74,7 @@ class RealsenseController extends GetxController {
     }
 
     sn = await cam!.getSerialNumber();
-    await cam!.configure(RealsenseConfiguration.ALIGN_TO_COLOR.index, [1]);
+    await cam!.enableRegistration(true);
 
     update();
   }
