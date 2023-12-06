@@ -18,7 +18,7 @@ include_directories(
   "$ENV{FLUTTER_VISION_DEP}/opengl/include"
   "$ENV{FLUTTER_VISION_DEP}/tensorflowlite/include/"
   "$ENV{FLUTTER_VISION_DEP}/zxing/include/"
-	"$ENV{OPENNI2_INCLUDE64}"
+	"$ENV{FLUTTER_VISION_DEP}/lipsedge/include"
   "${PROJECT_SOURCE_DIR}/include/"
 )
 
@@ -45,7 +45,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
   "$ENV{FLUTTER_VISION_DEP}/opengl/lib/glfw3.lib"
   optimized "$ENV{FLUTTER_VISION_DEP}/zxing/lib/ZXing.lib"
   debug "$ENV{FLUTTER_VISION_DEP}/zxing/lib/ZXingd.lib"
-  "$ENV{OPENNI2_LIB64}/OpenNI2.lib"
+  "$ENV{FLUTTER_VISION_DEP}/lipsedge/lib/OpenNI2.lib"
   ${OpenCV_LIBS}
   opengl32
   "$ENV{FLUTTER_VISION_DEP}/handler/build/flutterVisionHandler.lib"
@@ -73,8 +73,8 @@ set(flutter_vision_bundled_libraries
   "$ENV{FLUTTER_VISION_DEP}/opencv/x64/vc16/bin/opencv_videoio460d.dll"
   "$ENV{FLUTTER_VISION_DEP}/opencv/x64/vc16/bin/opencv_wechat_qrcode460.dll"
   "$ENV{FLUTTER_VISION_DEP}/opencv/x64/vc16/bin/opencv_wechat_qrcode460d.dll"
-  "$ENV{OPENNI2_REDIST64}/OpenNI2"
-  "$ENV{OPENNI2_REDIST64}/OpenNI.ini"
-  "$ENV{OPENNI2_REDIST64}/OpenNI2.dll"
+  "$ENV{FLUTTER_VISION_DEP}/lipsedge/OpenNI2"
+  "$ENV{FLUTTER_VISION_DEP}/lipsedge/OpenNI.ini"
+  "$ENV{FLUTTER_VISION_DEP}/lipsedge/OpenNI2.dll"
   PARENT_SCOPE
 )

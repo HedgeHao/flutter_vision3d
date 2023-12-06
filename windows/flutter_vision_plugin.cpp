@@ -360,6 +360,86 @@ namespace
 
       result->Success(flutter::EncodableValue(""));
     }
+    else if (method_call.method_name().compare("fvGetDepthData") == 0)
+    {
+      std::string serial;
+      parseDartArgument<std::string>(arguments, "serial", &serial);
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      if (cam)
+      {
+        int index;
+        parseDartArgument<int>(arguments, "index", &index);
+
+        flutter::EncodableList list = flutter::EncodableList();
+        uint16_t *data;
+        int *temp;
+        int length = 0;
+        if (index == 0)
+        {
+          data = cam->getDepthData();
+          length = cam->depthWidth * cam->depthHeight;
+          temp = new int[length];
+          for (int i = 0; i < length; i++)
+          {
+            list.push_back(data[i]);
+          }
+        }
+        else if (index == 1)
+        {
+          int x;
+          parseDartArgument<int>(arguments, "x", &x);
+
+          int y;
+          parseDartArgument<int>(arguments, "y", &y);
+
+          data = cam->getDepthData();
+          list.push_back(data[y * cam->depthHeight + x]);
+        }
+        else if (index == 2)
+        {
+          int roi_x;
+          parseDartArgument<int>(arguments, "x", &roi_x);
+
+          int roi_y;
+          parseDartArgument<int>(arguments, "y", &roi_y);
+
+          int roi_width;
+          parseDartArgument<int>(arguments, "roi_width", &roi_width);
+
+          int roi_height;
+          parseDartArgument<int>(arguments, "roi_height", &roi_height);
+
+          if (roi_x < 0 || roi_y < 0 || roi_x + roi_width > cam->depthWidth || roi_y + roi_height > cam->depthHeight)
+          {
+            // TODO: Workaround: put error code in return data. should throw error.
+            // Wrong ROI
+            list.push_back(-2);
+          }
+          else
+          {
+            data = cam->getDepthData();
+            length = roi_width * roi_height;
+            temp = new int[length];
+            int index = 0;
+            for (int y = roi_y; y < roi_y + roi_height; ++y)
+            {
+              for (int x = roi_x; x < roi_x + roi_width; ++x)
+              {
+                list.push_back(data[y * cam->depthWidth + x]);
+              }
+            }
+          }
+        }
+        else
+        {
+          // TODO: Workaround: put error code in return data. should throw error.
+          list.push_back(-1);
+        }
+
+        result->Success(list);
+      }
+    }
     else if (method_call.method_name().compare("ni2SetVideoSize") == 0)
     {
       int videoIndex;
