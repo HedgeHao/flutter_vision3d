@@ -84,6 +84,9 @@ public:
   {
     pipeline = new rs2::pipeline(ctx);
     cfg = rs2::config();
+    cfg.enable_stream(RS2_STREAM_COLOR, 1280, 720, RS2_FORMAT_BGR8, 30);
+    cfg.enable_stream(RS2_STREAM_DEPTH, 1280, 720, RS2_FORMAT_Z16, 30);
+    cfg.enable_stream(RS2_STREAM_INFRARED);
     cfg.enable_device(serial);
 
     return 0;

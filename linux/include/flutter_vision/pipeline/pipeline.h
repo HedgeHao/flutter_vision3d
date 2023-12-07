@@ -218,9 +218,11 @@ void PipelineFuncOpencvRelu(cv::Mat &img, std::vector<uint8_t> params, FlTexture
 
 void PipelineZeroDepthFilter(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
-    int threshold = params[0];
+    cv::Mat temp;
+    img.copyTo(temp);
 
-    int halfRange = params[1] / 2;
+    int threshold = params[0];
+    int halfRange = params[1];
 
     cv::parallel_for_(cv::Range(halfRange, img.rows - halfRange), [&](const cv::Range &rowRange)
                       {
@@ -237,9 +239,9 @@ void PipelineZeroDepthFilter(cv::Mat &img, std::vector<uint8_t> params, FlTextur
                     {
                         for (int y = -halfRange; y <= halfRange; ++y)
                         {
-                            if (img.at<uchar>(i + x, j + y) != 0)
+                            if (temp.at<uchar>(i + x, j + y) != 0)
                             {
-                                sum += img.at<uchar>(i + x, j + y);
+                                sum += temp.at<uchar>(i + x, j + y);
                                 ++count;
                             }
                         }
