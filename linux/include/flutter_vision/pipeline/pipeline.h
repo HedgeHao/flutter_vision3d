@@ -8,6 +8,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include "../fv_texture.h"
 
 #include <sys/time.h>
 void getCurrentTime(int64_t *timer)

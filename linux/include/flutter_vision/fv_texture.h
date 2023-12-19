@@ -9,7 +9,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "pipeline/pipeline.h"
 #include "tflite.h"
 
 #define FV_TEXTURE_TYPE (fv_texture_get_type())
@@ -19,6 +18,7 @@ struct FvTextureClass
   FlPixelBufferTextureClass parent_class;
 };
 
+class Pipeline;
 struct FvTexture
 {
   FlPixelBufferTexture flPixelBufferTexture;
