@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_vision_example/uvc/uvc.controller.dart';
 import 'package:get/get.dart';
 
-final TextEditingController ctl = TextEditingController()..text = '0';
+final TextEditingController ctl = TextEditingController()..text = '8';
 
 class UvcView extends GetView<UvcControllerDevice> {
   const UvcView({Key? key}) : super(key: key);

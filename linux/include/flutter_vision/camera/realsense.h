@@ -359,13 +359,13 @@ private:
         if (isRgbEnable && rgbFrame)
         {
           rgbTexture->cvImage = frame_to_mat(rgbFrame);
-          rgbTexture->pipeline->run(rgbTexture->cvImage, *flRegistrar, *FL_TEXTURE(rgbTexture), rgbTexture->video_width, rgbTexture->video_height, rgbTexture->buffer, models, flChannel);
+          rgbTexture->pipeline->run(rgbTexture, *flRegistrar, models, flChannel);
         }
 
         if (isDepthEnable && depthFrame)
         {
           depthTexture->cvImage = frame_to_mat(depthFrame);
-          depthTexture->pipeline->run(depthTexture->cvImage, *flRegistrar, *FL_TEXTURE(depthTexture), depthTexture->video_width, depthTexture->video_height, depthTexture->buffer, models, flChannel);
+          depthTexture->pipeline->run(depthTexture, *flRegistrar, models, flChannel);
 
           depthData = (uint16_t *)(depthFrame.get_data());
         }
@@ -373,7 +373,7 @@ private:
         if (isIrEnable && irFrame)
         {
           irTexture->cvImage = frame_to_mat(irFrame);
-          irTexture->pipeline->run(irTexture->cvImage, *flRegistrar, *FL_TEXTURE(irTexture), irTexture->video_width, irTexture->video_height, irTexture->buffer, models, flChannel);
+          irTexture->pipeline->run(irTexture, *flRegistrar, models, flChannel);
         }
 
         if (enablePointCloud)

@@ -573,15 +573,15 @@ static void flutter_vision_plugin_handle_method_call(
     {
       if (index == VideoIndex::RGB)
       {
-        ret = cam->rgbTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->rgbTexture), cam->rgbTexture->video_width, cam->rgbTexture->video_height, cam->rgbTexture->buffer, &self->models, self->flChannel, from, to);
+        ret = cam->rgbTexture->pipeline->runOnce(cam->rgbTexture, *self->texture_registrar, &self->models, self->flChannel, from, to);
       }
       else if (index == VideoIndex::Depth)
       {
-        ret = cam->depthTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->depthTexture), cam->depthTexture->video_width, cam->depthTexture->video_height, cam->depthTexture->buffer, &self->models, self->flChannel, from, to);
+        ret = cam->depthTexture->pipeline->runOnce(cam->depthTexture, *self->texture_registrar, &self->models, self->flChannel, from, to);
       }
       else if (index == VideoIndex::IR)
       {
-        ret = cam->irTexture->pipeline->runOnce(*self->texture_registrar, *FL_TEXTURE(cam->irTexture), cam->irTexture->video_width, cam->irTexture->video_height, cam->irTexture->buffer, &self->models, self->flChannel, from, to);
+        ret = cam->irTexture->pipeline->runOnce(cam->irTexture, *self->texture_registrar, &self->models, self->flChannel, from, to);
       }
     }
 

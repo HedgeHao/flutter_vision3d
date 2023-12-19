@@ -42,7 +42,7 @@ public:
         return;
 
       cv_bridge::toCvShare(img, "rgba8")->image.copyTo(rgbTexture->cvImage);
-      rgbTexture->pipeline->run(rgbTexture->cvImage, *flRegistrar, *FL_TEXTURE(rgbTexture), rgbTexture->video_width, rgbTexture->video_height, rgbTexture->buffer, models, flChannel);
+      rgbTexture->pipeline->run(rgbTexture, *flRegistrar, models, flChannel);
     };
     subscriber = this->create_subscription<sensor_msgs::msg::Image>(serial, 10, callback);
   }
