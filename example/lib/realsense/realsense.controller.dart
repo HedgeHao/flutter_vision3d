@@ -208,6 +208,11 @@ class RealsenseController extends GetxController {
     update([BUILDER_DEPTH_FILTER]);
   }
 
+  Future<void> screenshot() async {
+    FvPipeline rgbPipeline = cam!.rgbPipeline;
+    await rgbPipeline.imwrite("test.jpg", at: 0, append: true, runOnce: true);
+  }
+
   Future<void> test() async {
     var data = await cam?.getDepthData(DepthType.RANGE, x: 320, y: 240, width: 30, height: 1);
     print(data);

@@ -502,20 +502,25 @@ static void flutter_vision_plugin_handle_method_call(
     if (valueAppend != nullptr && fl_value_get_type(valueAppend) != FL_VALUE_TYPE_NULL)
       append = fl_value_get_bool(valueAppend);
 
+    bool runOnce = false;
+    FlValue *valueRunOnce = fl_value_lookup_string(args, "runOnce");
+    if (valueRunOnce != nullptr && fl_value_get_type(valueRunOnce) != FL_VALUE_TYPE_NULL)
+      runOnce = fl_value_get_bool(valueRunOnce);
+
     std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     if (cam != nullptr)
     {
       if (index == VideoIndex::RGB)
       {
-        cam->rgbTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
+        cam->rgbTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append, runOnce);
       }
       else if (index == VideoIndex::Depth)
       {
-        cam->depthTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
+        cam->depthTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append, runOnce);
       }
       else if (index == VideoIndex::IR)
       {
-        cam->irTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
+        cam->irTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append, runOnce);
       }
     }
 

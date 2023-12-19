@@ -32,6 +32,7 @@ struct FuncDef
     // TODO: function parameter definition should be relaxable
     void (*func)(cv::Mat &, std::vector<uint8_t> params, FlTextureRegistrar &, FlTexture &, int32_t &, int32_t &, std::vector<uint8_t> &, std::vector<TFLiteModel *> *, FlMethodChannel *);
     std::vector<uint8_t> params = {};
+    bool runOnce = false;
 };
 
 void PipelineFuncTest(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
@@ -293,10 +294,11 @@ public:
         imgPtr = m;
     }
 
-    void add(unsigned int index, const uint8_t *params, unsigned int len, int insertAt = -1, int interval = 0, bool append = false)
+    void add(unsigned int index, const uint8_t *params, unsigned int len, int insertAt = -1, int interval = 0, bool append = false, bool runOnce = false)
     {
         FuncDef f = pipelineFuncs[index];
         f.interval = interval;
+        f.runOnce = runOnce;
 
         for (unsigned int i = 0; i < len; i++)
             f.params.push_back(*(params + i));
@@ -373,6 +375,9 @@ public:
             }
             doScreenshot = false;
         }
+
+        std::vector<size_t> removeIndex = {};
+
         for (int i = 0; i < funcs.size(); i++)
         {
             if (funcs[i].interval > 0)
@@ -388,6 +393,8 @@ public:
             {
                 // printf("[Run] %s\n", funcs[i].name);
                 funcs[i].func(img, funcs[i].params, registrar, texture, texture_width, texture_height, pixelBuf, models, flChannel);
+                if (funcs[i].runOnce)
+                    removeIndex.push_back(i);
             }
             catch (std::exception &e)
             {
@@ -398,6 +405,14 @@ public:
             if (funcs[i].interval > 0)
             {
                 getCurrentTime(&funcs[i].timer);
+            }
+        }
+
+        for (size_t index : removeIndex)
+        {
+            if (index < funcs.size())
+            {
+                funcs.erase(funcs.begin() + index);
             }
         }
 
