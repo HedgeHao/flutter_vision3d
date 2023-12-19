@@ -358,24 +358,6 @@ public:
 
     int run(cv::Mat &img, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
     {
-        if (doScreenshot)
-        {
-            if (!img.empty())
-            {
-                if (screenshotCvtColor > 0)
-                {
-                    cv::Mat temp;
-                    cv::cvtColor(img, temp, screenshotCvtColor);
-                    cv::imwrite(screenshotSavePath.c_str(), temp);
-                }
-                else
-                {
-                    cv::imwrite(screenshotSavePath.c_str(), img);
-                }
-            }
-            doScreenshot = false;
-        }
-
         std::vector<size_t> removeIndex = {};
 
         for (int i = 0; i < funcs.size(); i++)
@@ -419,13 +401,6 @@ public:
         return 0;
     }
 
-    void screenshot(const char *filePath, int convert = -1)
-    {
-        doScreenshot = true;
-        screenshotSavePath = std::string(filePath);
-        screenshotCvtColor = convert;
-    }
-
     void clear()
     {
         funcs.clear();
@@ -455,9 +430,6 @@ public:
 private:
     std::vector<FuncDef> funcs = {};
     int64_t ts = 0;
-    bool doScreenshot = false;
-    std::string screenshotSavePath;
-    int screenshotCvtColor = -1;
     cv::Mat *imgPtr;
     cv::Mat img;
 };

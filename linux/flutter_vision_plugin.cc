@@ -775,35 +775,6 @@ static void flutter_vision_plugin_handle_method_call(
     FlValue *result = fl_value_new_uint8_list(bytes, 4);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
   }
-  else if (strcmp(method, "fvCameraScreenshot") == 0)
-  {
-    const char *serial = FL_ARG_STRING(args, "serial");
-    const int index = FL_ARG_INT(args, "index");
-    const char *path = FL_ARG_STRING(args, "path");
-    const int cvtCode = FL_ARG_INT(args, "cvtCode");
-
-    bool ret = false;
-    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
-    if (cam != nullptr)
-    {
-      if (index == VideoIndex::RGB)
-      {
-        cam->rgbTexture->pipeline->screenshot(path, cvtCode);
-      }
-      else if (index == VideoIndex::Depth)
-      {
-        cam->depthTexture->pipeline->screenshot(path, cvtCode);
-      }
-      else if (index == VideoIndex::IR)
-      {
-        cam->irTexture->pipeline->screenshot(path, cvtCode);
-      }
-
-      ret = true;
-    }
-
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(ret)));
-  }
   else
   {
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
