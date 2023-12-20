@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/model.dart';
+import 'package:flutter_vision/opencv_mat.dart';
 
 enum CameraType { OPENNI, REALSENSE, DUMMY, UVC, ROS }
 
@@ -174,6 +176,8 @@ const _FUNC_CV_THRESHOLD = 15;
 const _FUNC_CV_RELU = 16;
 
 const _FUNC_CUSTOM_DEPTH_ZERO_FILTER = 17;
+
+const _FUNC_CV_COPYTO = 18;
 
 // TODO: check method can be added to that pipeline
 class FvPipeline {
@@ -451,6 +455,7 @@ class FvPipeline {
       'interval': interval ?? 0,
       'serial': serial,
       'append': append ?? false,
+      'runOnce': runOnce ?? false,
     });
   }
 
@@ -467,6 +472,7 @@ class FvPipeline {
       'interval': interval ?? 0,
       'serial': serial,
       'append': append ?? false,
+      'runOnce': runOnce ?? false,
     });
   }
 
@@ -480,6 +486,30 @@ class FvPipeline {
       'interval': interval ?? 0,
       'serial': serial,
       'append': append ?? false,
+      'runOnce': runOnce ?? false,
+    });
+  }
+
+  Future<void> copyTo(OpencvMat mat, {int? at, int? interval, bool? append, bool? runOnce}) async {
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+      'index': index,
+      'funcIndex': _FUNC_CV_COPYTO,
+      'params': Uint8List.fromList([
+        (mat.pointer & 0xFF00000000000000) >> 56,
+        (mat.pointer & 0XFF000000000000) >> 48,
+        (mat.pointer & 0XFF0000000000) >> 40,
+        (mat.pointer & 0XFF00000000) >> 32,
+        (mat.pointer & 0XFF000000) >> 24,
+        (mat.pointer & 0XFF0000) >> 16,
+        (mat.pointer & 0XFF00) >> 8,
+        (mat.pointer & 0XFF),
+      ]),
+      'len': 8,
+      'at': at ?? -1,
+      'interval': interval ?? 0,
+      'serial': serial,
+      'append': append ?? false,
+      'runOnce': runOnce ?? false,
     });
   }
 
@@ -488,6 +518,13 @@ class FvPipeline {
       'index': index,
       'serial': serial,
       'removeAt': removeAt,
+    });
+  }
+
+  Future<bool> isRunOnceFinished() async {
+    return await FlutterVision.channel.invokeMethod('pipelineIsRunOnceFinished', {
+      'index': index,
+      'serial': serial,
     });
   }
 }

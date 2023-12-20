@@ -1,14 +1,31 @@
+import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_vision/camera/camera.dart';
 import 'package:flutter_vision/camera/realsense.dart';
 import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
+import 'package:flutter_vision/opencv_mat.dart';
 import 'package:get/get.dart';
 
 class RealsenseController extends GetxController {
   RealsenseController();
+
+  Completer<bool> pipelineFinishedCompleter = Completer();
+  Future<dynamic> fvCallback(MethodCall call) async {
+    if (call.method == 'pipelineFinished') {
+      pipelineFinishedCompleter.complete(true);
+    }
+  }
+
+  @override
+  void onInit() {
+    FlutterVision.listen(fvCallback);
+    super.onInit();
+  }
 
   static const BUILDER_DEVICE_LIST = 'BUILDER_DEVICE_LIST';
   static const BUILDER_TEXTURE = 'BUILDER_TEXTURE';
@@ -214,7 +231,22 @@ class RealsenseController extends GetxController {
   }
 
   Future<void> test() async {
-    var data = await cam?.getDepthData(DepthType.RANGE, x: 320, y: 240, width: 30, height: 1);
-    print(data);
+    OpencvMat mat = await OpencvMat.create();
+    FvPipeline depthPipeline = cam!.depthPipeline;
+    await depthPipeline.copyTo(mat, at: 0, append: true, runOnce: true);
+
+    bool finished = false;
+    for (int i = 0; i < 10; i++) {
+      finished = await depthPipeline.isRunOnceFinished();
+      if (finished) break;
+      sleep(const Duration(milliseconds: 10));
+    }
+
+    if (finished) {
+      OpencvMatShape shape = await mat.shape();
+      print(shape.toString());
+    } else {
+      print('timeout');
+    }
   }
 }

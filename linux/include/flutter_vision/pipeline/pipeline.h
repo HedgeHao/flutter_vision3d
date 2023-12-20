@@ -258,6 +258,24 @@ void PipelineZeroDepthFilter(FvTexture *fv, std::vector<uint8_t> params, FlTextu
         } });
 }
 
+void PipelineCopyTo(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+{
+    uint64_t pointer =
+        (static_cast<uint64_t>(params[0]) << 56) +
+        (static_cast<uint64_t>(params[1]) << 48) +
+        (static_cast<uint64_t>(params[2]) << 40) +
+        (static_cast<uint64_t>(params[3]) << 32) +
+        (static_cast<uint64_t>(params[4]) << 24) +
+        (static_cast<uint64_t>(params[5]) << 16) +
+        (static_cast<uint64_t>(params[6]) << 8) +
+        static_cast<uint64_t>(params[7]);
+
+    std::uintptr_t p = pointer;
+    cv::Mat *mat = (cv::Mat *)p;
+    fv->cvImage.copyTo(*mat);
+    // std::cout << "[CopyTo]: " << pointer << "," << mat->cols << "," << mat->rows << "," << mat->channels() << std::endl;
+}
+
 const FuncDef pipelineFuncs[] = {
     {0, "test", 0, 0, PipelineFuncTest},
     {1, "cvtColor", 0, 0, PipelineFuncOpencvCvtColor},
@@ -277,6 +295,7 @@ const FuncDef pipelineFuncs[] = {
     {15, "cvThreshold", 0, 0, PipelineFuncOpencvThreshold},
     {16, "relu", 0, 0, PipelineFuncOpencvRelu},
     {17, "zeroDepthFilter", 0, 0, PipelineZeroDepthFilter},
+    {18, "PipelineCopyTo", 0, 0, PipelineCopyTo},
 };
 
 class Pipeline
@@ -300,6 +319,11 @@ public:
         FuncDef f = pipelineFuncs[index];
         f.interval = interval;
         f.runOnce = runOnce;
+
+        if (runOnce)
+        {
+            runOnceFinished = false;
+        }
 
         for (unsigned int i = 0; i < len; i++)
             f.params.push_back(*(params + i));
@@ -399,6 +423,11 @@ public:
             }
         }
 
+        if (!removeIndex.empty())
+        {
+            runOnceFinished = true;
+        }
+
         return 0;
     }
 
@@ -413,6 +442,17 @@ public:
         {
             funcs[i].timer = 0;
         }
+    }
+
+    bool checkRunOnceFinished()
+    {
+        if (runOnceFinished)
+        {
+            runOnceFinished = false;
+            return true;
+        }
+
+        return false;
     }
 
     std::string getPipelineInfo()
@@ -433,5 +473,7 @@ private:
     int64_t ts = 0;
     cv::Mat *imgPtr;
     cv::Mat img;
+
+    bool runOnceFinished = true;
 };
 #endif

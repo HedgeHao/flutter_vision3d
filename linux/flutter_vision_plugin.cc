@@ -65,6 +65,7 @@ struct _FlutterVisionPlugin
   std::vector<TFLiteModel *> models{};
   std::vector<Pipeline *> pipelines{};
   std::vector<std::shared_ptr<FvCamera>> cams{};
+  std::vector<cv::Mat *> cvMats{};
 
   uint16_t *emptyUint16List = {};
 };
@@ -265,7 +266,7 @@ static void flutter_vision_plugin_handle_method_call(
     const char *serial = FL_ARG_STRING(args, "serial");
     const int index = FL_ARG_INT(args, "index");
 
-    int64_t pointer = 0;
+    uint64_t pointer = 0;
     std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
     if (cam)
     {
@@ -661,6 +662,31 @@ static void flutter_vision_plugin_handle_method_call(
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_string(error.c_str())));
   }
+  else if (strcmp(method, "pipelineIsRunOnceFinished") == 0)
+  {
+    const char *serial = FL_ARG_STRING(args, "serial");
+    const int index = FL_ARG_INT(args, "index");
+
+    bool finished = false;
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
+    if (cam)
+    {
+      if (index == VideoIndex::RGB)
+      {
+        finished = cam->rgbTexture->pipeline->checkRunOnceFinished();
+      }
+      else if (index == VideoIndex::Depth)
+      {
+        finished = cam->depthTexture->pipeline->checkRunOnceFinished();
+      }
+      else if (index == VideoIndex::IR)
+      {
+        finished = cam->irTexture->pipeline->checkRunOnceFinished();
+      }
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(finished)));
+  }
   else if (strcmp(method, "fvCameraConfig") == 0)
   {
     const char *serial = FL_ARG_STRING(args, "serial");
@@ -726,6 +752,27 @@ static void flutter_vision_plugin_handle_method_call(
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(map));
   }
+  else if (strcmp(method, "cvCreateMat") == 0)
+  {
+    cv::Mat *mat = new cv::Mat();
+    self->cvMats.push_back(mat);
+
+    uint64_t pointer = reinterpret_cast<std::uintptr_t>(mat);
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(pointer)));
+  }
+  else if (strcmp(method, "cvGetShape") == 0)
+  {
+    uint64_t imagePointer = FL_ARG_INT(args, "imagePointer");
+    std::uintptr_t pointer = imagePointer;
+    cv::Mat *mat = (cv::Mat *)pointer;
+
+    FlValue *map = fl_value_new_map();
+    fl_value_set(map, fl_value_new_string("cols"), fl_value_new_int(mat->cols));
+    fl_value_set(map, fl_value_new_string("rows"), fl_value_new_int(mat->rows));
+    fl_value_set(map, fl_value_new_string("channels"), fl_value_new_int(mat->channels()));
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(map));
+  }
   else if (strcmp(method, "tfliteCreateModel") == 0)
   {
     const char *path = FL_ARG_STRING(args, "modelPath");
@@ -775,6 +822,7 @@ static void flutter_vision_plugin_handle_method_call(
     FlValue *result = fl_value_new_uint8_list(bytes, 4);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
   }
+
   else
   {
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
