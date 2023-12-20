@@ -25,7 +25,11 @@ class OpencvMat {
     return OpencvMatShape(cols: shape['cols'], rows: shape['rows'], channels: shape['channels']);
   }
 
-  Future<int> copyTo(int destPointer) async {
-    return await FlutterVision.channel.invokeMethod('cvCopyTo', {'imagePointerFrom': pointer, 'imagePointerTo': destPointer});
+  Future<int> copyTo(int matBPointer) async {
+    return await FlutterVision.channel.invokeMethod('cvCopyTo', {'imagePointerA': pointer, 'imagePointerB': matBPointer});
+  }
+
+  Future<int> subtract(int matBPointer, int matDest) async {
+    return await FlutterVision.channel.invokeMethod('cvSubtract', {'imagePointerA': pointer, 'imagePointerB': matBPointer, 'imagePointerDest': matDest});
   }
 }

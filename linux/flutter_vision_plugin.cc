@@ -775,15 +775,32 @@ static void flutter_vision_plugin_handle_method_call(
   }
   else if (strcmp(method, "cvCopyTo") == 0)
   {
-    uint64_t imagePointerFrom = FL_ARG_INT(args, "imagePointerFrom");
-    std::uintptr_t pointerFrom = imagePointerFrom;
-    cv::Mat *matFrom = (cv::Mat *)pointerFrom;
+    uint64_t imagePointerA = FL_ARG_INT(args, "imagePointerA");
+    std::uintptr_t pointerFromA = imagePointerA;
+    cv::Mat *matA = (cv::Mat *)pointerFromA;
 
-    uint64_t imagePointerTo = FL_ARG_INT(args, "imagePointerTo");
-    std::uintptr_t pointerTo = imagePointerTo;
-    cv::Mat *matTo = (cv::Mat *)pointerTo;
+    uint64_t imagePointerB = FL_ARG_INT(args, "imagePointerB");
+    std::uintptr_t pointerB = imagePointerB;
+    cv::Mat *matB = (cv::Mat *)pointerB;
 
-    matFrom->copyTo(*matTo);
+    matA->copyTo(*matB);
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(0)));
+  }
+  else if (strcmp(method, "cvSubtract") == 0)
+  {
+    uint64_t imagePointerA = FL_ARG_INT(args, "imagePointerA");
+    std::uintptr_t pointerFromA = imagePointerA;
+    cv::Mat *matA = (cv::Mat *)pointerFromA;
+
+    uint64_t imagePointerB = FL_ARG_INT(args, "imagePointerB");
+    std::uintptr_t pointerB = imagePointerB;
+    cv::Mat *matB = (cv::Mat *)pointerB;
+
+    uint64_t imagePointerDest = FL_ARG_INT(args, "imagePointerDest");
+    std::uintptr_t pointerDest = imagePointerDest;
+    cv::Mat *matDest = (cv::Mat *)pointerDest;
+
+    cv::subtract(*matA, *matB, *matDest);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(0)));
   }
   else if (strcmp(method, "tfliteCreateModel") == 0)
