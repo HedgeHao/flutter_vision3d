@@ -773,6 +773,19 @@ static void flutter_vision_plugin_handle_method_call(
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(map));
   }
+  else if (strcmp(method, "cvCopyTo") == 0)
+  {
+    uint64_t imagePointerFrom = FL_ARG_INT(args, "imagePointerFrom");
+    std::uintptr_t pointerFrom = imagePointerFrom;
+    cv::Mat *matFrom = (cv::Mat *)pointerFrom;
+
+    uint64_t imagePointerTo = FL_ARG_INT(args, "imagePointerTo");
+    std::uintptr_t pointerTo = imagePointerTo;
+    cv::Mat *matTo = (cv::Mat *)pointerTo;
+
+    matFrom->copyTo(*matTo);
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(0)));
+  }
   else if (strcmp(method, "tfliteCreateModel") == 0)
   {
     const char *path = FL_ARG_STRING(args, "modelPath");

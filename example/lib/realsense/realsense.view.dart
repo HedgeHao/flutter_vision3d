@@ -307,7 +307,30 @@ class RealsenseView extends GetView<RealsenseController> {
                   : const SizedBox(),
             ),
             TextButton(onPressed: () => controller.screenshot(), child: const Text('Screenshot')),
-            TextButton(onPressed: () => controller.test(), child: const Text('Test')),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                    decoration: BoxDecoration(border: Border.all(width: 1)),
+                    width: 270,
+                    height: 180,
+                    child: GetBuilder<RealsenseController>(
+                      id: RealsenseController.BUILDER_TEXTURE_PROCESS_CAM,
+                      builder: (controller) {
+                        return controller.cam == null
+                            ? const SizedBox()
+                            : Texture(
+                                textureId: controller.processTextureId,
+                              );
+                      },
+                    )),
+                Column(
+                  children: [
+                    TextButton(onPressed: () => controller.test(), child: const Text('Test')),
+                  ],
+                )
+              ],
+            ),
           ],
         ))
       ]),

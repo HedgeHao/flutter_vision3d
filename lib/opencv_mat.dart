@@ -24,4 +24,8 @@ class OpencvMat {
     var shape = await FlutterVision.channel.invokeMethod('cvGetShape', {'imagePointer': pointer});
     return OpencvMatShape(cols: shape['cols'], rows: shape['rows'], channels: shape['channels']);
   }
+
+  Future<int> copyTo(int destPointer) async {
+    return await FlutterVision.channel.invokeMethod('cvCopyTo', {'imagePointerFrom': pointer, 'imagePointerTo': destPointer});
+  }
 }

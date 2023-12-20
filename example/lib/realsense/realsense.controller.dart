@@ -6,35 +6,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vision/camera/camera.dart';
 import 'package:flutter_vision/camera/realsense.dart';
+import 'package:flutter_vision/camera/dummy.dart';
 import 'package:flutter_vision/constants.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:flutter_vision/opencv_mat.dart';
 import 'package:get/get.dart';
 
 class RealsenseController extends GetxController {
-  RealsenseController();
-
-  Completer<bool> pipelineFinishedCompleter = Completer();
-  Future<dynamic> fvCallback(MethodCall call) async {
-    if (call.method == 'pipelineFinished') {
-      pipelineFinishedCompleter.complete(true);
-    }
-  }
-
-  @override
-  void onInit() {
-    FlutterVision.listen(fvCallback);
-    super.onInit();
-  }
-
   static const BUILDER_DEVICE_LIST = 'BUILDER_DEVICE_LIST';
   static const BUILDER_TEXTURE = 'BUILDER_TEXTURE';
   static const BUILDER_TEXTURE_OPENGL = 'BUILDER_TEXTURE_OPENGL';
   static const BUILDER_SLIDER = 'BUILDER_SLIDER';
   static const BUILDER_RELU_SLIDER = 'BUILDER_RELU_SLIDER';
   static const BUILDER_DEPTH_FILTER = 'BUILDER_DEPTH_FILTER';
+  static const BUILDER_TEXTURE_PROCESS_CAM = 'BUILDER_TEXTURE_PROCESS_CAM';
+
+  int processTextureId = 0;
+  RealsenseController() {
+    FvCamera.create("process", CameraType.DUMMY).then((c) async {
+      processCam = c as DummyCamera;
+      processTextureId = processCam!.rgbTextureId;
+      update([BUILDER_TEXTURE_PROCESS_CAM]);
+    });
+  }
 
   RealsenseCamera? cam;
+  DummyCamera? processCam;
   String currentModeRGB = '';
   String currentModeDepth = '';
   String currentModeIR = '';
@@ -233,7 +230,7 @@ class RealsenseController extends GetxController {
   Future<void> test() async {
     OpencvMat mat = await OpencvMat.create();
     FvPipeline depthPipeline = cam!.depthPipeline;
-    await depthPipeline.copyTo(mat, at: 0, append: true, runOnce: true);
+    await depthPipeline.copyTo(mat, at: 2, append: true, runOnce: true);
 
     bool finished = false;
     for (int i = 0; i < 10; i++) {
@@ -245,6 +242,16 @@ class RealsenseController extends GetxController {
     if (finished) {
       OpencvMatShape shape = await mat.shape();
       print(shape.toString());
+
+      int pointer = await processCam!.getOpenCVMat(StreamIndex.RGB);
+      await mat.copyTo(pointer);
+
+      FvPipeline processPipeline = processCam!.rgbPipeline;
+      await processPipeline.clear();
+      await processPipeline.applyColorMap(OpenCV.COLORMAP_JET);
+      await processPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+      await processPipeline.show();
+      await processPipeline.run();
     } else {
       print('timeout');
     }
