@@ -192,6 +192,17 @@ class RealsenseView extends GetView<RealsenseController> {
                 ),
                 Row(
                   children: [
+                    const Text('Depth Zero Filter'),
+                    GetBuilder<RealsenseController>(
+                        id: RealsenseController.BUILDER_DEPTH_FILTER,
+                        builder: (controller) => Switch(
+                              value: controller.depthFilter,
+                              onChanged: (value) => controller.enableDepthFilter(value),
+                            ))
+                  ],
+                ),
+                Row(
+                  children: [
                     const Text('PointCloud:'),
                     GetBuilder<RealsenseController>(
                         id: RealsenseController.BUILDER_TEXTURE_OPENGL,
@@ -217,6 +228,19 @@ class RealsenseView extends GetView<RealsenseController> {
                     Row(children: [const Text('cy:'), const SizedBox(width: 8), Text(controller.cy.toStringAsFixed(6))]),
                   ]),
                 ),
+                Row(
+                  children: [
+                    const Text('Current Modes:'),
+                    TextButton(
+                        onPressed: () {
+                          controller.getCurrentVideoMode();
+                        },
+                        child: const Text('Update')),
+                  ],
+                ),
+                Row(children: [const Text('RGB:'), GetBuilder<RealsenseController>(builder: (controller) => Text(controller.currentModeRGB))]),
+                Row(children: [const Text('Depth:'), GetBuilder<RealsenseController>(builder: (controller) => Text(controller.currentModeDepth))]),
+                Row(children: [const Text('IR:'), GetBuilder<RealsenseController>(builder: (controller) => Text(controller.currentModeIR))]),
               ],
             )),
         Expanded(
@@ -281,7 +305,38 @@ class RealsenseView extends GetView<RealsenseController> {
                       quarterTurns: 2,
                     )
                   : const SizedBox(),
-            )
+            ),
+            TextButton(onPressed: () => controller.screenshot(), child: const Text('Screenshot')),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                    decoration: BoxDecoration(border: Border.all(width: 1)),
+                    width: 270,
+                    height: 180,
+                    child: GetBuilder<RealsenseController>(
+                      id: RealsenseController.BUILDER_TEXTURE_PROCESS_CAM,
+                      builder: (controller) {
+                        return controller.cam == null
+                            ? const SizedBox()
+                            : Texture(
+                                textureId: controller.processTextureId,
+                              );
+                      },
+                    )),
+                Column(
+                  children: [
+                    TextButton(onPressed: () => controller.setDepthBaseline(), child: const Text('Baseline')),
+                    TextButton(onPressed: () => controller.volumeMetric(), child: const Text('Volume Metric')),
+                    Row(children: [
+                      const Text('Volume:'),
+                      GetBuilder<RealsenseController>(id: RealsenseController.BUILDER_VOLUME, builder: (controller) => Text(controller.volume)),
+                      const Text(' %'),
+                    ]),
+                  ],
+                )
+              ],
+            ),
           ],
         ))
       ]),

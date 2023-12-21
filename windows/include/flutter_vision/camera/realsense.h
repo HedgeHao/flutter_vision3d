@@ -238,7 +238,37 @@ public:
   bool enableImageRegistration(bool enable) { return true; }
 
   void getAvailableVideoModes(int index, std::vector<std::string> &rModes) {}
-  void getCurrentVideoMode(int index, std::string &mode) {}
+
+  void getCurrentVideoMode(int index, std::string &mode)
+  {
+    rs2::pipeline_profile profile = pipeline->get_active_profile();
+    rs2::stream_profile streamProfile;
+    if (index == VideoIndex::RGB)
+    {
+      streamProfile = profile.get_stream(RS2_STREAM_COLOR);
+    }
+    else if (index == VideoIndex::Depth)
+    {
+      streamProfile = profile.get_stream(RS2_STREAM_DEPTH);
+    }
+    else if (index == VideoIndex::IR)
+    {
+      streamProfile = profile.get_stream(RS2_STREAM_INFRARED);
+    }
+
+    std::stringstream ss;
+    ss << streamProfile.as<rs2::video_stream_profile>().width();
+    ss << ",";
+    ss << streamProfile.as<rs2::video_stream_profile>().height();
+    ss << ",";
+    ss << streamProfile.fps();
+    ss << ",";
+    ss << streamProfile.format();
+
+    mode.clear();
+    ss >> mode;
+  }
+
   bool setVideoMode(int index, int mode) { return true; }
 
   bool getSerialNumber(std::string &sn)
@@ -259,6 +289,14 @@ private:
   void _readVideoFeed()
   {
     int64_t now;
+
+    if (videoStart)
+    {
+      rs2::frameset frames = pipeline->wait_for_frames(timeout);
+      depthWidth = frames.get_depth_frame().get_width();
+      depthHeight = frames.get_depth_frame().get_height();
+    }
+
     while (videoStart)
     {
       if (pauseStream)
@@ -301,6 +339,8 @@ private:
           frame_to_mat(depthFrame, depthTexture->cvImage);
           depthTexture->pipeline->run(depthTexture->cvImage, flRegistrar, depthTexture->textureId, depthTexture->videoWidth, depthTexture->videoHeight, depthTexture->buffer, models, flChannel);
           depthTexture->setPixelBuffer();
+
+          depthData = (uint16_t *)(depthFrame.get_data());
         }
 
         if (isIrEnable && irFrame)

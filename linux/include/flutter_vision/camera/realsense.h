@@ -84,6 +84,9 @@ public:
   {
     pipeline = new rs2::pipeline(ctx);
     cfg = rs2::config();
+    cfg.enable_stream(RS2_STREAM_COLOR, 1280, 720, RS2_FORMAT_BGR8, 30);
+    cfg.enable_stream(RS2_STREAM_DEPTH, 1280, 720, RS2_FORMAT_Z16, 30);
+    cfg.enable_stream(RS2_STREAM_INFRARED);
     cfg.enable_device(serial);
 
     return 0;
@@ -248,16 +251,48 @@ public:
       }
     }
 
-    return 01;
+    return 0;
   }
 
   int getConfiguration(int prop) { return 0; }
 
-  // TODO: Not Implement
-  bool enableImageRegistration(bool enable) { return true; }
+  bool enableImageRegistration(bool enable)
+  {
+    std::vector<float> param = {enable ? 1.0f : 0.0f};
+    configure(RsConfiguration::FRAME_SYNC_COLOR_FILTER, param);
+    return true;
+  }
 
   void getAvailableVideoModes(int index, std::vector<std::string> &rModes) {}
-  void getCurrentVideoMode(int index, std::string &mode) {}
+  void getCurrentVideoMode(int index, std::string &mode)
+  {
+    rs2::pipeline_profile profile = pipeline->get_active_profile();
+    rs2::stream_profile streamProfile;
+    if (index == VideoIndex::RGB)
+    {
+      streamProfile = profile.get_stream(RS2_STREAM_COLOR);
+    }
+    else if (index == VideoIndex::Depth)
+    {
+      streamProfile = profile.get_stream(RS2_STREAM_DEPTH);
+    }
+    else if (index == VideoIndex::IR)
+    {
+      streamProfile = profile.get_stream(RS2_STREAM_INFRARED);
+    }
+
+    std::stringstream ss;
+    ss << streamProfile.as<rs2::video_stream_profile>().width();
+    ss << ",";
+    ss << streamProfile.as<rs2::video_stream_profile>().height();
+    ss << ",";
+    ss << streamProfile.fps();
+    ss << ",";
+    ss << streamProfile.format();
+
+    mode.clear();
+    ss >> mode;
+  }
   bool setVideoMode(int index, int mode) { return true; }
 
   bool getSerialNumber(std::string &sn)
@@ -283,6 +318,14 @@ private:
   int _readVideoFeed()
   {
     int64_t now;
+
+    if (videoStart)
+    {
+      rs2::frameset frames = pipeline->wait_for_frames(timeout);
+      depthWidth = frames.get_depth_frame().get_width();
+      depthHeight = frames.get_depth_frame().get_height();
+    }
+
     while (videoStart)
     {
       if (pauseStream)
@@ -305,8 +348,7 @@ private:
         {
           for (RsFilter f : filters)
           {
-
-            frames = f.filter->as<rs2::threshold_filter>().process(frames);
+            frames = f.filter->process(frames);
           }
         }
 
@@ -317,19 +359,21 @@ private:
         if (isRgbEnable && rgbFrame)
         {
           rgbTexture->cvImage = frame_to_mat(rgbFrame);
-          rgbTexture->pipeline->run(rgbTexture->cvImage, *flRegistrar, *FL_TEXTURE(rgbTexture), rgbTexture->video_width, rgbTexture->video_height, rgbTexture->buffer, models, flChannel);
+          rgbTexture->pipeline->run(rgbTexture, *flRegistrar, models, flChannel);
         }
 
         if (isDepthEnable && depthFrame)
         {
           depthTexture->cvImage = frame_to_mat(depthFrame);
-          depthTexture->pipeline->run(depthTexture->cvImage, *flRegistrar, *FL_TEXTURE(depthTexture), depthTexture->video_width, depthTexture->video_height, depthTexture->buffer, models, flChannel);
+          depthTexture->pipeline->run(depthTexture, *flRegistrar, models, flChannel);
+
+          depthData = (uint16_t *)(depthFrame.get_data());
         }
 
         if (isIrEnable && irFrame)
         {
           irTexture->cvImage = frame_to_mat(irFrame);
-          irTexture->pipeline->run(irTexture->cvImage, *flRegistrar, *FL_TEXTURE(irTexture), irTexture->video_width, irTexture->video_height, irTexture->buffer, models, flChannel);
+          irTexture->pipeline->run(irTexture, *flRegistrar, models, flChannel);
         }
 
         if (enablePointCloud)

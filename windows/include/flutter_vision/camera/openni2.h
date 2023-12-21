@@ -489,6 +489,10 @@ private:
         if (!(videoStart))
             return;
 
+        auto m = vsDepth.getVideoMode();
+        depthWidth = m.getResolutionX();
+        depthHeight = m.getResolutionY();
+
         while (videoStart)
         {
             if (pauseStream)
@@ -519,6 +523,8 @@ private:
                     depthTexture->pipeline->run(depthTexture->cvImage, flRegistrar, depthTexture->textureId, depthTexture->videoWidth, depthTexture->videoHeight, depthTexture->buffer, models, flChannel);
                     depthTexture->setPixelBuffer();
                     depthNewFrame = true;
+
+                    depthData = (uint16_t *)depthFrame.getData();
                 }
             }
 

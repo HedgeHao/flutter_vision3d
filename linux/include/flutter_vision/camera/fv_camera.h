@@ -34,6 +34,9 @@ public:
   int type;
   bool videoFeedProcessing = false;
 
+  uint16_t *depthData = new uint16_t[1280 * 720];
+  int depthWidth = 0, depthHeight = 0;
+
   FvCamera() {}
 
   FvCamera(const char *s)
@@ -154,6 +157,11 @@ public:
       }
     }
   }
+
+  uint16_t *getDepthData()
+  {
+    return depthData;
+  };
 
   virtual int camInit() = 0;
   virtual int openDevice() = 0;

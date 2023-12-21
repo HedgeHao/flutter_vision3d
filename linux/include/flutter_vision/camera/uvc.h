@@ -104,7 +104,7 @@ private:
 
       if (newFrame)
       {
-        rgbTexture->pipeline->run(rgbTexture->cvImage, *flRegistrar, *FL_TEXTURE(rgbTexture), rgbTexture->video_width, rgbTexture->video_height, rgbTexture->buffer, models, flChannel);
+        rgbTexture->pipeline->run(rgbTexture, *flRegistrar, models, flChannel);
         fl_method_channel_invoke_method(flChannel, "onUvcFrame", nullptr, nullptr, nullptr, NULL);
       }
     }

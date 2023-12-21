@@ -7,6 +7,8 @@ import 'package:flutter_vision/camera/ros_camera.dart';
 import 'package:flutter_vision/camera/uvc.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 
+enum DepthType { ALL, AT, RANGE }
+
 class FvCamera {
   late final CameraType cameraType;
 
@@ -113,7 +115,8 @@ class FvCamera {
   }
 
   Future<bool> enableRegistration(bool enable) async {
-    return await FlutterVision.channel.invokeMethod('fvEnableRegistration', {'enable': enable, 'serial': serial});
+    int ret = await FlutterVision.channel.invokeMethod('fvEnableRegistration', {'enable': enable, 'serial': serial});
+    return ret == 0;
   }
 
   Future<bool> pauseStream(bool pause) async {
@@ -139,6 +142,19 @@ class FvCamera {
 
   Future<void> loadPresetParameter(String path) async {
     return await FlutterVision.channel.invokeMethod('rsLoadPresetParameters', {'serial': serial, 'path': path});
+  }
+
+  Future<List<int>> getDepthData(DepthType depthType, {int? x, int? y, int? width, int? height}) async {
+    if (depthType == DepthType.AT && (x == null || y == null)) {
+      throw Exception("coordinate not provide");
+    } else if (depthType == DepthType.RANGE && (x == null || y == null || width == null || height == null)) {
+      throw Exception("roi not provide");
+    }
+
+    List<Object?> data = await FlutterVision.channel.invokeMethod('fvGetDepthData', {'serial': serial, 'index': depthType.index, 'x': x, 'y': y, 'roi_width': width, 'roi_height': height});
+    List<int> rData = data.map((e) => e as int).toList();
+
+    return rData;
   }
 
   Future<void> test(int rgbPointer, int depthPointer, int irPointer) async {}

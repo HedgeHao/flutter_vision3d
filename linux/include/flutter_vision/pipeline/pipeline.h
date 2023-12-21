@@ -8,6 +8,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include "../fv_texture.h"
 
 #include <sys/time.h>
 void getCurrentTime(int64_t *timer)
@@ -30,19 +31,20 @@ struct FuncDef
     int interval = 0;
     int64_t timer = 0;
     // TODO: function parameter definition should be relaxable
-    void (*func)(cv::Mat &, std::vector<uint8_t> params, FlTextureRegistrar &, FlTexture &, int32_t &, int32_t &, std::vector<uint8_t> &, std::vector<TFLiteModel *> *, FlMethodChannel *);
+    void (*func)(FvTexture *, std::vector<uint8_t> params, FlTextureRegistrar &, std::vector<TFLiteModel *> *, FlMethodChannel *);
     std::vector<uint8_t> params = {};
+    bool runOnce = false;
 };
 
-void PipelineFuncTest(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+void PipelineFuncTest(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
     printf("[Pipeline:Test()] %d\n", params[0]);
 }
 
-void PipelineFuncOpencvCvtColor(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+void PipelineFuncOpencvCvtColor(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
     // printf("PipelineFuncOpencvCvtColor:%d\n", params[0]);
-    cv::cvtColor(img, img, params[0]);
+    cv::cvtColor(fv->cvImage, fv->cvImage, params[0]);
 }
 
 /**
@@ -50,7 +52,7 @@ void PipelineFuncOpencvCvtColor(cv::Mat &img, std::vector<uint8_t> params, FlTex
  *
  * @param params first byte is length of file path string
  */
-void PipelineFuncOpencvImwrite(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+void PipelineFuncOpencvImwrite(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
     std::string path;
     std::stringstream ss;
@@ -58,10 +60,10 @@ void PipelineFuncOpencvImwrite(cv::Mat &img, std::vector<uint8_t> params, FlText
         ss << params[i];
     ss >> path;
 
-    cv::imwrite(path.c_str(), img);
+    cv::imwrite(path.c_str(), fv->cvImage);
 }
 
-void PipelineFuncOpencvImread(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+void PipelineFuncOpencvImread(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
     std::string path;
     std::stringstream ss;
@@ -69,18 +71,18 @@ void PipelineFuncOpencvImread(cv::Mat &img, std::vector<uint8_t> params, FlTextu
         ss << params[i];
     ss >> path;
 
-    img = cv::imread(path.c_str());
+    fv->cvImage = cv::imread(path.c_str());
 }
 
-void PipelineFuncShow(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+void PipelineFuncShow(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
-    // printf("PipelineFuncShow: %d, %d\n", img.cols, img.rows);
-    texture_width = img.cols;
-    texture_height = img.rows;
-    pixelBuf.clear();
-    pixelBuf.resize(texture_width * texture_height * 4);
-    pixelBuf.assign(img.data, img.data + img.total() * img.channels());
-    fl_texture_registrar_mark_texture_frame_available(&registrar, FL_TEXTURE(&texture));
+    // printf("PipelineFuncShow: %d, %d\n", fv->cvImage.cols, fv->cvImage.rows);
+    fv->video_width = fv->cvImage.cols;
+    fv->video_height = fv->cvImage.rows;
+    fv->buffer.clear();
+    fv->buffer.resize(fv->video_width * fv->video_height * 4);
+    fv->buffer.assign(fv->cvImage.data, fv->cvImage.data + fv->cvImage.total() * fv->cvImage.channels());
+    fl_texture_registrar_mark_texture_frame_available(&registrar, FL_TEXTURE(fv));
 }
 
 /**
@@ -88,17 +90,17 @@ void PipelineFuncShow(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegist
  *
  * @param params 0: convert type, 1~4: alpha (double)
  */
-void PipelineFuncOpencvConvertTo(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+void PipelineFuncOpencvConvertTo(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
     // printf("ConvertTo:Param:%d\n", params[0]);
     float scale = *reinterpret_cast<float *>(&params[1]);
     float shift = *reinterpret_cast<float *>(&params[5]);
-    img.convertTo(img, params[0], scale, shift);
+    fv->cvImage.convertTo(fv->cvImage, params[0], scale, shift);
 }
 
-void PipelineFuncOpencvApplyColorMap(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+void PipelineFuncOpencvApplyColorMap(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
-    cv::applyColorMap(img, img, params[0]);
+    cv::applyColorMap(fv->cvImage, fv->cvImage, params[0]);
 }
 
 /**
@@ -106,12 +108,12 @@ void PipelineFuncOpencvApplyColorMap(cv::Mat &img, std::vector<uint8_t> params, 
  *
  * @param params [0-1]: width, [2-3]: height [4]: mode
  */
-void PipelineFuncOpencvResize(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+void PipelineFuncOpencvResize(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
     int width = (params[0] << 8) + params[1];
     int height = (params[2] << 8) + params[3];
 
-    cv::resize(img, img, cv::Size(width, height), params[4]);
+    cv::resize(fv->cvImage, fv->cvImage, cv::Size(width, height), params[4]);
 }
 
 /**
@@ -119,18 +121,18 @@ void PipelineFuncOpencvResize(cv::Mat &img, std::vector<uint8_t> params, FlTextu
  *
  * @param params x, y, width, height: each contains 2 bytes
  */
-void PipelineFuncCrop(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+void PipelineFuncCrop(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
     // TODO: Check ROI is valid
     int xStart = (params[0] << 8) + params[1];
     int xEnd = (params[2] << 8) + params[3];
     int yStart = (params[4] << 8) + params[5];
     int yEnd = (params[6] << 8) + params[7];
-    img = img(cv::Range(yStart, yEnd), cv::Range(xStart, xEnd));
-    // printf("Crop: %d, %d, %d\n", img.cols, img.rows, img.channels());
+    fv->cvImage = fv->cvImage(cv::Range(yStart, yEnd), cv::Range(xStart, xEnd));
+    // printf("Crop: %d, %d, %d\n", fv->cvImage.cols, fv->cvImage.rows, fv->cvImage.channels());
 }
 
-void PipelineFuncOpencvRectangle(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+void PipelineFuncOpencvRectangle(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
     float x1 = *reinterpret_cast<float *>(&params[0]);
     float y1 = *reinterpret_cast<float *>(&params[4]);
@@ -143,23 +145,23 @@ void PipelineFuncOpencvRectangle(cv::Mat &img, std::vector<uint8_t> params, FlTe
     uint8_t thickness = params[20];
     uint8_t lineType = params[21];
     uint8_t shift = params[22];
-    cv::rectangle(img, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(b, g, r, alpha), thickness, lineType, shift);
+    cv::rectangle(fv->cvImage, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(b, g, r, alpha), thickness, lineType, shift);
 }
 
-void PipelineFuncOpencvRotate(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+void PipelineFuncOpencvRotate(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
-    cv::rotate(img, img, params[0]);
+    cv::rotate(fv->cvImage, fv->cvImage, params[0]);
 }
 
-void PipelineFuncTfSetInputTensor(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+void PipelineFuncTfSetInputTensor(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
     if (params[2] == 0)
-        models->at(params[0])->setInput<uint8_t>(params[1], img, img.cols * img.rows * img.channels());
+        models->at(params[0])->setInput<uint8_t>(params[1], fv->cvImage, fv->cvImage.cols * fv->cvImage.rows * fv->cvImage.channels());
     else if (params[2] == 1)
-        models->at(params[0])->setInput<float>(params[1], img, img.cols * img.rows * img.channels());
+        models->at(params[0])->setInput<float>(params[1], fv->cvImage, fv->cvImage.cols * fv->cvImage.rows * fv->cvImage.channels());
 }
 
-void PipelineFuncTfInference(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+void PipelineFuncTfInference(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
     bool success = models->at(params[0])->inference();
     if (!success)
@@ -171,48 +173,107 @@ void PipelineFuncTfInference(cv::Mat &img, std::vector<uint8_t> params, FlTextur
     fl_method_channel_invoke_method(flChannel, "onInference", nullptr, nullptr, nullptr, NULL);
 }
 
-void PipelineFuncCustomHandler(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+void PipelineFuncCustomHandler(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
     int size = (params[0] << 8) + params[1];
     float *result = new float[size]{0};
-    flutterVisionHandler(img, result);
+    flutterVisionHandler(fv->cvImage, result);
     fl_method_channel_invoke_method(flChannel, "onHandled", fl_value_new_float32_list(result, size), nullptr, nullptr, NULL);
 }
 
-void PipelineFuncOpencvNormalize(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+void PipelineFuncOpencvNormalize(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
     float alpha = *reinterpret_cast<float *>(&params[0]);
     float beta = *reinterpret_cast<float *>(&params[4]);
     uint8_t normType = params[8];
     uint8_t dType = params[9];
 
-    cv::normalize(img, img, alpha, beta, normType, dType);
+    cv::normalize(fv->cvImage, fv->cvImage, alpha, beta, normType, dType);
 }
 
-void PipelineFuncOpencvThreshold(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+void PipelineFuncOpencvThreshold(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
     float threshold = *reinterpret_cast<float *>(&params[0]);
     float max = *reinterpret_cast<float *>(&params[4]);
     uint8_t type = params[8];
 
-    cv::threshold(img, img, threshold, max, type);
+    cv::threshold(fv->cvImage, fv->cvImage, threshold, max, type);
 }
 
-void PipelineFuncOpencvRelu(cv::Mat &img, std::vector<uint8_t> params, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+void PipelineFuncOpencvRelu(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
 {
     float threshold = *reinterpret_cast<float *>(&params[0]);
     uchar thresholdValueUchar = static_cast<uchar>(threshold * 255.0);
     uchar *p;
-    for (int i = 0; i < img.rows; ++i)
+    for (int i = 0; i < fv->cvImage.rows; ++i)
     {
-        p = img.ptr<uchar>(i);
-        for (int j = 0; j < img.cols; ++j)
+        p = fv->cvImage.ptr<uchar>(i);
+        for (int j = 0; j < fv->cvImage.cols; ++j)
         {
-            if(p[j] < thresholdValueUchar){
+            if (p[j] < thresholdValueUchar)
+            {
                 p[j] = 0;
             }
         }
     }
+}
+
+void PipelineZeroDepthFilter(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+{
+    cv::Mat temp;
+    fv->cvImage.copyTo(temp);
+
+    int threshold = params[0];
+    int halfRange = params[1];
+
+    cv::parallel_for_(cv::Range(halfRange, fv->cvImage.rows - halfRange), [&](const cv::Range &rowRange)
+                      {
+        for (int i = rowRange.start; i < rowRange.end; ++i)
+        {
+            for (int j = halfRange; j < fv->cvImage.cols - halfRange; ++j)
+            {
+                if (fv->cvImage.at<uchar>(i, j) <= threshold)
+                {
+                    int sum = 0;
+                    int count = 0;
+
+                    for (int x = -halfRange; x <= halfRange; ++x)
+                    {
+                        for (int y = -halfRange; y <= halfRange; ++y)
+                        {
+                            if (temp.at<uchar>(i + x, j + y) != 0)
+                            {
+                                sum += temp.at<uchar>(i + x, j + y);
+                                ++count;
+                            }
+                        }
+                    }
+
+                    if (count > 0)
+                    {
+                        fv->cvImage.at<uchar>(i, j) = sum / count;
+                    }
+                }
+            }
+        } });
+}
+
+void PipelineCopyTo(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+{
+    uint64_t pointer =
+        (static_cast<uint64_t>(params[0]) << 56) +
+        (static_cast<uint64_t>(params[1]) << 48) +
+        (static_cast<uint64_t>(params[2]) << 40) +
+        (static_cast<uint64_t>(params[3]) << 32) +
+        (static_cast<uint64_t>(params[4]) << 24) +
+        (static_cast<uint64_t>(params[5]) << 16) +
+        (static_cast<uint64_t>(params[6]) << 8) +
+        static_cast<uint64_t>(params[7]);
+
+    std::uintptr_t p = pointer;
+    cv::Mat *mat = (cv::Mat *)p;
+    fv->cvImage.copyTo(*mat);
+    // std::cout << "[CopyTo]: " << pointer << "," << mat->cols << "," << mat->rows << "," << mat->channels() << std::endl;
 }
 
 const FuncDef pipelineFuncs[] = {
@@ -232,7 +293,10 @@ const FuncDef pipelineFuncs[] = {
     {13, "customHandler", 0, 0, PipelineFuncCustomHandler},
     {14, "cvNormalized", 0, 0, PipelineFuncOpencvNormalize},
     {15, "cvThreshold", 0, 0, PipelineFuncOpencvThreshold},
-    {16, "relu", 0, 0, PipelineFuncOpencvRelu}};
+    {16, "relu", 0, 0, PipelineFuncOpencvRelu},
+    {17, "zeroDepthFilter", 0, 0, PipelineZeroDepthFilter},
+    {18, "PipelineCopyTo", 0, 0, PipelineCopyTo},
+};
 
 class Pipeline
 {
@@ -250,10 +314,16 @@ public:
         imgPtr = m;
     }
 
-    void add(unsigned int index, const uint8_t *params, unsigned int len, int insertAt = -1, int interval = 0, bool append = false)
+    void add(unsigned int index, const uint8_t *params, unsigned int len, int insertAt = -1, int interval = 0, bool append = false, bool runOnce = false)
     {
         FuncDef f = pipelineFuncs[index];
         f.interval = interval;
+        f.runOnce = runOnce;
+
+        if (runOnce)
+        {
+            runOnceFinished = false;
+        }
 
         for (unsigned int i = 0; i < len; i++)
             f.params.push_back(*(params + i));
@@ -282,7 +352,13 @@ public:
         }
     }
 
-    int runOnce(FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel, int &from, int &to)
+    int removeAt(unsigned int index)
+    {
+        funcs.erase(funcs.begin() + index);
+        return 0;
+    }
+
+    int runOnce(FvTexture *fv, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel, int &from, int &to)
     {
         if (to == -1 || to >= funcs.size())
             to = funcs.size();
@@ -293,7 +369,7 @@ public:
             try
             {
                 error = "";
-                funcs[i].func(img, funcs[i].params, registrar, texture, texture_width, texture_height, pixelBuf, models, flChannel);
+                funcs[i].func(fv, funcs[i].params, registrar, models, flChannel);
             }
             catch (std::exception &e)
             {
@@ -305,25 +381,10 @@ public:
         return 0;
     }
 
-    int run(cv::Mat &img, FlTextureRegistrar &registrar, FlTexture &texture, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+    int run(FvTexture *fv, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
     {
-        if (doScreenshot)
-        {
-            if (!img.empty())
-            {
-                if (screenshotCvtColor > 0)
-                {
-                    cv::Mat temp;
-                    cv::cvtColor(img, temp, screenshotCvtColor);
-                    cv::imwrite(screenshotSavePath.c_str(), temp);
-                }
-                else
-                {
-                    cv::imwrite(screenshotSavePath.c_str(), img);
-                }
-            }
-            doScreenshot = false;
-        }
+        std::vector<size_t> removeIndex = {};
+
         for (int i = 0; i < funcs.size(); i++)
         {
             if (funcs[i].interval > 0)
@@ -338,7 +399,9 @@ public:
             try
             {
                 // printf("[Run] %s\n", funcs[i].name);
-                funcs[i].func(img, funcs[i].params, registrar, texture, texture_width, texture_height, pixelBuf, models, flChannel);
+                funcs[i].func(fv, funcs[i].params, registrar, models, flChannel);
+                if (funcs[i].runOnce)
+                    removeIndex.push_back(i);
             }
             catch (std::exception &e)
             {
@@ -352,14 +415,20 @@ public:
             }
         }
 
-        return 0;
-    }
+        for (size_t index : removeIndex)
+        {
+            if (index < funcs.size())
+            {
+                funcs.erase(funcs.begin() + index);
+            }
+        }
 
-    void screenshot(const char *filePath, int convert = -1)
-    {
-        doScreenshot = true;
-        screenshotSavePath = std::string(filePath);
-        screenshotCvtColor = convert;
+        if (!removeIndex.empty())
+        {
+            runOnceFinished = true;
+        }
+
+        return 0;
     }
 
     void clear()
@@ -373,6 +442,17 @@ public:
         {
             funcs[i].timer = 0;
         }
+    }
+
+    bool checkRunOnceFinished()
+    {
+        if (runOnceFinished)
+        {
+            runOnceFinished = false;
+            return true;
+        }
+
+        return false;
     }
 
     std::string getPipelineInfo()
@@ -391,10 +471,9 @@ public:
 private:
     std::vector<FuncDef> funcs = {};
     int64_t ts = 0;
-    bool doScreenshot = false;
-    std::string screenshotSavePath;
-    int screenshotCvtColor = -1;
     cv::Mat *imgPtr;
     cv::Mat img;
+
+    bool runOnceFinished = true;
 };
 #endif

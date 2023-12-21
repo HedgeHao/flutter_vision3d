@@ -103,13 +103,6 @@ class OpenNIController extends GetxController {
     update([BUILDER_TEXTURE]);
   }
 
-  void test() async {
-    FvPipeline irPipeline = cam!.irPipeline;
-    await irPipeline.threshold(170, 255, type: OpenCV.THRESH_TOZERO, at: 1, append: false);
-    await irPipeline.normalize(127, 255, normType: OpenCV.NORM_MINMAX, at: 2, append: false);
-    print(await irPipeline.info());
-  }
-
   void selectDevice(int selectIndex) {
     selectedNiDevice = deviceList[selectIndex];
   }
@@ -201,5 +194,10 @@ class OpenNIController extends GetxController {
 
   Future<void> videoPause(bool pause) async {
     await cam?.pauseStream(pause);
+  }
+
+  Future<void> test() async {
+    var data = await cam?.getDepthData(DepthType.AT, x:320,y:200);
+    print(data?[0]);
   }
 }
