@@ -218,15 +218,6 @@ class Pipeline
 public:
     std::string error = "";
 
-    Pipeline()
-    {
-    }
-
-    Pipeline(cv::Mat *m)
-    {
-        imgPtr = m;
-    }
-
     void add(unsigned int index, const std::vector<uint8_t> &params, unsigned int len, int insertAt = -1, int interval = 0, bool append = false, bool runOnce = false)
     {
         FuncDef f = pipelineFuncs[index];
@@ -257,6 +248,12 @@ public:
             else
                 funcs.at(insertAt) = f;
         }
+    }
+
+    int removeAt(unsigned int index)
+    {
+        funcs.erase(funcs.begin() + index);
+        return 0;
     }
 
     int runOnce(std::unique_ptr<FvTexture> &fv, flutter::TextureRegistrar *registrar, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel, int from = 0, int to = -1)
@@ -355,6 +352,17 @@ public:
         funcs.clear();
     }
 
+    bool checkRunOnceFinished()
+    {
+        if (runOnceFinished)
+        {
+            runOnceFinished = false;
+            return true;
+        }
+
+        return false;
+    }
+
     std::string getPipelineInfo()
     {
         std::string info;
@@ -374,6 +382,6 @@ private:
     bool doScreenshot = false;
     std::string screenshotSavePath;
     int screenshotCvtColor = -1;
-    cv::Mat *imgPtr;
+    bool runOnceFinished = true;
 };
 #endif

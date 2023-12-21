@@ -579,6 +579,37 @@ namespace
 
       result->Success(flutter::EncodableValue(nullptr));
     }
+    else if (method_call.method_name().compare("pipelineRemoveAt") == 0)
+    {
+      std::string serial;
+      parseDartArgument<std::string>(arguments, "serial", &serial);
+
+      int index = -1;
+      parseDartArgument<int>(arguments, "index", &index);
+
+      int removeAt = 0;
+      parseDartArgument<int>(arguments, "removeAt", &removeAt);
+
+      int ret = 0;
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      if (cam)
+      {
+        if (index == VideoIndex::RGB)
+        {
+          ret = cam->rgbTexture->pipeline->removeAt(removeAt);
+        }
+        else if (index == VideoIndex::Depth)
+        {
+          ret = cam->depthTexture->pipeline->removeAt(removeAt);
+        }
+        else if (index == VideoIndex::IR)
+        {
+          ret = cam->irTexture->pipeline->removeAt(removeAt);
+        }
+      }
+
+      result->Success(flutter::EncodableValue(ret));
+    }
     else if (method_call.method_name().compare("pipelineRun") == 0)
     {
       int index = -1;
@@ -615,6 +646,34 @@ namespace
       }
 
       result->Success(flutter::EncodableValue(ret));
+    }
+    else if (method_call.method_name().compare("pipelineIsRunOnceFinished") == 0)
+    {
+      int index = -1;
+      parseDartArgument<int>(arguments, "index", &index);
+
+      std::string serial;
+      parseDartArgument<std::string>(arguments, "serial", &serial);
+
+      bool finished = false;
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      if (cam)
+      {
+        if (index == VideoIndex::RGB)
+        {
+          finished = cam->rgbTexture->pipeline->checkRunOnceFinished();
+        }
+        else if (index == VideoIndex::Depth)
+        {
+          finished = cam->depthTexture->pipeline->checkRunOnceFinished();
+        }
+        else if (index == VideoIndex::IR)
+        {
+          finished = cam->irTexture->pipeline->checkRunOnceFinished();
+        }
+      }
+
+      result->Success(flutter::EncodableValue(finished));
     }
     else if (method_call.method_name().compare("pipelineClear") == 0)
     {
@@ -792,6 +851,14 @@ namespace
       }
 
       result->Success(flutter::EncodableValue(ret ? 0 : -1));
+    }
+    else if (method_call.method_name().compare("cvCreateMat") == 0)
+    {
+      cv::Mat *mat = new cv::Mat();
+      this->cvMats.push_back(mat);
+
+      int64_t pointer = reinterpret_cast<std::uintptr_t>(mat);
+      result->Success(flutter::EncodableValue(pointer));
     }
     else if (method_call.method_name().compare("tfliteCreateModel") == 0)
     {
