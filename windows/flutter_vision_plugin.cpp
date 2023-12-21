@@ -599,17 +599,17 @@ namespace
       {
         if (index == VideoIndex::RGB)
         {
-          ret = cam->rgbTexture->pipeline->runOnce(cam->rgbTexture->cvImage, textureRegistrar, cam->rgbTexture->textureId, cam->rgbTexture->videoWidth, cam->rgbTexture->videoHeight, cam->rgbTexture->buffer, &models, flChannel, from, to);
+          ret = cam->rgbTexture->pipeline->runOnce(cam->rgbTexture, textureRegistrar, &models, flChannel, from, to);
           cam->rgbTexture->setPixelBuffer();
         }
         else if (index == VideoIndex::Depth)
         {
-          ret = cam->depthTexture->pipeline->runOnce(cam->depthTexture->cvImage, textureRegistrar, cam->depthTexture->textureId, cam->depthTexture->videoWidth, cam->depthTexture->videoHeight, cam->depthTexture->buffer, &models, flChannel, from, to);
+          ret = cam->depthTexture->pipeline->runOnce(cam->depthTexture, textureRegistrar, &models, flChannel, from, to);
           cam->depthTexture->setPixelBuffer();
         }
         else if (index == VideoIndex::IR)
         {
-          ret = cam->irTexture->pipeline->runOnce(cam->irTexture->cvImage, textureRegistrar, cam->irTexture->textureId, cam->irTexture->videoWidth, cam->irTexture->videoHeight, cam->irTexture->buffer, &models, flChannel, from, to);
+          ret = cam->irTexture->pipeline->runOnce(cam->irTexture, textureRegistrar, &models, flChannel, from, to);
           cam->irTexture->setPixelBuffer();
         }
       }
