@@ -803,6 +803,32 @@ static void flutter_vision_plugin_handle_method_call(
     cv::subtract(*matA, *matB, *matDest);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(0)));
   }
+  else if (strcmp(method, "cvThreshold") == 0)
+  {
+    uint64_t imagePointerA = FL_ARG_INT(args, "imagePointerA");
+    std::uintptr_t pointerFromA = imagePointerA;
+    cv::Mat *matA = (cv::Mat *)pointerFromA;
+
+    uint64_t imagePointerDest = FL_ARG_INT(args, "imagePointerDest");
+    std::uintptr_t pointerDest = imagePointerDest;
+    cv::Mat *matDest = (cv::Mat *)pointerDest;
+
+    float min = FL_ARG_FLOAT(args, "min");
+    float max = FL_ARG_FLOAT(args, "max");
+    int type = FL_ARG_INT(args, "type");
+
+    cv::threshold(*matA, *matDest, min, max, type);
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(0)));
+  }
+  else if (strcmp(method, "cvCountNonZero") == 0)
+  {
+    uint64_t imagePointerA = FL_ARG_INT(args, "imagePointerA");
+    std::uintptr_t pointerFromA = imagePointerA;
+    cv::Mat *matA = (cv::Mat *)pointerFromA;
+
+    int result = cv::countNonZero(*matA);
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_int(result)));
+  }
   else if (strcmp(method, "tfliteCreateModel") == 0)
   {
     const char *path = FL_ARG_STRING(args, "modelPath");

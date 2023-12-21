@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_vision/camera/camera.dart';
 import 'package:flutter_vision/camera/realsense.dart';
 import 'package:flutter_vision/camera/dummy.dart';
@@ -20,27 +18,39 @@ class RealsenseController extends GetxController {
   static const BUILDER_RELU_SLIDER = 'BUILDER_RELU_SLIDER';
   static const BUILDER_DEPTH_FILTER = 'BUILDER_DEPTH_FILTER';
   static const BUILDER_TEXTURE_PROCESS_CAM = 'BUILDER_TEXTURE_PROCESS_CAM';
+  static const BUILDER_VOLUME = 'BUILDER_VOLUME';
 
-  int processTextureId = 0;
-  RealsenseController() {
+  @override
+  void onInit() {
     FvCamera.create("process", CameraType.DUMMY).then((c) async {
-      processCam = c as DummyCamera;
-      processTextureId = processCam!.rgbTextureId;
+      matCamera = c as DummyCamera;
+      processTextureId = matCamera!.rgbTextureId;
+      matCameraPointer = await matCamera!.getOpenCVMat(StreamIndex.RGB);
       update([BUILDER_TEXTURE_PROCESS_CAM]);
     });
+
+    OpencvMat.create().then((mat) => depthBaseline = mat);
+    OpencvMat.create().then((mat) => processMat = mat);
+
+    super.onInit();
   }
 
   RealsenseCamera? cam;
-  DummyCamera? processCam;
+  DummyCamera? matCamera;
+  late OpencvMat depthBaseline;
+  late OpencvMat processMat;
   String currentModeRGB = '';
   String currentModeDepth = '';
   String currentModeIR = '';
   String sn = '';
+  String volume = '';
   double fx = 0, fy = 0, cx = 0, cy = 0;
   int rgbTextureId = 0;
   int depthTextureId = 0;
   int irTextureId = 0;
   int openglTextureId = 0;
+  int processTextureId = 0;
+  int matCameraPointer = 0;
   bool pointCloud = false;
   bool depthFilter = false;
   List<DropdownMenuItem<int>> items = [];
@@ -227,33 +237,49 @@ class RealsenseController extends GetxController {
     await rgbPipeline.imwrite("test.jpg", at: 0, append: true, runOnce: true);
   }
 
-  Future<void> test() async {
-    OpencvMat mat = await OpencvMat.create();
-    FvPipeline depthPipeline = cam!.depthPipeline;
-    await depthPipeline.copyTo(mat, at: 2, append: true, runOnce: true);
+  Future<void> _displayProcessFrame() async {
+    FvPipeline processPipeline = matCamera!.rgbPipeline;
+    await processPipeline.clear();
+    await processPipeline.applyColorMap(OpenCV.COLORMAP_JET);
+    await processPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+    await processPipeline.show();
+    await processPipeline.run();
 
-    bool finished = false;
-    for (int i = 0; i < 10; i++) {
-      finished = await depthPipeline.isRunOnceFinished();
-      if (finished) break;
-      sleep(const Duration(milliseconds: 10));
-    }
+    processTextureId = matCamera!.rgbTextureId;
+    update([BUILDER_TEXTURE_PROCESS_CAM]);
+  }
+
+  Future<void> setDepthBaseline() async {
+    FvPipeline depthPipeline = cam!.depthPipeline;
+    await depthPipeline.copyTo(depthBaseline, at: 2, append: true, runOnce: true);
+
+    bool finished = await depthPipeline.waitUntilFinished();
 
     if (finished) {
-      OpencvMatShape shape = await mat.shape();
-      print(shape.toString());
+      await depthBaseline.copyTo(matBPointer: matCameraPointer);
 
-      int pointer = await processCam!.getOpenCVMat(StreamIndex.RGB);
-      await mat.copyTo(pointer);
-
-      FvPipeline processPipeline = processCam!.rgbPipeline;
-      await processPipeline.clear();
-      await processPipeline.applyColorMap(OpenCV.COLORMAP_JET);
-      await processPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
-      await processPipeline.show();
-      await processPipeline.run();
+      await _displayProcessFrame();
     } else {
       print('timeout');
+    }
+  }
+
+  Future<void> volumeMetric() async {
+    FvPipeline depthPipeline = cam!.depthPipeline;
+    await depthPipeline.copyTo(processMat, at: 2, append: true, runOnce: true);
+    bool finished = await depthPipeline.waitUntilFinished();
+
+    if (finished) {
+      await depthBaseline.subtract(matB: processMat, matDest: processMat);
+      await processMat.threshold(matDest: processMat, min: 5, max: 255, type: OpenCV.THRESH_BINARY);
+      await processMat.copyTo(matBPointer: matCameraPointer);
+      await _displayProcessFrame();
+
+      OpencvMatShape shape = await processMat.shape();
+      int nonZero = await processMat.countNonZero();
+
+      volume = (nonZero / (shape.rows * shape.cols) * 100).toStringAsFixed(2);
+      update([BUILDER_VOLUME]);
     }
   }
 }

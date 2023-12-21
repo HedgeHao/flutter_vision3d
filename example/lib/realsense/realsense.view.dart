@@ -326,7 +326,13 @@ class RealsenseView extends GetView<RealsenseController> {
                     )),
                 Column(
                   children: [
-                    TextButton(onPressed: () => controller.test(), child: const Text('Test')),
+                    TextButton(onPressed: () => controller.setDepthBaseline(), child: const Text('Baseline')),
+                    TextButton(onPressed: () => controller.volumeMetric(), child: const Text('Volume Metric')),
+                    Row(children: [
+                      const Text('Volume:'),
+                      GetBuilder<RealsenseController>(id: RealsenseController.BUILDER_VOLUME, builder: (controller) => Text(controller.volume)),
+                      const Text(' %'),
+                    ]),
                   ],
                 )
               ],

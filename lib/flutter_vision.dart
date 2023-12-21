@@ -527,6 +527,15 @@ class FvPipeline {
       'serial': serial,
     });
   }
+
+  Future<bool> waitUntilFinished({int trys = 10, int interval = 10}) async {
+    for (int i = 0; i < trys; i++) {
+      if (await isRunOnceFinished()) return true;
+      sleep(Duration(milliseconds: interval));
+    }
+
+    return false;
+  }
 }
 
 int _tflite_model_counter_ = 0;
