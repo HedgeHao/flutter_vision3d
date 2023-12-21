@@ -54,9 +54,9 @@ namespace
     OpenGLFL *glfl;
 
     std::vector<TFLiteModel *> models{};
-    std::vector<OpenCVCamera *> cameras{};
     std::vector<Pipeline *> pipelines{};
     std::vector<FvCamera *> cams{};
+    std::vector<cv::Mat *> cvMats{};
 
     static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);
 
@@ -554,6 +554,9 @@ namespace
       bool append = false;
       parseDartArgument<bool>(arguments, "append", &append);
 
+      bool runOnce = false;
+      parseDartArgument<bool>(arguments, "runOnce", &runOnce);
+
       std::string serial;
       parseDartArgument<std::string>(arguments, "serial", &serial);
 
@@ -562,15 +565,15 @@ namespace
       {
         if (index == VideoIndex::RGB)
         {
-          cam->rgbTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
+          cam->rgbTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append, runOnce);
         }
         else if (index == VideoIndex::Depth)
         {
-          cam->depthTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
+          cam->depthTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append, runOnce);
         }
         else if (index == VideoIndex::IR)
         {
-          cam->irTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
+          cam->irTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append, runOnce);
         }
       }
 
@@ -788,7 +791,7 @@ namespace
         ret = cam->enableImageRegistration(enable);
       }
 
-      result->Success(flutter::EncodableValue(ret));
+      result->Success(flutter::EncodableValue(ret ? 0 : -1));
     }
     else if (method_call.method_name().compare("tfliteCreateModel") == 0)
     {

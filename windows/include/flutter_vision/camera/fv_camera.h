@@ -83,6 +83,11 @@ public:
         rgbTexture = std::make_unique<FvTexture>(flRegistrar);
         depthTexture = std::make_unique<FvTexture>(flRegistrar);
         irTexture = std::make_unique<FvTexture>(flRegistrar);
+
+        // Create pipeline
+        rgbTexture->pipeline = new Pipeline();
+        depthTexture->pipeline = new Pipeline();
+        irTexture->pipeline = new Pipeline();
     }
 
     int64_t getTextureId(int index)

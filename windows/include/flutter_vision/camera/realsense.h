@@ -330,14 +330,14 @@ private:
         if (isRgbEnable && rgbFrame)
         {
           frame_to_mat(rgbFrame, rgbTexture->cvImage);
-          rgbTexture->pipeline->run(rgbTexture->cvImage, flRegistrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer, models, flChannel);
+          rgbTexture->pipeline->run(rgbTexture, flRegistrar, models, flChannel);
           rgbTexture->setPixelBuffer();
         }
 
         if (isDepthEnable && depthFrame)
         {
           frame_to_mat(depthFrame, depthTexture->cvImage);
-          depthTexture->pipeline->run(depthTexture->cvImage, flRegistrar, depthTexture->textureId, depthTexture->videoWidth, depthTexture->videoHeight, depthTexture->buffer, models, flChannel);
+          depthTexture->pipeline->run(depthTexture, flRegistrar, models, flChannel);
           depthTexture->setPixelBuffer();
 
           depthData = (uint16_t *)(depthFrame.get_data());
@@ -346,7 +346,7 @@ private:
         if (isIrEnable && irFrame)
         {
           frame_to_mat(irFrame, irTexture->cvImage);
-          irTexture->pipeline->run(irTexture->cvImage, flRegistrar, irTexture->textureId, irTexture->videoWidth, irTexture->videoHeight, irTexture->buffer, models, flChannel);
+          irTexture->pipeline->run(irTexture, flRegistrar, models, flChannel);
           irTexture->setPixelBuffer();
         }
 

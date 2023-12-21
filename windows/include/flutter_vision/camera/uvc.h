@@ -72,13 +72,13 @@ public:
 
     bool enableImageRegistration(bool enable) { return true; }
     void getIntrinsic(int index, double &fx, double &fy, double &cx, double &cy) {}
-    void getAvailableVideoModes(int index, std::vector<std::string>& rModes){}
-    void getCurrentVideoMode(int index, std::string& mode){}
-    bool setVideoMode(int index, int mode){return true;}
-    void loadPresetParameters(std::string &path){}
+    void getAvailableVideoModes(int index, std::vector<std::string> &rModes) {}
+    void getCurrentVideoMode(int index, std::string &mode) {}
+    bool setVideoMode(int index, int mode) { return true; }
+    void loadPresetParameters(std::string &path) {}
 
     // TODO: Use USB library to do this if needed
-    bool getSerialNumber(std::string &sn){return true;}
+    bool getSerialNumber(std::string &sn) { return true; }
 
 private:
     int uvcIndex = -1;
@@ -96,7 +96,7 @@ private:
 
             if (newFrame)
             {
-                rgbTexture->pipeline->run(rgbTexture->cvImage, flRegistrar, rgbTexture->textureId, rgbTexture->videoWidth, rgbTexture->videoHeight, rgbTexture->buffer, models, flChannel);
+                rgbTexture->pipeline->run(rgbTexture, flRegistrar, models, flChannel);
                 rgbTexture->setPixelBuffer();
                 flChannel->InvokeMethod("onUvcFrame", nullptr, nullptr);
             }

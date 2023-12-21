@@ -9,6 +9,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include "../texture.h"
 
 #include "../tflite.h"
 #include "flutter_vision_handler.h"
@@ -228,7 +229,7 @@ public:
         imgPtr = m;
     }
 
-    void add(unsigned int index, const std::vector<uint8_t> &params, unsigned int len, int insertAt = -1, int interval = 0, bool append = false)
+    void add(unsigned int index, const std::vector<uint8_t> &params, unsigned int len, int insertAt = -1, int interval = 0, bool append = false, bool runOnce = false)
     {
         FuncDef f = pipelineFuncs[index];
         f.interval = interval;
@@ -293,7 +294,7 @@ public:
         return 0;
     }
 
-    int run(cv::Mat &img, flutter::TextureRegistrar *registrar, int64_t &textureId, int32_t &texture_width, int32_t &texture_height, std::vector<uint8_t> &pixelBuf, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel)
+    int run(std::unique_ptr<FvTexture> &fv, flutter::TextureRegistrar *registrar, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel)
     {
         for (int i = 0; i < funcs.size(); i++)
         {
@@ -309,7 +310,7 @@ public:
             try
             {
                 // std::cout << "Run:" << funcs[i].name << std::endl;
-                funcs[i].func(img, funcs[i].params, registrar, textureId, texture_width, texture_height, pixelBuf, models, flChannel);
+                funcs[i].func(fv->cvImage, funcs[i].params, registrar, fv->textureId, fv->videoWidth, fv->videoHeight, fv->buffer, models, flChannel);
             }
             catch (std::exception &e)
             {
@@ -325,17 +326,17 @@ public:
 
         if (doScreenshot)
         {
-            if (!img.empty())
+            if (!fv->cvImage.empty())
             {
                 if (screenshotCvtColor > 0)
                 {
                     cv::Mat temp;
-                    cv::cvtColor(img, temp, screenshotCvtColor);
+                    cv::cvtColor(fv->cvImage, temp, screenshotCvtColor);
                     cv::imwrite(screenshotSavePath.c_str(), temp);
                 }
                 else
                 {
-                    cv::imwrite(screenshotSavePath.c_str(), img);
+                    cv::imwrite(screenshotSavePath.c_str(), fv->cvImage);
                 }
             }
             doScreenshot = false;
