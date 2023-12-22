@@ -860,6 +860,89 @@ namespace
       int64_t pointer = reinterpret_cast<std::uintptr_t>(mat);
       result->Success(flutter::EncodableValue(pointer));
     }
+    else if (method_call.method_name().compare("cvGetShape") == 0)
+    {
+      int64_t imagePointerA = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerA", &imagePointerA);
+      std::uintptr_t pointerA = imagePointerA;
+      cv::Mat *matA = (cv::Mat *)pointerA;
+
+      flutter::EncodableMap map = flutter::EncodableMap();
+      map[flutter::EncodableValue("cols")] = matA->cols;
+      map[flutter::EncodableValue("rows")] = matA->rows;
+      map[flutter::EncodableValue("channels")] = matA->channels();
+
+      result->Success(flutter::EncodableValue(map));
+    }
+    else if (method_call.method_name().compare("cvCopyTo") == 0)
+    {
+      int64_t imagePointerA = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerA", &imagePointerA);
+      std::uintptr_t pointerA = imagePointerA;
+      cv::Mat *matA = (cv::Mat *)pointerA;
+
+      int64_t imagePointerB = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerB", &imagePointerB);
+      std::uintptr_t pointerB = imagePointerB;
+      cv::Mat *matB = (cv::Mat *)pointerB;
+
+      matA->copyTo(*matB);
+      result->Success(flutter::EncodableValue(0));
+    }
+    else if (method_call.method_name().compare("cvSubtract") == 0)
+    {
+      int64_t imagePointerA = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerA", &imagePointerA);
+      std::uintptr_t pointerA = imagePointerA;
+      cv::Mat *matA = (cv::Mat *)pointerA;
+
+      int64_t imagePointerB = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerB", &imagePointerB);
+      std::uintptr_t pointerB = imagePointerB;
+      cv::Mat *matB = (cv::Mat *)pointerB;
+
+      int64_t imagePointerDest = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerDest", &imagePointerDest);
+      std::uintptr_t pointerDest = imagePointerDest;
+      cv::Mat *matDest = (cv::Mat *)pointerDest;
+
+      cv::subtract(*matA, *matB, *matDest);
+      result->Success(flutter::EncodableValue(0));
+    }
+    else if (method_call.method_name().compare("cvThreshold") == 0)
+    {
+      int64_t imagePointerA = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerA", &imagePointerA);
+      std::uintptr_t pointerA = imagePointerA;
+      cv::Mat *matA = (cv::Mat *)pointerA;
+
+      int64_t imagePointerDest = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerDest", &imagePointerDest);
+      std::uintptr_t pointerDest = imagePointerDest;
+      cv::Mat *matDest = (cv::Mat *)pointerDest;
+
+      double min = 0.0;
+      parseDartArgument<double>(arguments, "min", &min);
+
+      double max = 0.0;
+      parseDartArgument<double>(arguments, "max", &max);
+
+      int type = 0;
+      parseDartArgument<int>(arguments, "type", &type);
+
+      cv::threshold(*matA, *matDest, min, max, type);
+      result->Success(flutter::EncodableValue(0));
+    }
+    else if (method_call.method_name().compare("cvCountNonZero") == 0)
+    {
+      int64_t imagePointerA = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerA", &imagePointerA);
+      std::uintptr_t pointerA = imagePointerA;
+      cv::Mat *matA = (cv::Mat *)pointerA;
+
+      int nonZero = cv::countNonZero(*matA);
+      result->Success(flutter::EncodableValue(nonZero));
+    }
     else if (method_call.method_name().compare("tfliteCreateModel") == 0)
     {
       std::string path;

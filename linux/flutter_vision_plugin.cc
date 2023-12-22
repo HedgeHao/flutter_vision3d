@@ -762,7 +762,7 @@ static void flutter_vision_plugin_handle_method_call(
   }
   else if (strcmp(method, "cvGetShape") == 0)
   {
-    uint64_t imagePointer = FL_ARG_INT(args, "imagePointer");
+    uint64_t imagePointer = FL_ARG_INT(args, "imagePointerA");
     std::uintptr_t pointer = imagePointer;
     cv::Mat *mat = (cv::Mat *)pointer;
 

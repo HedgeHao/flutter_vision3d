@@ -21,7 +21,7 @@ class OpencvMat {
   }
 
   Future<OpencvMatShape> shape() async {
-    var shape = await FlutterVision.channel.invokeMethod('cvGetShape', {'imagePointer': pointer});
+    var shape = await FlutterVision.channel.invokeMethod('cvGetShape', {'imagePointerA': pointer});
     return OpencvMatShape(cols: shape['cols'], rows: shape['rows'], channels: shape['channels']);
   }
 
