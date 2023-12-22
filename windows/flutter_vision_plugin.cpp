@@ -1017,42 +1017,6 @@ namespace
       }
       result->Success(fl);
     }
-    else if (method_call.method_name().compare("fvCameraScreenshot") == 0)
-    {
-      std::string serial;
-      parseDartArgument<std::string>(arguments, "serial", &serial);
-
-      int index = 0;
-      parseDartArgument<int>(arguments, "index", &index);
-
-      std::string path;
-      parseDartArgument<std::string>(arguments, "path", &path);
-
-      int cvtCode = 0;
-      parseDartArgument<int>(arguments, "cvtCode", &cvtCode);
-
-      bool ret = false;
-      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
-      if (cam != nullptr)
-      {
-        if (index == VideoIndex::RGB)
-        {
-          cam->rgbTexture->pipeline->screenshot(path.c_str(), cvtCode);
-        }
-        else if (index == VideoIndex::Depth)
-        {
-          cam->depthTexture->pipeline->screenshot(path.c_str(), cvtCode);
-        }
-        else if (index == VideoIndex::IR)
-        {
-          cam->irTexture->pipeline->screenshot(path.c_str(), cvtCode);
-        }
-
-        ret = true;
-      }
-
-      result->Success(flutter::EncodableValue(ret));
-    }
     else if (method_call.method_name().compare("test") == 0)
     {
       result->Success(flutter::EncodableValue(true));

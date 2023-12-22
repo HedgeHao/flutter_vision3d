@@ -27,6 +27,7 @@ struct FuncDef
     // TODO: function parameter definition should be flexable
     void (*func)(std::unique_ptr<FvTexture> &, std::vector<uint8_t> params, flutter::TextureRegistrar *, std::vector<TFLiteModel *> *, flutter::MethodChannel<flutter::EncodableValue> *);
     std::vector<uint8_t> params = {};
+    bool runOnce = false;
 };
 
 void PipelineFuncTest(std::unique_ptr<FvTexture> &fv, std::vector<uint8_t> params, flutter::TextureRegistrar *registrar, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel)
@@ -194,6 +195,82 @@ void PipelineFuncOpencvThreshold(std::unique_ptr<FvTexture> &fv, std::vector<uin
     cv::threshold(fv->cvImage, fv->cvImage, threshold, max, type);
 }
 
+void PipelineFuncOpencvRelu(std::unique_ptr<FvTexture> &fv, std::vector<uint8_t> params, flutter::TextureRegistrar *registrar, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel)
+{
+    float threshold = *reinterpret_cast<float *>(&params[0]);
+    uchar thresholdValueUchar = static_cast<uchar>(threshold * 255.0);
+    uchar *p;
+    for (int i = 0; i < fv->cvImage.rows; ++i)
+    {
+        p = fv->cvImage.ptr<uchar>(i);
+        for (int j = 0; j < fv->cvImage.cols; ++j)
+        {
+            if (p[j] < thresholdValueUchar)
+            {
+                p[j] = 0;
+            }
+        }
+    }
+}
+
+void PipelineZeroDepthFilter(std::unique_ptr<FvTexture> &fv, std::vector<uint8_t> params, flutter::TextureRegistrar *registrar, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel)
+{
+    cv::Mat temp;
+    fv->cvImage.copyTo(temp);
+
+    int threshold = params[0];
+    int halfRange = params[1];
+
+    cv::parallel_for_(cv::Range(halfRange, fv->cvImage.rows - halfRange), [&](const cv::Range &rowRange)
+                      {
+        for (int i = rowRange.start; i < rowRange.end; ++i)
+        {
+            for (int j = halfRange; j < fv->cvImage.cols - halfRange; ++j)
+            {
+                if (fv->cvImage.at<uchar>(i, j) <= threshold)
+                {
+                    int sum = 0;
+                    int count = 0;
+
+                    for (int x = -halfRange; x <= halfRange; ++x)
+                    {
+                        for (int y = -halfRange; y <= halfRange; ++y)
+                        {
+                            if (temp.at<uchar>(i + x, j + y) != 0)
+                            {
+                                sum += temp.at<uchar>(i + x, j + y);
+                                ++count;
+                            }
+                        }
+                    }
+
+                    if (count > 0)
+                    {
+                        fv->cvImage.at<uchar>(i, j) = sum / count;
+                    }
+                }
+            }
+        } });
+}
+
+void PipelineCopyTo(std::unique_ptr<FvTexture> &fv, std::vector<uint8_t> params, flutter::TextureRegistrar *registrar, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel)
+{
+    uint64_t pointer =
+        (static_cast<uint64_t>(params[0]) << 56) +
+        (static_cast<uint64_t>(params[1]) << 48) +
+        (static_cast<uint64_t>(params[2]) << 40) +
+        (static_cast<uint64_t>(params[3]) << 32) +
+        (static_cast<uint64_t>(params[4]) << 24) +
+        (static_cast<uint64_t>(params[5]) << 16) +
+        (static_cast<uint64_t>(params[6]) << 8) +
+        static_cast<uint64_t>(params[7]);
+
+    std::uintptr_t p = pointer;
+    cv::Mat *mat = (cv::Mat *)p;
+    fv->cvImage.copyTo(*mat);
+    // std::cout << "[CopyTo]: " << pointer << "," << mat->cols << "," << mat->rows << "," << mat->channels() << std::endl;
+}
+
 const FuncDef pipelineFuncs[] = {
     {0, "test", 0, 0, PipelineFuncTest},
     {1, "cvtColor", 0, 0, PipelineFuncOpencvCvtColor},
@@ -211,6 +288,9 @@ const FuncDef pipelineFuncs[] = {
     {13, "PipelineFuncCustomHandler", 0, 0, PipelineFuncCustomHandler},
     {14, "cvNormalized", 0, 0, PipelineFuncOpencvNormalize},
     {15, "cvThreshold", 0, 0, PipelineFuncOpencvThreshold},
+    {16, "relu", 0, 0, PipelineFuncOpencvRelu},
+    {17, "zeroDepthFilter", 0, 0, PipelineZeroDepthFilter},
+    {18, "PipelineCopyTo", 0, 0, PipelineCopyTo},
 };
 
 class Pipeline
@@ -222,6 +302,12 @@ public:
     {
         FuncDef f = pipelineFuncs[index];
         f.interval = interval;
+        f.runOnce = runOnce;
+
+        if (runOnce)
+        {
+            runOnceFinished = false;
+        }
 
         for (unsigned int i = 0; i < len; i++)
             f.params.push_back(params.at(i));
@@ -291,6 +377,8 @@ public:
 
     int run(std::unique_ptr<FvTexture> &fv, flutter::TextureRegistrar *registrar, std::vector<TFLiteModel *> *models, flutter::MethodChannel<flutter::EncodableValue> *flChannel)
     {
+        std::vector<size_t> removeIndex = {};
+
         for (int i = 0; i < funcs.size(); i++)
         {
             if (funcs[i].interval > 0)
@@ -306,6 +394,8 @@ public:
             {
                 // std::cout << "Run:" << funcs[i].name << std::endl;
                 funcs[i].func(fv, funcs[i].params, registrar, models, flChannel);
+                if (funcs[i].runOnce)
+                    removeIndex.push_back(i);
             }
             catch (std::exception &e)
             {
@@ -319,32 +409,20 @@ public:
             }
         }
 
-        if (doScreenshot)
+        for (size_t index : removeIndex)
         {
-            if (!fv->cvImage.empty())
+            if (index < funcs.size())
             {
-                if (screenshotCvtColor > 0)
-                {
-                    cv::Mat temp;
-                    cv::cvtColor(fv->cvImage, temp, screenshotCvtColor);
-                    cv::imwrite(screenshotSavePath.c_str(), temp);
-                }
-                else
-                {
-                    cv::imwrite(screenshotSavePath.c_str(), fv->cvImage);
-                }
+                funcs.erase(funcs.begin() + index);
             }
-            doScreenshot = false;
+        }
+
+        if (!removeIndex.empty())
+        {
+            runOnceFinished = true;
         }
 
         return 0;
-    }
-
-    void screenshot(const char *filePath, int convert = -1)
-    {
-        doScreenshot = true;
-        screenshotSavePath = std::string(filePath);
-        screenshotCvtColor = convert;
     }
 
     void clear()
@@ -379,9 +457,6 @@ public:
 private:
     std::vector<FuncDef> funcs = {};
     int64_t ts = 0;
-    bool doScreenshot = false;
-    std::string screenshotSavePath;
-    int screenshotCvtColor = -1;
     bool runOnceFinished = true;
 };
 #endif
