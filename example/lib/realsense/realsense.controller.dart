@@ -276,9 +276,7 @@ class RealsenseController extends GetxController {
       await _displayProcessFrame();
 
       OpencvMatShape shape = await processMat.shape();
-      print(shape.toString());
       int nonZero = await processMat.countNonZero();
-      print(nonZero);
 
       volume = (nonZero / (shape.rows * shape.cols) * 100).toStringAsFixed(2);
       update([BUILDER_VOLUME]);
