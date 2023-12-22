@@ -54,9 +54,9 @@ namespace
     OpenGLFL *glfl;
 
     std::vector<TFLiteModel *> models{};
-    std::vector<OpenCVCamera *> cameras{};
     std::vector<Pipeline *> pipelines{};
     std::vector<FvCamera *> cams{};
+    std::vector<cv::Mat *> cvMats{};
 
     static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);
 
@@ -554,6 +554,9 @@ namespace
       bool append = false;
       parseDartArgument<bool>(arguments, "append", &append);
 
+      bool runOnce = false;
+      parseDartArgument<bool>(arguments, "runOnce", &runOnce);
+
       std::string serial;
       parseDartArgument<std::string>(arguments, "serial", &serial);
 
@@ -562,19 +565,50 @@ namespace
       {
         if (index == VideoIndex::RGB)
         {
-          cam->rgbTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
+          cam->rgbTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append, runOnce);
         }
         else if (index == VideoIndex::Depth)
         {
-          cam->depthTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
+          cam->depthTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append, runOnce);
         }
         else if (index == VideoIndex::IR)
         {
-          cam->irTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append);
+          cam->irTexture->pipeline->add(funcIndex, params, len, insertAt, interval, append, runOnce);
         }
       }
 
       result->Success(flutter::EncodableValue(nullptr));
+    }
+    else if (method_call.method_name().compare("pipelineRemoveAt") == 0)
+    {
+      std::string serial;
+      parseDartArgument<std::string>(arguments, "serial", &serial);
+
+      int index = -1;
+      parseDartArgument<int>(arguments, "index", &index);
+
+      int removeAt = 0;
+      parseDartArgument<int>(arguments, "removeAt", &removeAt);
+
+      int ret = 0;
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      if (cam)
+      {
+        if (index == VideoIndex::RGB)
+        {
+          ret = cam->rgbTexture->pipeline->removeAt(removeAt);
+        }
+        else if (index == VideoIndex::Depth)
+        {
+          ret = cam->depthTexture->pipeline->removeAt(removeAt);
+        }
+        else if (index == VideoIndex::IR)
+        {
+          ret = cam->irTexture->pipeline->removeAt(removeAt);
+        }
+      }
+
+      result->Success(flutter::EncodableValue(ret));
     }
     else if (method_call.method_name().compare("pipelineRun") == 0)
     {
@@ -596,22 +630,50 @@ namespace
       {
         if (index == VideoIndex::RGB)
         {
-          ret = cam->rgbTexture->pipeline->runOnce(cam->rgbTexture->cvImage, textureRegistrar, cam->rgbTexture->textureId, cam->rgbTexture->videoWidth, cam->rgbTexture->videoHeight, cam->rgbTexture->buffer, &models, flChannel, from, to);
+          ret = cam->rgbTexture->pipeline->runOnce(cam->rgbTexture, textureRegistrar, &models, flChannel, from, to);
           cam->rgbTexture->setPixelBuffer();
         }
         else if (index == VideoIndex::Depth)
         {
-          ret = cam->depthTexture->pipeline->runOnce(cam->depthTexture->cvImage, textureRegistrar, cam->depthTexture->textureId, cam->depthTexture->videoWidth, cam->depthTexture->videoHeight, cam->depthTexture->buffer, &models, flChannel, from, to);
+          ret = cam->depthTexture->pipeline->runOnce(cam->depthTexture, textureRegistrar, &models, flChannel, from, to);
           cam->depthTexture->setPixelBuffer();
         }
         else if (index == VideoIndex::IR)
         {
-          ret = cam->irTexture->pipeline->runOnce(cam->irTexture->cvImage, textureRegistrar, cam->irTexture->textureId, cam->irTexture->videoWidth, cam->irTexture->videoHeight, cam->irTexture->buffer, &models, flChannel, from, to);
+          ret = cam->irTexture->pipeline->runOnce(cam->irTexture, textureRegistrar, &models, flChannel, from, to);
           cam->irTexture->setPixelBuffer();
         }
       }
 
       result->Success(flutter::EncodableValue(ret));
+    }
+    else if (method_call.method_name().compare("pipelineIsRunOnceFinished") == 0)
+    {
+      int index = -1;
+      parseDartArgument<int>(arguments, "index", &index);
+
+      std::string serial;
+      parseDartArgument<std::string>(arguments, "serial", &serial);
+
+      bool finished = false;
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+      if (cam)
+      {
+        if (index == VideoIndex::RGB)
+        {
+          finished = cam->rgbTexture->pipeline->checkRunOnceFinished();
+        }
+        else if (index == VideoIndex::Depth)
+        {
+          finished = cam->depthTexture->pipeline->checkRunOnceFinished();
+        }
+        else if (index == VideoIndex::IR)
+        {
+          finished = cam->irTexture->pipeline->checkRunOnceFinished();
+        }
+      }
+
+      result->Success(flutter::EncodableValue(finished));
     }
     else if (method_call.method_name().compare("pipelineClear") == 0)
     {
@@ -788,7 +850,98 @@ namespace
         ret = cam->enableImageRegistration(enable);
       }
 
-      result->Success(flutter::EncodableValue(ret));
+      result->Success(flutter::EncodableValue(ret ? 0 : -1));
+    }
+    else if (method_call.method_name().compare("cvCreateMat") == 0)
+    {
+      cv::Mat *mat = new cv::Mat();
+      this->cvMats.push_back(mat);
+
+      int64_t pointer = reinterpret_cast<std::uintptr_t>(mat);
+      result->Success(flutter::EncodableValue(pointer));
+    }
+    else if (method_call.method_name().compare("cvGetShape") == 0)
+    {
+      int64_t imagePointerA = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerA", &imagePointerA);
+      std::uintptr_t pointerA = imagePointerA;
+      cv::Mat *matA = (cv::Mat *)pointerA;
+
+      flutter::EncodableMap map = flutter::EncodableMap();
+      map[flutter::EncodableValue("cols")] = matA->cols;
+      map[flutter::EncodableValue("rows")] = matA->rows;
+      map[flutter::EncodableValue("channels")] = matA->channels();
+
+      result->Success(flutter::EncodableValue(map));
+    }
+    else if (method_call.method_name().compare("cvCopyTo") == 0)
+    {
+      int64_t imagePointerA = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerA", &imagePointerA);
+      std::uintptr_t pointerA = imagePointerA;
+      cv::Mat *matA = (cv::Mat *)pointerA;
+
+      int64_t imagePointerB = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerB", &imagePointerB);
+      std::uintptr_t pointerB = imagePointerB;
+      cv::Mat *matB = (cv::Mat *)pointerB;
+
+      matA->copyTo(*matB);
+      result->Success(flutter::EncodableValue(0));
+    }
+    else if (method_call.method_name().compare("cvSubtract") == 0)
+    {
+      int64_t imagePointerA = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerA", &imagePointerA);
+      std::uintptr_t pointerA = imagePointerA;
+      cv::Mat *matA = (cv::Mat *)pointerA;
+
+      int64_t imagePointerB = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerB", &imagePointerB);
+      std::uintptr_t pointerB = imagePointerB;
+      cv::Mat *matB = (cv::Mat *)pointerB;
+
+      int64_t imagePointerDest = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerDest", &imagePointerDest);
+      std::uintptr_t pointerDest = imagePointerDest;
+      cv::Mat *matDest = (cv::Mat *)pointerDest;
+
+      cv::subtract(*matA, *matB, *matDest);
+      result->Success(flutter::EncodableValue(0));
+    }
+    else if (method_call.method_name().compare("cvThreshold") == 0)
+    {
+      int64_t imagePointerA = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerA", &imagePointerA);
+      std::uintptr_t pointerA = imagePointerA;
+      cv::Mat *matA = (cv::Mat *)pointerA;
+
+      int64_t imagePointerDest = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerDest", &imagePointerDest);
+      std::uintptr_t pointerDest = imagePointerDest;
+      cv::Mat *matDest = (cv::Mat *)pointerDest;
+
+      double min = 0.0;
+      parseDartArgument<double>(arguments, "min", &min);
+
+      double max = 0.0;
+      parseDartArgument<double>(arguments, "max", &max);
+
+      int type = 0;
+      parseDartArgument<int>(arguments, "type", &type);
+
+      cv::threshold(*matA, *matDest, min, max, type);
+      result->Success(flutter::EncodableValue(0));
+    }
+    else if (method_call.method_name().compare("cvCountNonZero") == 0)
+    {
+      int64_t imagePointerA = 0;
+      parseDartArgument<int64_t>(arguments, "imagePointerA", &imagePointerA);
+      std::uintptr_t pointerA = imagePointerA;
+      cv::Mat *matA = (cv::Mat *)pointerA;
+
+      int nonZero = cv::countNonZero(*matA);
+      result->Success(flutter::EncodableValue(nonZero));
     }
     else if (method_call.method_name().compare("tfliteCreateModel") == 0)
     {
@@ -946,42 +1099,6 @@ namespace
         fl.push_back(flutter::EncodableValue(*(bytes + i)));
       }
       result->Success(fl);
-    }
-    else if (method_call.method_name().compare("fvCameraScreenshot") == 0)
-    {
-      std::string serial;
-      parseDartArgument<std::string>(arguments, "serial", &serial);
-
-      int index = 0;
-      parseDartArgument<int>(arguments, "index", &index);
-
-      std::string path;
-      parseDartArgument<std::string>(arguments, "path", &path);
-
-      int cvtCode = 0;
-      parseDartArgument<int>(arguments, "cvtCode", &cvtCode);
-
-      bool ret = false;
-      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
-      if (cam != nullptr)
-      {
-        if (index == VideoIndex::RGB)
-        {
-          cam->rgbTexture->pipeline->screenshot(path.c_str(), cvtCode);
-        }
-        else if (index == VideoIndex::Depth)
-        {
-          cam->depthTexture->pipeline->screenshot(path.c_str(), cvtCode);
-        }
-        else if (index == VideoIndex::IR)
-        {
-          cam->irTexture->pipeline->screenshot(path.c_str(), cvtCode);
-        }
-
-        ret = true;
-      }
-
-      result->Success(flutter::EncodableValue(ret));
     }
     else if (method_call.method_name().compare("test") == 0)
     {

@@ -224,9 +224,9 @@ class RealsenseController extends GetxController {
     FvPipeline depthPipeline = cam!.depthPipeline;
     depthFilter = enable;
     if (enable) {
-      await depthPipeline.zeroDepthFilter(0, 5, at: 1, append: true);
+      await depthPipeline.zeroDepthFilter(0, 5, at: 2, append: true);
     } else {
-      await depthPipeline.removeAt(1);
+      await depthPipeline.removeAt(2);
     }
 
     update([BUILDER_DEPTH_FILTER]);
