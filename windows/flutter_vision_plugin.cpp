@@ -394,7 +394,7 @@ namespace
           parseDartArgument<int>(arguments, "y", &y);
 
           data = cam->getDepthData();
-          list.push_back(data[y * cam->depthHeight + x]);
+          list.push_back(data[y * cam->depthWidth + x]);
         }
         else if (index == 2)
         {
