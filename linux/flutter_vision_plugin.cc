@@ -342,7 +342,7 @@ static void flutter_vision_plugin_handle_method_call(
         length = 1;
 
         temp = new int[1];
-        temp[0] = data[y * cam->depthHeight + x];
+        temp[0] = data[y * cam->depthWidth + x];
       }
       else if (index == 2)
       {

@@ -385,6 +385,7 @@ public:
     {
         std::vector<size_t> removeIndex = {};
 
+        isRunning = true;
         for (int i = 0; i < funcs.size(); i++)
         {
             if (funcs[i].interval > 0)
@@ -428,11 +429,15 @@ public:
             runOnceFinished = true;
         }
 
+        isRunning = false;
+
         return 0;
     }
 
     void clear()
     {
+        while(isRunning);
+
         funcs.clear();
     }
 
@@ -475,5 +480,6 @@ private:
     cv::Mat img;
 
     bool runOnceFinished = true;
+    bool isRunning = false;
 };
 #endif
