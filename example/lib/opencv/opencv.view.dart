@@ -99,6 +99,14 @@ class OpencvView extends GetView<OpencvController> {
                   Row(children: [
                     TextButton(
                         onPressed: () {
+                          controller.drawLine();
+                        },
+                        child: const Text('Draw')),
+                    const Text(': Draw line on the source image'),
+                  ]),
+                  Row(children: [
+                    TextButton(
+                        onPressed: () {
                           controller.rotate();
                         },
                         child: const Text('Rotate')),

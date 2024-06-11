@@ -178,6 +178,7 @@ const _FUNC_CV_RELU = 16;
 const _FUNC_CUSTOM_DEPTH_ZERO_FILTER = 17;
 
 const _FUNC_CV_COPYTO = 18;
+const _FUNC_CV_LINE = 19;
 
 // TODO: check method can be added to that pipeline
 class FvPipeline {
@@ -357,6 +358,29 @@ class FvPipeline {
       'funcIndex': _FUNC_CV_RECTANGLE,
       'params': Uint8List.fromList([...x1Bytes, ...y1Bytes, ...x2Bytes, ...y2Bytes, r, g, b, alpha ?? 255, thickness ?? 1, lineType ?? OpenCV.LINE_TYPE_LINE_8, shift ?? 0]),
       'len': 23,
+      'at': at ?? -1,
+      'interval': interval ?? 0,
+      'serial': serial,
+      'append': append ?? false,
+      'runOnce': runOnce ?? false,
+    });
+  }
+
+  Future<void> cvLine(double x1, double y1, double x2, double y2, int r, int g, int b, {int? at, int? thickness, int? lineType, int? alpha, int? interval, bool? append, bool? runOnce}) async {
+    List<Object?> x1f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': x1});
+    Uint8List x1Bytes = Uint8List.fromList(x1f.map((e) => e as int).toList());
+    List<Object?> y1f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': y1});
+    Uint8List y1Bytes = Uint8List.fromList(y1f.map((e) => e as int).toList());
+    List<Object?> x2f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': x2});
+    Uint8List x2Bytes = Uint8List.fromList(x2f.map((e) => e as int).toList());
+    List<Object?> y2f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': y2});
+    Uint8List y2Bytes = Uint8List.fromList(y2f.map((e) => e as int).toList());
+
+    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+      'index': index,
+      'funcIndex': _FUNC_CV_LINE,
+      'params': Uint8List.fromList([...x1Bytes, ...y1Bytes, ...x2Bytes, ...y2Bytes, r, g, b, alpha ?? 255, thickness ?? 1, lineType ?? OpenCV.LINE_TYPE_LINE_8]),
+      'len': 22,
       'at': at ?? -1,
       'interval': interval ?? 0,
       'serial': serial,

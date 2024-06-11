@@ -276,6 +276,22 @@ void PipelineCopyTo(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistr
     // std::cout << "[CopyTo]: " << pointer << "," << mat->cols << "," << mat->rows << "," << mat->channels() << std::endl;
 }
 
+void PipelineOpencvLine(FvTexture *fv, std::vector<uint8_t> params, FlTextureRegistrar &registrar, std::vector<TFLiteModel *> *models, FlMethodChannel *flChannel)
+{
+    float x1 = *reinterpret_cast<float *>(&params[0]);
+    float y1 = *reinterpret_cast<float *>(&params[4]);
+    float x2 = *reinterpret_cast<float *>(&params[8]);
+    float y2 = *reinterpret_cast<float *>(&params[12]);
+    uint8_t r = params[16];
+    uint8_t g = params[17];
+    uint8_t b = params[18];
+    uint8_t alpha = params[19];
+    uint8_t thickness = params[20];
+    uint8_t lineType = params[21];
+
+    cv::line(fv->cvImage, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(b, g, r, alpha), thickness, lineType);
+}
+
 const FuncDef pipelineFuncs[] = {
     {0, "test", 0, 0, PipelineFuncTest},
     {1, "cvtColor", 0, 0, PipelineFuncOpencvCvtColor},
@@ -296,6 +312,7 @@ const FuncDef pipelineFuncs[] = {
     {16, "relu", 0, 0, PipelineFuncOpencvRelu},
     {17, "zeroDepthFilter", 0, 0, PipelineZeroDepthFilter},
     {18, "PipelineCopyTo", 0, 0, PipelineCopyTo},
+    {19, "cvLine", 0, 0, PipelineOpencvLine},
 };
 
 class Pipeline

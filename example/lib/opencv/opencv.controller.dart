@@ -127,6 +127,19 @@ class OpencvController extends GetxController {
     update();
   }
 
+  Future<void> drawLine() async {
+    if (originalCam == null || processCam == null || imgPath.isEmpty) return;
+
+    await _loadImage();
+
+    FvPipeline processPipeline = processCam!.rgbPipeline;
+    await processPipeline.cvLine(10, 10, 100, 100, 255, 0, 0, thickness: 2, at: 1, append: true);
+    await processPipeline.run();
+
+    pipelineInfo = await processPipeline.info();
+    update();
+  }
+
   Future<void> rotate() async {
     if (originalCam == null || processCam == null || imgPath.isEmpty) return;
 
