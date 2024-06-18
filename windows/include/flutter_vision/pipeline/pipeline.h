@@ -364,6 +364,9 @@ public:
         if (to == -1 || to >= funcs.size())
             to = funcs.size();
 
+        while (isRunning)
+            ;
+
         for (int i = from; i < to; i++)
         {
             try
@@ -396,7 +399,7 @@ public:
     {
         std::vector<size_t> removeIndex = {};
 
-isRunning = true;
+        isRunning = true;
         for (int i = 0; i < funcs.size(); i++)
         {
             if (funcs[i].interval > 0)
@@ -447,7 +450,8 @@ isRunning = true;
 
     void clear()
     {
-        while(isRunning);
+        while (isRunning)
+            ;
 
         funcs.clear();
     }

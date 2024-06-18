@@ -173,7 +173,7 @@ namespace
       std::string mode = "";
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
-      if (cam != nullptr && cam->type == (CameraType::OPENNI))
+      if (cam != nullptr)
       {
         cam->getCurrentVideoMode(index, mode);
 
