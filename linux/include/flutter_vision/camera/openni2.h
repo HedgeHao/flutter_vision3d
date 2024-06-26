@@ -16,10 +16,10 @@ public:
   int readVideoFeed() { return NOT_SUPPORT; }
   int configure(int prop, std::vector<float> &value) { return NOT_SUPPORT; }
   int getConfiguration(int prop) { return NOT_SUPPORT; }
-  void getIntrinsic(int index, double &fx, double &fy, double &cx, double &cy){};
+  void getIntrinsic(int index, double &fx, double &fy, double &cx, double &cy) {};
   bool enableImageRegistration(bool enable) { return NOT_SUPPORT; };
-  void getAvailableVideoModes(int index, std::vector<std::string> &){};
-  void getCurrentVideoMode(int index, std::string &mode){};
+  void getAvailableVideoModes(int index, std::vector<std::string> &) {};
+  void getCurrentVideoMode(int index, std::string &mode) {};
   bool setVideoMode(int index, int mode) { return NOT_SUPPORT; };
   bool getSerialNumber(std::string &sn) { return NOT_SUPPORT; };
   void loadPresetParameters(std::string &path) {}
@@ -75,7 +75,7 @@ public:
     device = nullptr;
   }
 
-  OpenniCam(const char *s) : FvCamera(s){};
+  OpenniCam(const char *s) : FvCamera(s) {};
 
   int camInit() { return 0; }
 
@@ -531,6 +531,10 @@ private:
         if (vsColor.readFrame(&rgbFrame) == STATUS_OK)
         {
           rgbTexture->cvImage = cv::Mat(rgbFrame.getHeight(), rgbFrame.getWidth(), CV_8UC3, (void *)rgbFrame.getData());
+          if (!crop.empty())
+          {
+            rgbTexture->cvImage = rgbTexture->cvImage(crop);
+          }
           rgbTexture->pipeline->run(rgbTexture, *flRegistrar, models, flChannel);
           rgbNewFrame = true;
         }

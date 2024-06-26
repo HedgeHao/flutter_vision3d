@@ -424,6 +424,8 @@ public:
             catch (std::exception &e)
             {
                 error = e.what();
+                std::cout << "[Pipeline Error]" << funcs[i].name << ":" << error << std::endl;
+                isRunning = false;
                 return -1;
             }
 
@@ -453,7 +455,8 @@ public:
 
     void clear()
     {
-        while(isRunning);
+        while (isRunning)
+            ;
 
         funcs.clear();
     }

@@ -138,9 +138,6 @@ static void flutter_vision_plugin_handle_method_call(
   }
   else if (strcmp(method, "ni2GetCurrentVideoMode") == 0)
   {
-#ifdef DISABLE_OPENNI
-    response = FL_METHOD_RESPONSE(fl_method_error_response_new("NOT SUPPORT", "NOT SUPPORT", nullptr));
-#else
     const char *serial = FL_ARG_STRING(args, "serial");
     const int index = FL_ARG_INT(args, "index");
 
@@ -153,7 +150,6 @@ static void flutter_vision_plugin_handle_method_call(
     }
 
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_string(mode.c_str())));
-#endif
   }
   else if (strcmp(method, "ni2SetVideoMode") == 0)
   {
@@ -174,6 +170,23 @@ static void flutter_vision_plugin_handle_method_call(
     }
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(ret)));
 #endif
+  }
+  else if (strcmp(method, "fvSetCameraCrop") == 0)
+  {
+    const char *serial = FL_ARG_STRING(args, "serial");
+    const int startX = FL_ARG_INT(args, "startX");
+    const int startY = FL_ARG_INT(args, "startY");
+    const int endX = FL_ARG_INT(args, "endX");
+    const int endY = FL_ARG_INT(args, "endY");
+
+    std::shared_ptr<FvCamera> cam = FvCamera::findCam(serial, &self->cams);
+    int ret = 0;
+    if (cam != nullptr)
+    {
+      cam->setCrop(startX, endX, startY, endY);
+    }
+
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(ret)));
   }
   else if (strcmp(method, "fvCameraOpen") == 0)
   {

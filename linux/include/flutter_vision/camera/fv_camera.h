@@ -33,6 +33,7 @@ public:
   bool pauseStream = false;
   int type;
   bool videoFeedProcessing = false;
+  cv::Rect crop;
 
   uint16_t *depthData = new uint16_t[1280 * 720];
   int depthWidth = 0, depthHeight = 0;
@@ -162,6 +163,12 @@ public:
   {
     return depthData;
   };
+
+  void setCrop(int startX, int endX, int startY, int endY)
+  {
+    crop = cv::Rect(startX, startY, endX, endY);
+    std::cout << "Set Crop Area:" << startX << "," << startY << "," << endX << "," << endY << std::endl;
+  }
 
   virtual int camInit() = 0;
   virtual int openDevice() = 0;

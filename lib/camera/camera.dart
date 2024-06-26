@@ -157,5 +157,9 @@ class FvCamera {
     return rData;
   }
 
+  Future<void> setCameraCrop({required int startX, required int startY, required int endX, required int endY}) async {
+    await FlutterVision.channel.invokeMethod('fvSetCameraCrop', {'serial': serial, 'startX': startX, 'startY': startY, 'endX': endX, 'endY': endY});
+  }
+
   Future<void> test(int rgbPointer, int depthPointer, int irPointer) async {}
 }
