@@ -421,6 +421,7 @@ public:
             catch (std::exception &e)
             {
                 error = e.what();
+                isRunning = false;
                 return -1;
             }
 

@@ -122,7 +122,7 @@ class RealsenseController extends GetxController {
   void pipelineRGB() async {
     FvPipeline uvcPipeline = cam!.rgbPipeline;
     await uvcPipeline.clear();
-    await uvcPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
+    await uvcPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
     await uvcPipeline.show();
 
     update([BUILDER_TEXTURE]);

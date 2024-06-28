@@ -206,6 +206,26 @@ namespace
 
       result->Success(flutter::EncodableValue(false));
     }
+    else if (method_call.method_name().compare("fvSetCameraCrop") == 0)
+    {
+      int startX;
+      parseDartArgument<int>(arguments, "startX", &startX);
+      int startY;
+      parseDartArgument<int>(arguments, "startY", &startX);
+      int endX;
+      parseDartArgument<int>(arguments, "endX", &startX);
+      int endY;
+      parseDartArgument<int>(arguments, "endY", &startX);
+
+      FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
+
+      if (cam != nullptr && cam->type == (CameraType::OPENNI))
+      {
+        cam->setCrop(startX, endX, startY, endY);
+      }
+
+      result->Success(flutter::EncodableValue(0));
+    }
     else if (method_call.method_name().compare("fvCameraOpen") == 0)
     {
       std::string serial;

@@ -35,6 +35,7 @@ public:
     bool videoFeedProcessing = false;
     uint16_t *depthData = new uint16_t[1280 * 720];
     int depthWidth = 0, depthHeight = 0;
+    cv::Rect crop;
 
     FvCamera() {}
 
@@ -141,6 +142,12 @@ public:
                 std::cout << "";
             }
         }
+    }
+
+    void setCrop(int startX, int endX, int startY, int endY)
+    {
+        crop = cv::Rect(startX, startY, endX, endY);
+        std::cout << "Set Crop Area:" << startX << "," << startY << "," << endX << "," << endY << std::endl;
     }
 
     uint16_t *getDepthData()

@@ -359,6 +359,7 @@ private:
         if (isRgbEnable && rgbFrame)
         {
           rgbTexture->cvImage = frame_to_mat(rgbFrame);
+          cv::cvtColor(rgbTexture->cvImage, rgbTexture->cvImage, cv::COLOR_BGR2RGB);
           rgbTexture->pipeline->run(rgbTexture, *flRegistrar, models, flChannel);
         }
 

@@ -54,7 +54,7 @@ public:
         device = nullptr;
     }
 
-    OpenniCam(const char *s) : FvCamera(s){};
+    OpenniCam(const char *s) : FvCamera(s) {};
 
     void camInit() {}
 
@@ -509,6 +509,10 @@ private:
                 if (vsColor.readFrame(&rgbFrame) == STATUS_OK)
                 {
                     rgbTexture->cvImage = cv::Mat(rgbFrame.getHeight(), rgbFrame.getWidth(), CV_8UC3, (void *)rgbFrame.getData());
+                    if (!crop.empty())
+                    {
+                        rgbTexture->cvImage = rgbTexture->cvImage(crop);
+                    }
                     rgbTexture->pipeline->run(rgbTexture, flRegistrar, models, flChannel);
                     rgbTexture->setPixelBuffer();
                     rgbNewFrame = true;
