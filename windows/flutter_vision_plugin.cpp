@@ -208,14 +208,17 @@ namespace
     }
     else if (method_call.method_name().compare("fvSetCameraCrop") == 0)
     {
+      std::string serial;
+      parseDartArgument<std::string>(arguments, "serial", &serial);
+
       int startX;
       parseDartArgument<int>(arguments, "startX", &startX);
       int startY;
-      parseDartArgument<int>(arguments, "startY", &startX);
+      parseDartArgument<int>(arguments, "startY", &startY);
       int endX;
-      parseDartArgument<int>(arguments, "endX", &startX);
+      parseDartArgument<int>(arguments, "endX", &endX);
       int endY;
-      parseDartArgument<int>(arguments, "endY", &startX);
+      parseDartArgument<int>(arguments, "endY", &endY);
 
       FvCamera *cam = FvCamera::findCam(serial.c_str(), &cams);
 
