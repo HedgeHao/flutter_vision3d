@@ -5,7 +5,7 @@
 void flutter3dVisionHandler(cv::Mat &img, float *result)
 {
   // OpenCV
-  cv::putText(img, "Handled By Flutter Vision", cv::Point(0, img.rows), cv::FONT_HERSHEY_PLAIN, 2, cv::Scalar(255, 0, 0), 2, cv::LINE_4);
+  cv::putText(img, "Handled By Flutter Vision 3D", cv::Point(0, img.rows), cv::FONT_HERSHEY_PLAIN, 2, cv::Scalar(255, 0, 0), 2, cv::LINE_4);
 
   // Tensorflow Inference
   result[0] = 11;

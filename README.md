@@ -1,4 +1,4 @@
-# Flutter Vision
+# Flutter Vision3D
 
 A framework for 2D & 3D image processing with AI (Tensorflow Lite)
 

@@ -68,7 +68,7 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Flutter Vision Examples"),
+        title: const Text("Flutter Vision 3D Examples"),
       ),
       body: ListView(
         children: [
