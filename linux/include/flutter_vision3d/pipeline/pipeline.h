@@ -22,7 +22,7 @@ void getCurrentTime(int64_t *timer)
 }
 
 #include "../tflite.h"
-#include "flutter_3d_vision_handler.h"
+#include "flutter_vision3d_handler.h"
 
 struct FuncDef
 {

@@ -134,7 +134,7 @@ else()
 endif()
 
 # List of absolute paths to libraries that should be bundled with the plugin
-set(flutter_3d_vision_bundled_libraries
+set(flutter_vision3d_bundled_libraries
   "${CMAKE_BINARY_DIR}/plugins/flutter_vision3d/handler/libflutter3dVisionHandler.so"
   PARENT_SCOPE
 )
