@@ -3,7 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  flutter_vision
+  flutter_vision3d
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

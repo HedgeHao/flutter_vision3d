@@ -1,4 +1,4 @@
-import 'package:flutter_vision/flutter_vision.dart';
+import 'package:flutter_vision3d/flutter_vision3d.dart';
 
 class OpencvMatShape {
   int cols;
@@ -16,12 +16,12 @@ class OpencvMat {
 
   static Future<OpencvMat> create() async {
     OpencvMat mat = OpencvMat();
-    mat.pointer = await FlutterVision.channel.invokeMethod('cvCreateMat');
+    mat.pointer = await FlutterVision3d.channel.invokeMethod('cvCreateMat');
     return mat;
   }
 
   Future<OpencvMatShape> shape() async {
-    var shape = await FlutterVision.channel.invokeMethod('cvGetShape', {'imagePointerA': pointer});
+    var shape = await FlutterVision3d.channel.invokeMethod('cvGetShape', {'imagePointerA': pointer});
     return OpencvMatShape(cols: shape['cols'], rows: shape['rows'], channels: shape['channels']);
   }
 
@@ -29,7 +29,7 @@ class OpencvMat {
     if (matB == null && matBPointer == null) return -1;
 
     int pointerB = (matB != null ? matB.pointer : matBPointer!);
-    return await FlutterVision.channel.invokeMethod('cvCopyTo', {'imagePointerA': pointer, 'imagePointerB': pointerB});
+    return await FlutterVision3d.channel.invokeMethod('cvCopyTo', {'imagePointerA': pointer, 'imagePointerB': pointerB});
   }
 
   Future<int> subtract({OpencvMat? matB, OpencvMat? matDest, int? matBPointer, int? matDestPointer}) async {
@@ -38,16 +38,16 @@ class OpencvMat {
     int pointerB = (matB != null ? matB.pointer : matBPointer!);
     int pointerDest = (matDest != null) ? matDest.pointer : matDestPointer!;
 
-    return await FlutterVision.channel.invokeMethod('cvSubtract', {'imagePointerA': pointer, 'imagePointerB': pointerB, 'imagePointerDest': pointerDest});
+    return await FlutterVision3d.channel.invokeMethod('cvSubtract', {'imagePointerA': pointer, 'imagePointerB': pointerB, 'imagePointerDest': pointerDest});
   }
 
   Future<int> threshold({OpencvMat? matDest, int? matDestPointer, required double min, required double max, required int type}) async {
     if (matDest == null && matDestPointer == null) return -1;
     int pointerDest = (matDest != null) ? matDest.pointer : matDestPointer!;
-    return await FlutterVision.channel.invokeMethod('cvThreshold', {'imagePointerA': pointer, 'imagePointerDest': pointerDest, 'min': min, 'max': max, 'type': type});
+    return await FlutterVision3d.channel.invokeMethod('cvThreshold', {'imagePointerA': pointer, 'imagePointerDest': pointerDest, 'min': min, 'max': max, 'type': type});
   }
 
   Future<int> countNonZero() async {
-    return await FlutterVision.channel.invokeMethod('cvCountNonZero', {'imagePointerA': pointer});
+    return await FlutterVision3d.channel.invokeMethod('cvCountNonZero', {'imagePointerA': pointer});
   }
 }

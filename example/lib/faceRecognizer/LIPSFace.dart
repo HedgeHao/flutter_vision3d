@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:flutter_vision/algorithm.dart';
+import 'package:flutter_vision3d/algorithm.dart';
 
 int numClasses = 1;
 int downsampleScale = 8;

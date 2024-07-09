@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_vision/flutter_vision.dart';
-import 'package:flutter_vision_example/openni2/openni2.controller.dart';
-import 'package:flutter_vision_example/widgets/pointcloud/pointcloud.view.dart';
+import 'package:flutter_vision3d/flutter_vision3d.dart';
+import 'package:flutter_vision3d_example/openni2/openni2.controller.dart';
+import 'package:flutter_vision3d_example/widgets/pointcloud/pointcloud.view.dart';
 import 'package:get/get.dart';
 
 class OpenNIView extends GetView<OpenNIController> {

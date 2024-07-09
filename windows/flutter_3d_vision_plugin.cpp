@@ -1,4 +1,4 @@
-#include "include/flutter_vision/flutter_vision_plugin.h"
+#include "include/flutter_vision3d/flutter_vision3d_plugin.h"
 
 // This must be included before many other Windows headers.
 #include <windows.h>
@@ -12,16 +12,16 @@
 #include <sstream>
 #include <thread>
 
-#include "include/flutter_vision/pipeline/pipeline.h"
-#include "include/flutter_vision/texture.h"
-#include "include/flutter_vision/camera/realsense.h"
-#include "include/flutter_vision/camera/openni2.h"
-#include "include/flutter_vision/camera/dummy.h"
-#include "include/flutter_vision/camera/uvc.h"
-#include "include/flutter_vision/barcode_scanner/opencv_barcode.hpp"
-#include "include/flutter_vision/barcode_scanner/zxing.hpp"
+#include "include/flutter_vision3d/pipeline/pipeline.h"
+#include "include/flutter_vision3d/texture.h"
+#include "include/flutter_vision3d/camera/realsense.h"
+#include "include/flutter_vision3d/camera/openni2.h"
+#include "include/flutter_vision3d/camera/dummy.h"
+#include "include/flutter_vision3d/camera/uvc.h"
+#include "include/flutter_vision3d/barcode_scanner/opencv_barcode.hpp"
+#include "include/flutter_vision3d/barcode_scanner/zxing.hpp"
 
-#include "include/flutter_vision/opengl/opengl.h"
+#include "include/flutter_vision3d/opengl/opengl.h"
 
 #define PIPELINE_INDEX_TFLITE 8
 
@@ -47,7 +47,7 @@ namespace
     }
   }
 
-  class FlutterVisionPlugin : public flutter::Plugin
+  class FlutterVision3dPlugin : public flutter::Plugin
   {
   public:
     flutter::MethodChannel<flutter::EncodableValue> *flChannel;
@@ -60,9 +60,9 @@ namespace
 
     static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);
 
-    FlutterVisionPlugin(flutter::TextureRegistrar *texture_registrar);
+    FlutterVision3dPlugin(flutter::TextureRegistrar *texture_registrar);
 
-    virtual ~FlutterVisionPlugin();
+    virtual ~FlutterVision3dPlugin();
 
   private:
     // Called when a method is called on this plugin's channel from Dart.
@@ -76,15 +76,15 @@ namespace
   };
 
   // static
-  void FlutterVisionPlugin::RegisterWithRegistrar(
+  void FlutterVision3dPlugin::RegisterWithRegistrar(
       flutter::PluginRegistrarWindows *registrar)
   {
-    auto plugin = std::make_unique<FlutterVisionPlugin>(registrar->texture_registrar());
+    auto plugin = std::make_unique<FlutterVision3dPlugin>(registrar->texture_registrar());
 
     plugin->flChannel =
         new flutter::MethodChannel<flutter::EncodableValue>(
             registrar->messenger(),
-            "flutter_vision",
+            "flutter_vision3d",
             &flutter::StandardMethodCodec::GetInstance());
 
     plugin->flChannel->SetMethodCallHandler(
@@ -98,16 +98,16 @@ namespace
     registrar->AddPlugin(std::move(plugin));
   }
 
-  FlutterVisionPlugin::FlutterVisionPlugin(flutter::TextureRegistrar *texture_registrar)
+  FlutterVision3dPlugin::FlutterVision3dPlugin(flutter::TextureRegistrar *texture_registrar)
   {
     textureRegistrar = texture_registrar;
     uvcTexture = std::make_unique<FvTexture>(textureRegistrar);
     glfl = new OpenGLFL(textureRegistrar);
   }
 
-  FlutterVisionPlugin::~FlutterVisionPlugin() {}
+  FlutterVision3dPlugin::~FlutterVision3dPlugin() {}
 
-  void FlutterVisionPlugin::HandleMethodCall(
+  void FlutterVision3dPlugin::HandleMethodCall(
       const flutter::MethodCall<flutter::EncodableValue> &method_call,
       std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result)
   {
@@ -1135,10 +1135,10 @@ namespace
 
 } // namespace
 
-void FlutterVisionPluginRegisterWithRegistrar(
+void FlutterVision3dPluginRegisterWithRegistrar(
     FlutterDesktopPluginRegistrarRef registrar)
 {
-  FlutterVisionPlugin::RegisterWithRegistrar(
+  FlutterVision3dPlugin::RegisterWithRegistrar(
       flutter::PluginRegistrarManager::GetInstance()
           ->GetRegistrar<flutter::PluginRegistrarWindows>(registrar));
 }

@@ -1,8 +1,8 @@
-name: flutter_vision
+name: flutter_vision3d
 description: Framework for 2D and 3D image processing. Integrate with OpenCV, OpenNI2, Realsense2 and TensorFlow Lite.
-version: 1.0.2
-homepage: https://github.com/HedgeHao/flutter_vision
-repository: https://github.com/HedgeHao/flutter_vision
+version: 1.0.3
+homepage: https://github.com/HedgeHao/flutter_vision3d
+repository: https://github.com/HedgeHao/flutter_vision3d
 
 environment:
   sdk: ">=2.16.1 <3.0.0"
@@ -21,9 +21,9 @@ flutter:
   plugin:
     platforms:
       # android:
-      #   package: tw.hedgehao.flutter_vision
-      #   pluginClass: FlutterVisionPlugin
+      #   package: tw.hedgehao.flutter_vision3d
+      #   pluginClass: FlutterVision3dPlugin
       linux:
-        pluginClass: FlutterVisionPlugin
+        pluginClass: FlutterVision3dPlugin
       windows:
-        pluginClass: FlutterVisionPlugin
+        pluginClass: FlutterVision3dPlugin

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_vision_example/widgets/pointcloud/pointcloud.controller.dart';
+import 'package:flutter_vision3d_example/widgets/pointcloud/pointcloud.controller.dart';
 import 'package:get/get.dart';
 
 class PointCloud extends StatelessWidget {

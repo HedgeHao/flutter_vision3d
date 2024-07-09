@@ -1,5 +1,5 @@
 import 'package:flutter/gestures.dart';
-import 'package:flutter_vision/flutter_vision.dart';
+import 'package:flutter_vision3d/flutter_vision3d.dart';
 import 'package:get/get.dart';
 
 enum MOUSEBUTTON {
@@ -39,11 +39,11 @@ class PointCloudController extends GetxController {
         pitch -= (details.position.dy - mouseLastY) * mouseMoveSensitivityAngle;
         yaw %= 360;
         pitch %= 360;
-        FlutterVision.openglSetCamAngle(yaw, pitch);
+        FlutterVision3d.openglSetCamAngle(yaw, pitch);
       } else if (details.buttons == MOUSEBUTTON.right.index) {
         camPosX += (details.position.dx - mouseLastX) * mouseMoveSensitivityPos;
         camPosY -= (details.position.dy - mouseLastY) * mouseMoveSensitivityPos;
-        FlutterVision.openglSetCamPosition(camPosX, camPosY, camPosZ);
+        FlutterVision3d.openglSetCamPosition(camPosX, camPosY, camPosZ);
       }
     }
 
@@ -58,7 +58,7 @@ class PointCloudController extends GetxController {
       } else {
         fov += eyeZOffset;
       }
-      FlutterVision.openglSetCamFov(fov);
+      FlutterVision3d.openglSetCamFov(fov);
     }
   }
 }

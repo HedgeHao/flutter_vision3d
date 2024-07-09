@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_vision_example/opencv/opencv.controller.dart';
+import 'package:flutter_vision3d_example/opencv/opencv.controller.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart';
 

@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "tw.hedgehao" "\0"
-            VALUE "FileDescription", "Demonstrates how to use the flutter_vision plugin." "\0"
+            VALUE "FileDescription", "Demonstrates how to use the flutter_vision3d plugin." "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "flutter_vision_example" "\0"
+            VALUE "InternalName", "flutter_vision3d_example" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2022 HedgeHao. All rights reserved." "\0"
-            VALUE "OriginalFilename", "flutter_vision_example.exe" "\0"
-            VALUE "ProductName", "flutter_vision_example" "\0"
+            VALUE "OriginalFilename", "flutter_vision3d_example.exe" "\0"
+            VALUE "ProductName", "flutter_vision3d_example" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -6,4 +6,4 @@
 #define _EXPORT_
 #endif
 
-_EXPORT_ void flutterVisionHandler(cv::Mat &, float *);
+_EXPORT_ void flutter3dVisionHandler(cv::Mat &, float *);

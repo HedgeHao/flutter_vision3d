@@ -22,7 +22,7 @@ void getCurrentTime(int64_t *timer)
 }
 
 #include "../tflite.h"
-#include "flutter_vision_handler.h"
+#include "flutter_3d_vision_handler.h"
 
 struct FuncDef
 {
@@ -177,7 +177,7 @@ void PipelineFuncCustomHandler(FvTexture *fv, std::vector<uint8_t> params, FlTex
 {
     int size = (params[0] << 8) + params[1];
     float *result = new float[size]{0};
-    flutterVisionHandler(fv->cvImage, result);
+    flutter3dVisionHandler(fv->cvImage, result);
     fl_method_channel_invoke_method(flChannel, "onHandled", fl_value_new_float32_list(result, size), nullptr, nullptr, NULL);
 }
 
