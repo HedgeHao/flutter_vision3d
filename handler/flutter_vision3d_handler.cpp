@@ -1,8 +1,8 @@
-#include "flutter_3d_vision_handler.h"
+#include "flutter_vision3d_handler.h"
 
 #include <opencv2/imgproc/imgproc.hpp>
 
-void flutter3dVisionHandler(cv::Mat &img, float *result)
+void flutterVision3dHandler(cv::Mat &img, float *result)
 {
   // OpenCV
   cv::putText(img, "Handled By Flutter Vision 3D", cv::Point(0, img.rows), cv::FONT_HERSHEY_PLAIN, 2, cv::Scalar(255, 0, 0), 2, cv::LINE_4);

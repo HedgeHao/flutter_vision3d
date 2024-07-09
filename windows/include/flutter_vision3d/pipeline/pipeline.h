@@ -12,7 +12,7 @@
 #include "../texture.h"
 
 #include "../tflite.h"
-#include "flutter_3d_vision_handler.h"
+#include "flutter_vision3d_handler.h"
 
 void getCurrentTime(int64_t *timer)
 {
@@ -168,7 +168,7 @@ void PipelineFuncCustomHandler(std::unique_ptr<FvTexture> &fv, std::vector<uint8
 {
     int size = (params[0] << 8) + params[1];
     float *result = new float[size]{0};
-    flutter3dVisionHandler(fv->cvImage, result);
+    flutterVision3dHandler(fv->cvImage, result);
 
     std::vector<float> list(result, result + size);
     std::unique_ptr<flutter::EncodableValue> test = std::make_unique<flutter::EncodableValue>(list);

@@ -177,7 +177,7 @@ void PipelineFuncCustomHandler(FvTexture *fv, std::vector<uint8_t> params, FlTex
 {
     int size = (params[0] << 8) + params[1];
     float *result = new float[size]{0};
-    flutter3dVisionHandler(fv->cvImage, result);
+    flutterVision3dHandler(fv->cvImage, result);
     fl_method_channel_invoke_method(flChannel, "onHandled", fl_value_new_float32_list(result, size), nullptr, nullptr, NULL);
 }
 

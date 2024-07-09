@@ -11,14 +11,14 @@ endif()
 # not be changed
 set(PLUGIN_NAME "flutter_vision3d_plugin")
 
-message("FLUTTER_3D_VISION_DEP=$ENV{FLUTTER_3D_VISION_DEP}")
+message("FLUTTER_VISION3D_DEP=$ENV{FLUTTER_VISION3D_DEP}")
 include_directories(
-	"$ENV{FLUTTER_3D_VISION_DEP}/opencv/include"
-  "$ENV{FLUTTER_3D_VISION_DEP}/realsense2/include"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opengl/include"
-  "$ENV{FLUTTER_3D_VISION_DEP}/tensorflowlite/include/"
-  "$ENV{FLUTTER_3D_VISION_DEP}/zxing/include/"
-	"$ENV{FLUTTER_3D_VISION_DEP}/lipsedge/include"
+	"$ENV{FLUTTER_VISION3D_DEP}/opencv/include"
+  "$ENV{FLUTTER_VISION3D_DEP}/realsense2/include"
+  "$ENV{FLUTTER_VISION3D_DEP}/opengl/include"
+  "$ENV{FLUTTER_VISION3D_DEP}/tensorflowlite/include/"
+  "$ENV{FLUTTER_VISION3D_DEP}/zxing/include/"
+	"$ENV{FLUTTER_VISION3D_DEP}/lipsedge/include"
   "${PROJECT_SOURCE_DIR}/include/"
 )
 
@@ -35,46 +35,46 @@ target_include_directories(${PLUGIN_NAME} INTERFACE
 target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
 
 
-set(OpenCV_DIR "$ENV{FLUTTER_3D_VISION_DEP}/opencv")
+set(OpenCV_DIR "$ENV{FLUTTER_VISION3D_DEP}/opencv")
 find_package(OpenCV REQUIRED)
 
 target_link_libraries(${PLUGIN_NAME} PRIVATE
-  "$ENV{FLUTTER_3D_VISION_DEP}/realsense2/lib/x64/realsense2.lib"
-  "$ENV{FLUTTER_3D_VISION_DEP}/tensorflowlite/lib/tensorflowlite.dll.if.lib"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opengl/lib/glew32.lib"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opengl/lib/glfw3.lib"
-  optimized "$ENV{FLUTTER_3D_VISION_DEP}/zxing/lib/ZXing.lib"
-  debug "$ENV{FLUTTER_3D_VISION_DEP}/zxing/lib/ZXingd.lib"
-  "$ENV{FLUTTER_3D_VISION_DEP}/lipsedge/lib/OpenNI2.lib"
+  "$ENV{FLUTTER_VISION3D_DEP}/realsense2/lib/x64/realsense2.lib"
+  "$ENV{FLUTTER_VISION3D_DEP}/tensorflowlite/lib/tensorflowlite.dll.if.lib"
+  "$ENV{FLUTTER_VISION3D_DEP}/opengl/lib/glew32.lib"
+  "$ENV{FLUTTER_VISION3D_DEP}/opengl/lib/glfw3.lib"
+  optimized "$ENV{FLUTTER_VISION3D_DEP}/zxing/lib/ZXing.lib"
+  debug "$ENV{FLUTTER_VISION3D_DEP}/zxing/lib/ZXingd.lib"
+  "$ENV{FLUTTER_VISION3D_DEP}/lipsedge/lib/OpenNI2.lib"
   ${OpenCV_LIBS}
   opengl32
-  "$ENV{FLUTTER_3D_VISION_DEP}/handler/build/flutter3dVisionHandler.lib"
+  "$ENV{FLUTTER_VISION3D_DEP}/handler/build/flutterVision3dHandler.lib"
 )
 
 # List of absolute paths to libraries that should be bundled with the plugin
 set(flutter_3d_vision_bundled_libraries
-  "$ENV{FLUTTER_3D_VISION_DEP}/tensorflowlite/bin/tensorflowlite.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opengl/bin/glew32.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/realsense2/bin/x64/realsense2.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/handler/build/flutter3dVisionHandler.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opencv/x64/vc16/bin/opencv_barcode460.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opencv/x64/vc16/bin/opencv_barcode460d.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opencv/x64/vc16/bin/opencv_core460.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opencv/x64/vc16/bin/opencv_core460d.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opencv/x64/vc16/bin/opencv_dnn460.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opencv/x64/vc16/bin/opencv_dnn460d.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opencv/x64/vc16/bin/opencv_highgui460.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opencv/x64/vc16/bin/opencv_highgui460d.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opencv/x64/vc16/bin/opencv_imgcodecs460.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opencv/x64/vc16/bin/opencv_imgcodecs460d.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opencv/x64/vc16/bin/opencv_imgproc460.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opencv/x64/vc16/bin/opencv_imgproc460d.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opencv/x64/vc16/bin/opencv_videoio460.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opencv/x64/vc16/bin/opencv_videoio460d.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opencv/x64/vc16/bin/opencv_wechat_qrcode460.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/opencv/x64/vc16/bin/opencv_wechat_qrcode460d.dll"
-  "$ENV{FLUTTER_3D_VISION_DEP}/lipsedge/OpenNI2"
-  "$ENV{FLUTTER_3D_VISION_DEP}/lipsedge/OpenNI.ini"
-  "$ENV{FLUTTER_3D_VISION_DEP}/lipsedge/OpenNI2.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/tensorflowlite/bin/tensorflowlite.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/opengl/bin/glew32.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/realsense2/bin/x64/realsense2.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/handler/build/flutterVision3dHandler.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/opencv/x64/vc16/bin/opencv_barcode460.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/opencv/x64/vc16/bin/opencv_barcode460d.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/opencv/x64/vc16/bin/opencv_core460.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/opencv/x64/vc16/bin/opencv_core460d.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/opencv/x64/vc16/bin/opencv_dnn460.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/opencv/x64/vc16/bin/opencv_dnn460d.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/opencv/x64/vc16/bin/opencv_highgui460.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/opencv/x64/vc16/bin/opencv_highgui460d.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/opencv/x64/vc16/bin/opencv_imgcodecs460.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/opencv/x64/vc16/bin/opencv_imgcodecs460d.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/opencv/x64/vc16/bin/opencv_imgproc460.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/opencv/x64/vc16/bin/opencv_imgproc460d.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/opencv/x64/vc16/bin/opencv_videoio460.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/opencv/x64/vc16/bin/opencv_videoio460d.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/opencv/x64/vc16/bin/opencv_wechat_qrcode460.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/opencv/x64/vc16/bin/opencv_wechat_qrcode460d.dll"
+  "$ENV{FLUTTER_VISION3D_DEP}/lipsedge/OpenNI2"
+  "$ENV{FLUTTER_VISION3D_DEP}/lipsedge/OpenNI.ini"
+  "$ENV{FLUTTER_VISION3D_DEP}/lipsedge/OpenNI2.dll"
   PARENT_SCOPE
 )

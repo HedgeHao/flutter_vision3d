@@ -32,7 +32,7 @@ A framework for 2D & 3D image processing with AI (Tensorflow Lite)
 
 ![](doc/img/screenshot5.png)
 
-3. Add system environment variable `FLUTTER_3D_VISION_DEP`
+3. Add system environment variable `FLUTTER_VISION3D_DEP`
 
 ![](doc/img/screenshot4.png)
 
