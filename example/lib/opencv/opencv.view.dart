@@ -13,7 +13,6 @@ class OpencvView extends GetView<OpencvController> {
   @override
   Widget build(BuildContext context) {
     ctl.text = join(File(Platform.resolvedExecutable).parent.absolute.path, 'data', 'flutter_assets', 'assets', 'flutter_logo.png');
-    ctl.text = 'C:/Users/Acer/Desktop/barcode.jpg';
     controller.imgPath = ctl.text;
 
     Size size = MediaQuery.of(context).size;
