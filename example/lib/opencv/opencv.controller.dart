@@ -2,11 +2,11 @@ import 'dart:io';
 import 'dart:math';
 import 'package:path/path.dart';
 
-import 'package:flutter_vision/camera/camera.dart';
-import 'package:flutter_vision/camera/dummy.dart';
-import 'package:flutter_vision/constants.dart';
-import 'package:flutter_vision/flutter_vision.dart';
-import 'package:flutter_vision/model.dart';
+import 'package:flutter_vision3d/camera/camera.dart';
+import 'package:flutter_vision3d/camera/dummy.dart';
+import 'package:flutter_vision3d/constants.dart';
+import 'package:flutter_vision3d/flutter_vision3d.dart';
+import 'package:flutter_vision3d/model.dart';
 import 'package:get/get.dart';
 
 class OpencvController extends GetxController {
@@ -192,11 +192,11 @@ class OpencvController extends GetxController {
 
     String assetFolder = join(File(Platform.resolvedExecutable).parent.absolute.path, 'data', 'flutter_assets', 'assets');
 
-    bool ret = await FlutterVision.barcodeInit("$assetFolder/barcode_sr.prototxt", '$assetFolder/barcode_sr.caffemodel');
+    bool ret = await FlutterVision3d.barcodeInit("$assetFolder/barcode_sr.prototxt", '$assetFolder/barcode_sr.caffemodel');
 
     if (!ret) return [];
 
     int pointer = await processCam!.getOpenCVMat(1);
-    return await FlutterVision.barcodeDecode(pointer);
+    return await FlutterVision3d.barcodeDecode(pointer);
   }
 }

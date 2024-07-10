@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_vision_example/hand_detection/hand_detection.controller.dart';
+import 'package:flutter_vision3d_example/hand_detection/hand_detection.controller.dart';
 import 'package:get/get.dart';
 
 final TextEditingController ctl = TextEditingController()..text = '0';

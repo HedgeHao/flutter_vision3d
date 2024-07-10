@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
-set(PROJECT_NAME "flutter_vision")
+set(PROJECT_NAME "flutter_vision3d")
 project(${PROJECT_NAME} LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "-Wno-error=deprecated-declarations -Wno-deprecated-declarations ")
 
 # This value is used when generating builds using this plugin, so it must
 # not be changed
-set(PLUGIN_NAME "flutter_vision_plugin")
+set(PLUGIN_NAME "flutter_vision3d_plugin")
 
 add_subdirectory("${PROJECT_SOURCE_DIR}/../handler/" "handler/")
 
@@ -20,7 +20,7 @@ link_directories(
 )
 
 add_library(${PLUGIN_NAME} SHARED
-  "flutter_vision_plugin.cc"
+  "flutter_vision3d_plugin.cc"
 )
 apply_standard_settings(${PLUGIN_NAME})
 set_target_properties(${PLUGIN_NAME} PROPERTIES
@@ -39,7 +39,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE ${OPENGL_LIBRARIES})
 find_package(GLEW REQUIRED)
 target_link_libraries(${PLUGIN_NAME} PRIVATE GLEW::GLEW)
 
-target_link_libraries(${PLUGIN_NAME} PRIVATE flutterVisionHandler)
+target_link_libraries(${PLUGIN_NAME} PRIVATE flutterVision3dHandler)
 
 # OpenCV
 find_package(OpenCV 4.0.0 REQUIRED COMPONENTS core imgproc highgui)
@@ -64,7 +64,7 @@ endif()
 find_path(OPENNI2_INC NAMES OpenNI.h HINTS "$ENV{OPENNI2_INCLUDE}")
 find_library(OPENNI2_LIB NAMES OpenNI2 HINTS "$ENV{OPENNI2_REDIST}")
 
-if(OPENNI2_INC AND OPENNI2_LIB)
+if(${OPENNI2_INC} AND ${OPENNI2_LIB})
   include_directories($ENV{OPENNI2_INCLUDE})
   target_link_libraries(${PLUGIN_NAME} PRIVATE OpenNI2)
 else()
@@ -134,7 +134,7 @@ else()
 endif()
 
 # List of absolute paths to libraries that should be bundled with the plugin
-set(flutter_vision_bundled_libraries
-  "${CMAKE_BINARY_DIR}/plugins/flutter_vision/handler/libflutterVisionHandler.so"
+set(flutter_vision3d_bundled_libraries
+  "${CMAKE_BINARY_DIR}/plugins/flutter_vision3d/handler/libflutter3dVisionHandler.so"
   PARENT_SCOPE
 )

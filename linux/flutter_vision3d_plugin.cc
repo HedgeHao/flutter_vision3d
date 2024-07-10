@@ -1,18 +1,18 @@
-#include "include/flutter_vision/flutter_vision_plugin.h"
+#include "include/flutter_vision3d/flutter_vision3d_plugin.h"
 
 #include <flutter_linux/flutter_linux.h>
 #include <gtk/gtk.h>
 #include <sys/utsname.h>
 
-#include "include/flutter_vision/pipeline/pipeline.h"
-#include "include/flutter_vision/tflite.h"
+#include "include/flutter_vision3d/pipeline/pipeline.h"
+#include "include/flutter_vision3d/tflite.h"
 
-#include "include/flutter_vision/camera/realsense.h"
-#include "include/flutter_vision/camera/openni2.h"
-#include "include/flutter_vision/camera/dummy.h"
-#include "include/flutter_vision/camera/uvc.h"
-#include "include/flutter_vision/camera/ros2.h"
-#include "include/flutter_vision/fv_texture.h"
+#include "include/flutter_vision3d/camera/realsense.h"
+#include "include/flutter_vision3d/camera/openni2.h"
+#include "include/flutter_vision3d/camera/dummy.h"
+#include "include/flutter_vision3d/camera/uvc.h"
+#include "include/flutter_vision3d/camera/ros2.h"
+#include "include/flutter_vision3d/fv_texture.h"
 
 #include <cstring>
 #include <memory>
@@ -25,9 +25,9 @@
 #define FL_ARG_INT32_LIST(args, name) fl_value_get_int32_list(fl_value_lookup_string(args, name))
 #define FL_ARG_FLOAT_LIST(args, name) fl_value_get_float_list(fl_value_lookup_string(args, name))
 
-#define FLUTTER_VISION_PLUGIN(obj)                                     \
-  (G_TYPE_CHECK_INSTANCE_CAST((obj), flutter_vision_plugin_get_type(), \
-                              FlutterVisionPlugin))
+#define flutter_vision3d_PLUGIN(obj)                                     \
+  (G_TYPE_CHECK_INSTANCE_CAST((obj), flutter_vision3d_plugin_get_type(), \
+                              FlutterVision3dPlugin))
 
 enum CameraType
 {
@@ -51,7 +51,7 @@ RealsenseCam *findRsCam(const char *serial, std::vector<RealsenseCam *> *cams)
   return nullptr;
 }
 
-struct _FlutterVisionPlugin
+struct _FlutterVision3dPlugin
 {
   GObject parent_instance;
 
@@ -70,11 +70,11 @@ struct _FlutterVisionPlugin
   uint16_t *emptyUint16List = {};
 };
 
-G_DEFINE_TYPE(FlutterVisionPlugin, flutter_vision_plugin, g_object_get_type())
+G_DEFINE_TYPE(FlutterVision3dPlugin, flutter_vision3d_plugin, g_object_get_type())
 
 // Called when a method call is received from Flutter.
-static void flutter_vision_plugin_handle_method_call(
-    FlutterVisionPlugin *self,
+static void flutter_vision3d_plugin_handle_method_call(
+    FlutterVision3dPlugin *self,
     FlMethodCall *method_call)
 {
   g_autoptr(FlMethodResponse) response = nullptr;
@@ -900,18 +900,18 @@ static void flutter_vision_plugin_handle_method_call(
   fl_method_call_respond(method_call, response, nullptr);
 }
 
-static void flutter_vision_plugin_dispose(GObject *object)
+static void flutter_vision3d_plugin_dispose(GObject *object)
 {
-  G_OBJECT_CLASS(flutter_vision_plugin_parent_class)->dispose(object);
+  G_OBJECT_CLASS(flutter_vision3d_plugin_parent_class)->dispose(object);
 
 #ifndef DISABLE_ROS
   rclcpp::shutdown();
 #endif
 }
 
-static void flutter_vision_plugin_class_init(FlutterVisionPluginClass *klass)
+static void flutter_vision3d_plugin_class_init(FlutterVision3dPluginClass *klass)
 {
-  G_OBJECT_CLASS(klass)->dispose = flutter_vision_plugin_dispose;
+  G_OBJECT_CLASS(klass)->dispose = flutter_vision3d_plugin_dispose;
 
 #ifndef DISABLE_ROS
   char *argv[] = {strdup("/")};
@@ -919,24 +919,24 @@ static void flutter_vision_plugin_class_init(FlutterVisionPluginClass *klass)
 #endif
 }
 
-static void flutter_vision_plugin_init(FlutterVisionPlugin *self) {}
+static void flutter_vision3d_plugin_init(FlutterVision3dPlugin *self) {}
 
 static void method_call_cb(FlMethodChannel *channel, FlMethodCall *method_call,
                            gpointer user_data)
 {
-  FlutterVisionPlugin *plugin = FLUTTER_VISION_PLUGIN(user_data);
-  flutter_vision_plugin_handle_method_call(plugin, method_call);
+  FlutterVision3dPlugin *plugin = flutter_vision3d_PLUGIN(user_data);
+  flutter_vision3d_plugin_handle_method_call(plugin, method_call);
 }
 
-void flutter_vision_plugin_register_with_registrar(FlPluginRegistrar *registrar)
+void flutter_vision3d_plugin_register_with_registrar(FlPluginRegistrar *registrar)
 {
-  FlutterVisionPlugin *plugin = FLUTTER_VISION_PLUGIN(
-      g_object_new(flutter_vision_plugin_get_type(), nullptr));
+  FlutterVision3dPlugin *plugin = flutter_vision3d_PLUGIN(
+      g_object_new(flutter_vision3d_plugin_get_type(), nullptr));
 
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   g_autoptr(FlMethodChannel) channel =
       fl_method_channel_new(fl_plugin_registrar_get_messenger(registrar),
-                            "flutter_vision",
+                            "flutter_vision3d",
                             FL_METHOD_CODEC(codec));
   fl_method_channel_set_method_call_handler(channel, method_call_cb,
                                             g_object_ref(plugin),

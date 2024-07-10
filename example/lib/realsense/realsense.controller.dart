@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_vision/camera/camera.dart';
-import 'package:flutter_vision/camera/realsense.dart';
-import 'package:flutter_vision/camera/dummy.dart';
-import 'package:flutter_vision/constants.dart';
-import 'package:flutter_vision/flutter_vision.dart';
-import 'package:flutter_vision/opencv_mat.dart';
+import 'package:flutter_vision3d/camera/camera.dart';
+import 'package:flutter_vision3d/camera/realsense.dart';
+import 'package:flutter_vision3d/camera/dummy.dart';
+import 'package:flutter_vision3d/constants.dart';
+import 'package:flutter_vision3d/flutter_vision3d.dart';
+import 'package:flutter_vision3d/opencv_mat.dart';
 import 'package:get/get.dart';
 
 class RealsenseController extends GetxController {
@@ -155,7 +155,7 @@ class RealsenseController extends GetxController {
   }
 
   void enumerateDevice() async {
-    deviceList = await FlutterVision.rsEnumerateDevices();
+    deviceList = await FlutterVision3d.rsEnumerateDevices();
 
     if (deviceList.isNotEmpty) {
       selectedRsDevice = deviceList[0];
@@ -165,7 +165,7 @@ class RealsenseController extends GetxController {
   }
 
   void openglRender() {
-    FlutterVision.openglRender().then((value) => {
+    FlutterVision3d.openglRender().then((value) => {
           if (pointCloud) {Future.delayed(const Duration(milliseconds: 1), openglRender)}
         });
   }
@@ -183,7 +183,7 @@ class RealsenseController extends GetxController {
       }
     }
 
-    openglTextureId = await FlutterVision.getOpenglTextureId();
+    openglTextureId = await FlutterVision3d.getOpenglTextureId();
 
     update([BUILDER_TEXTURE_OPENGL]);
   }

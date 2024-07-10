@@ -1,15 +1,15 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_vision/camera/camera.dart';
-import 'package:flutter_vision/camera/openni.dart';
-import 'package:flutter_vision/constants.dart';
-import 'package:flutter_vision/flutter_vision.dart';
+import 'package:flutter_vision3d/camera/camera.dart';
+import 'package:flutter_vision3d/camera/openni.dart';
+import 'package:flutter_vision3d/constants.dart';
+import 'package:flutter_vision3d/flutter_vision3d.dart';
 import 'package:get/get.dart';
 
 class OpenNIController extends GetxController {
   OpenNIController() {
-    FlutterVision.niInitialize();
+    FlutterVision3d.niInitialize();
   }
 
   static const BUILDER_DEVICE_LIST = 'BUILDER_DEVICE_LIST';
@@ -108,7 +108,7 @@ class OpenNIController extends GetxController {
   }
 
   void enumerateDevice() async {
-    deviceList = await FlutterVision.enumerateDevices();
+    deviceList = await FlutterVision3d.enumerateDevices();
 
     if (deviceList.isNotEmpty) {
       selectedNiDevice = deviceList[0];
@@ -118,7 +118,7 @@ class OpenNIController extends GetxController {
   }
 
   void openglRender() {
-    FlutterVision.openglRender().then((value) => {
+    FlutterVision3d.openglRender().then((value) => {
           if (pointCloud) {Future.delayed(const Duration(milliseconds: 1), openglRender)}
         });
   }
@@ -136,7 +136,7 @@ class OpenNIController extends GetxController {
       }
     }
 
-    openglTextureId = await FlutterVision.getOpenglTextureId();
+    openglTextureId = await FlutterVision3d.getOpenglTextureId();
 
     update([BUILDER_TEXTURE_OPENGL]);
   }
@@ -197,7 +197,7 @@ class OpenNIController extends GetxController {
   }
 
   Future<void> test() async {
-    var data = await cam?.getDepthData(DepthType.AT, x:320,y:200);
+    var data = await cam?.getDepthData(DepthType.AT, x: 320, y: 200);
     print(data?[0]);
   }
 }

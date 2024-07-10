@@ -5,9 +5,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import 'package:flutter_vision/constants.dart';
-import 'package:flutter_vision/model.dart';
-import 'package:flutter_vision/opencv_mat.dart';
+import 'package:flutter_vision3d/constants.dart';
+import 'package:flutter_vision3d/model.dart';
+import 'package:flutter_vision3d/opencv_mat.dart';
 
 enum CameraType { OPENNI, REALSENSE, DUMMY, UVC, ROS }
 
@@ -63,8 +63,8 @@ class OpenNi2Device {
   }
 }
 
-class FlutterVision {
-  static const MethodChannel channel = MethodChannel('flutter_vision');
+class FlutterVision3d {
+  static const MethodChannel channel = MethodChannel('flutter_vision3d');
 
   static listen(Future<dynamic> Function(MethodCall) callback) {
     channel.setMethodCallHandler(callback);
@@ -194,25 +194,25 @@ class FvPipeline {
   String serial;
 
   Future<String> info() async {
-    return await FlutterVision.channel.invokeMethod('pipelineInfo', {'index': index, 'serial': serial});
+    return await FlutterVision3d.channel.invokeMethod('pipelineInfo', {'index': index, 'serial': serial});
   }
 
   Future<String> error() async {
-    return await FlutterVision.channel.invokeMethod('pipelineError', {'index': index, 'serial': serial});
+    return await FlutterVision3d.channel.invokeMethod('pipelineError', {'index': index, 'serial': serial});
   }
 
   FvPipeline(this.serial, this.index);
 
   Future<int> run({int? from, int? to}) async {
-    return await FlutterVision.channel.invokeMethod('pipelineRun', {'index': index, 'serial': serial, 'from': from ?? 0, 'to': to ?? -1});
+    return await FlutterVision3d.channel.invokeMethod('pipelineRun', {'index': index, 'serial': serial, 'from': from ?? 0, 'to': to ?? -1});
   }
 
   Future<void> clear() async {
-    await FlutterVision.channel.invokeMethod('pipelineClear', {'index': index, 'serial': serial});
+    await FlutterVision3d.channel.invokeMethod('pipelineClear', {'index': index, 'serial': serial});
   }
 
   Future<void> test(int t, {int? at, int? interval, bool? append, bool? runOnce}) async {
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_TEST,
       'params': Uint8List.fromList([t]),
@@ -226,7 +226,7 @@ class FvPipeline {
   }
 
   Future<void> cvtColor(int mode, {int? at, int? interval, bool? append, bool? runOnce}) async {
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_CVTCOLOR,
       'params': Uint8List.fromList([mode]),
@@ -240,7 +240,7 @@ class FvPipeline {
   }
 
   Future<void> imwrite(String path, {int? at, int? interval, bool? append, bool? runOnce}) async {
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_IMWRITE,
       'params': Uint8List.fromList([path.length, ...utf8.encode(path)]),
@@ -254,7 +254,7 @@ class FvPipeline {
   }
 
   Future<void> imread(String path, {int? at, int? interval, bool? append, bool? runOnce}) async {
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_IMREAD,
       'params': Uint8List.fromList([path.length, ...utf8.encode(path)]),
@@ -268,7 +268,7 @@ class FvPipeline {
   }
 
   Future<void> show({int? at, int? interval, bool? append, bool? runOnce}) async {
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_SHOW,
       'params': null,
@@ -282,13 +282,13 @@ class FvPipeline {
   }
 
   Future<void> convertTo(int mode, double scale, {int? at, double? shift, int? interval, bool? append, bool? runOnce}) async {
-    List<Object?> scaleList = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': scale});
+    List<Object?> scaleList = await FlutterVision3d.channel.invokeMethod("_float2uint8", {'value': scale});
     Uint8List scaleBytes = Uint8List.fromList(scaleList.map((e) => e as int).toList());
 
-    List<Object?> shiftList = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': shift ?? 0});
+    List<Object?> shiftList = await FlutterVision3d.channel.invokeMethod("_float2uint8", {'value': shift ?? 0});
     Uint8List shiftBytes = Uint8List.fromList(shiftList.map((e) => e as int).toList());
 
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_CONVERTO,
       'params': Uint8List.fromList([mode, ...scaleBytes, ...shiftBytes]),
@@ -302,7 +302,7 @@ class FvPipeline {
   }
 
   Future<void> applyColorMap(int colorMap, {int? at, int? interval, bool? append, bool? runOnce}) async {
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_APPLY_COLOR_MAP,
       'params': Uint8List.fromList([colorMap]),
@@ -316,7 +316,7 @@ class FvPipeline {
   }
 
   Future<void> resize(int width, int height, {int? at, int? mode, int? interval, bool? append, bool? runOnce}) async {
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_RESIZE,
       'params': Uint8List.fromList([(width >> 8) & 0xff, width & 0xff, (height >> 8) & 0xff, height & 0xff, mode ?? OpenCV.INTER_NEAREST]),
@@ -330,7 +330,7 @@ class FvPipeline {
   }
 
   Future<void> crop(int xStart, int xEnd, int yStart, int yEnd, {int? at, int? interval, bool? append, bool? runOnce}) async {
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_CROP,
       'params': Uint8List.fromList([xStart >> 8, xStart & 0xff, xEnd >> 8, xEnd & 0xff, yStart >> 8, yStart & 0xff, yEnd >> 8, yEnd & 0xff]),
@@ -344,16 +344,16 @@ class FvPipeline {
   }
 
   Future<void> cvRectangle(double x1, double y1, double x2, double y2, int r, int g, int b, {int? at, int? thickness, int? lineType, int? shift, int? alpha, int? interval, bool? append, bool? runOnce}) async {
-    List<Object?> x1f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': x1});
+    List<Object?> x1f = await FlutterVision3d.channel.invokeMethod("_float2uint8", {'value': x1});
     Uint8List x1Bytes = Uint8List.fromList(x1f.map((e) => e as int).toList());
-    List<Object?> y1f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': y1});
+    List<Object?> y1f = await FlutterVision3d.channel.invokeMethod("_float2uint8", {'value': y1});
     Uint8List y1Bytes = Uint8List.fromList(y1f.map((e) => e as int).toList());
-    List<Object?> x2f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': x2});
+    List<Object?> x2f = await FlutterVision3d.channel.invokeMethod("_float2uint8", {'value': x2});
     Uint8List x2Bytes = Uint8List.fromList(x2f.map((e) => e as int).toList());
-    List<Object?> y2f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': y2});
+    List<Object?> y2f = await FlutterVision3d.channel.invokeMethod("_float2uint8", {'value': y2});
     Uint8List y2Bytes = Uint8List.fromList(y2f.map((e) => e as int).toList());
 
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_CV_RECTANGLE,
       'params': Uint8List.fromList([...x1Bytes, ...y1Bytes, ...x2Bytes, ...y2Bytes, r, g, b, alpha ?? 255, thickness ?? 1, lineType ?? OpenCV.LINE_TYPE_LINE_8, shift ?? 0]),
@@ -367,16 +367,16 @@ class FvPipeline {
   }
 
   Future<void> cvLine(double x1, double y1, double x2, double y2, int r, int g, int b, {int? at, int? thickness, int? lineType, int? alpha, int? interval, bool? append, bool? runOnce}) async {
-    List<Object?> x1f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': x1});
+    List<Object?> x1f = await FlutterVision3d.channel.invokeMethod("_float2uint8", {'value': x1});
     Uint8List x1Bytes = Uint8List.fromList(x1f.map((e) => e as int).toList());
-    List<Object?> y1f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': y1});
+    List<Object?> y1f = await FlutterVision3d.channel.invokeMethod("_float2uint8", {'value': y1});
     Uint8List y1Bytes = Uint8List.fromList(y1f.map((e) => e as int).toList());
-    List<Object?> x2f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': x2});
+    List<Object?> x2f = await FlutterVision3d.channel.invokeMethod("_float2uint8", {'value': x2});
     Uint8List x2Bytes = Uint8List.fromList(x2f.map((e) => e as int).toList());
-    List<Object?> y2f = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': y2});
+    List<Object?> y2f = await FlutterVision3d.channel.invokeMethod("_float2uint8", {'value': y2});
     Uint8List y2Bytes = Uint8List.fromList(y2f.map((e) => e as int).toList());
 
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_CV_LINE,
       'params': Uint8List.fromList([...x1Bytes, ...y1Bytes, ...x2Bytes, ...y2Bytes, r, g, b, alpha ?? 255, thickness ?? 1, lineType ?? OpenCV.LINE_TYPE_LINE_8]),
@@ -390,7 +390,7 @@ class FvPipeline {
   }
 
   Future<void> rotate(int rotateCode, {int? at, int? interval, bool? append, bool? runOnce}) async {
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_CV_ROTATE,
       'params': Uint8List.fromList([rotateCode]),
@@ -404,7 +404,7 @@ class FvPipeline {
   }
 
   Future<void> setInputTensorData(int modelIndex, int tensorIndex, int dataType, {int? at, int? interval, bool? append, bool? runOnce}) async {
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_SET_INPUT_TENSOR,
       'params': Uint8List.fromList([modelIndex, tensorIndex, dataType]),
@@ -418,7 +418,7 @@ class FvPipeline {
   }
 
   Future<void> inference(int modelIndex, {int? at, int? interval, bool? append, bool? runOnce}) async {
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_INFERENCE,
       'params': Uint8List.fromList([modelIndex]),
@@ -432,7 +432,7 @@ class FvPipeline {
   }
 
   Future<void> customHandler(int size, {int? at, int? interval, bool? append, bool? runOnce}) async {
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_CUSTOM_HANDLER,
       'params': Uint8List.fromList([size >> 8, size & 0xff]),
@@ -446,12 +446,12 @@ class FvPipeline {
   }
 
   Future<void> normalize(double alpha, double beta, {int? normType, int? dType, int? at, int? interval, bool? append, bool? runOnce}) async {
-    List<Object?> alphaList = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': alpha});
+    List<Object?> alphaList = await FlutterVision3d.channel.invokeMethod("_float2uint8", {'value': alpha});
     Uint8List alphaBytes = Uint8List.fromList(alphaList.map((e) => e as int).toList());
-    List<Object?> betaList = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': beta});
+    List<Object?> betaList = await FlutterVision3d.channel.invokeMethod("_float2uint8", {'value': beta});
     Uint8List betaBytes = Uint8List.fromList(betaList.map((e) => e as int).toList());
 
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_CV_NORMALIZE,
       'params': Uint8List.fromList([...alphaBytes, ...betaBytes, normType ?? OpenCV.NORM_MINMAX, dType ?? -1]),
@@ -465,12 +465,12 @@ class FvPipeline {
   }
 
   Future<void> threshold(double threshold, double max, {int? type, int? at, int? interval, bool? append, bool? runOnce}) async {
-    List<Object?> thresholdList = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': threshold});
+    List<Object?> thresholdList = await FlutterVision3d.channel.invokeMethod("_float2uint8", {'value': threshold});
     Uint8List thresholdBytes = Uint8List.fromList(thresholdList.map((e) => e as int).toList());
-    List<Object?> maxList = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': max});
+    List<Object?> maxList = await FlutterVision3d.channel.invokeMethod("_float2uint8", {'value': max});
     Uint8List maxBytes = Uint8List.fromList(maxList.map((e) => e as int).toList());
 
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_CV_THRESHOLD,
       'params': Uint8List.fromList([...thresholdBytes, ...maxBytes, type ?? OpenCV.THRESH_BINARY]),
@@ -484,10 +484,10 @@ class FvPipeline {
   }
 
   Future<void> relu(double threshold, {int? at, int? interval, bool? append, bool? runOnce}) async {
-    List<Object?> thresholdList = await FlutterVision.channel.invokeMethod("_float2uint8", {'value': threshold});
+    List<Object?> thresholdList = await FlutterVision3d.channel.invokeMethod("_float2uint8", {'value': threshold});
     Uint8List thresholdBytes = Uint8List.fromList(thresholdList.map((e) => e as int).toList());
 
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_CV_RELU,
       'params': Uint8List.fromList([...thresholdBytes]),
@@ -501,7 +501,7 @@ class FvPipeline {
   }
 
   Future<void> zeroDepthFilter(int threshold, int range, {int? at, int? interval, bool? append, bool? runOnce}) async {
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_CUSTOM_DEPTH_ZERO_FILTER,
       'params': Uint8List.fromList([threshold, range]),
@@ -515,7 +515,7 @@ class FvPipeline {
   }
 
   Future<void> copyTo(OpencvMat mat, {int? at, int? interval, bool? append, bool? runOnce}) async {
-    await FlutterVision.channel.invokeMethod('pipelineAdd', {
+    await FlutterVision3d.channel.invokeMethod('pipelineAdd', {
       'index': index,
       'funcIndex': _FUNC_CV_COPYTO,
       'params': Uint8List.fromList([
@@ -538,7 +538,7 @@ class FvPipeline {
   }
 
   Future<void> removeAt(int removeAt) async {
-    await FlutterVision.channel.invokeMethod('pipelineRemoveAt', {
+    await FlutterVision3d.channel.invokeMethod('pipelineRemoveAt', {
       'index': index,
       'serial': serial,
       'removeAt': removeAt,
@@ -546,7 +546,7 @@ class FvPipeline {
   }
 
   Future<bool> isRunOnceFinished() async {
-    return await FlutterVision.channel.invokeMethod('pipelineIsRunOnceFinished', {
+    return await FlutterVision3d.channel.invokeMethod('pipelineIsRunOnceFinished', {
       'index': index,
       'serial': serial,
     });
@@ -571,12 +571,12 @@ class TFLiteModel {
   TFLiteModel._create(this.modelPath, this.index);
 
   static Future<TFLiteModel> create(modelPath) async {
-    await FlutterVision.tfliteCreateModel(modelPath);
+    await FlutterVision3d.tfliteCreateModel(modelPath);
     return TFLiteModel._create(modelPath, _tflite_model_counter_++);
   }
 
   Future<Float32List> getTensorOutput(int tensorIndex, List<int> size) async {
-    List l = await FlutterVision.channel.invokeMethod('tfliteGetTensorOutput', {'tensorIndex': tensorIndex, 'size': Int32List.fromList(size)});
+    List l = await FlutterVision3d.channel.invokeMethod('tfliteGetTensorOutput', {'tensorIndex': tensorIndex, 'size': Int32List.fromList(size)});
 
     if (Platform.isWindows) {
       Float32List flist = Float32List(l.length);
@@ -590,7 +590,7 @@ class TFLiteModel {
   }
 
   Future<dynamic> _getModelInfo(String key) async {
-    Map<dynamic, dynamic> m = await FlutterVision.channel.invokeMethod('tfliteGetModelInfo', {'index': index});
+    Map<dynamic, dynamic> m = await FlutterVision3d.channel.invokeMethod('tfliteGetModelInfo', {'index': index});
 
     return m[key];
   }

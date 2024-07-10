@@ -3,12 +3,12 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_vision/camera/camera.dart';
-import 'package:flutter_vision/camera/uvc.dart';
-import 'package:flutter_vision/constants.dart';
-import 'package:flutter_vision/flutter_vision.dart';
-import 'package:flutter_vision_example/define.dart';
-import 'package:flutter_vision_example/faceRecognizer/LIPSFace.dart';
+import 'package:flutter_vision3d/camera/camera.dart';
+import 'package:flutter_vision3d/camera/uvc.dart';
+import 'package:flutter_vision3d/constants.dart';
+import 'package:flutter_vision3d/flutter_vision3d.dart';
+import 'package:flutter_vision3d_example/define.dart';
+import 'package:flutter_vision3d_example/faceRecognizer/LIPSFace.dart';
 import 'package:get/get.dart';
 
 class PositionedRect extends StatelessWidget {
@@ -35,7 +35,7 @@ class FaceRecognizerController extends GetxController {
 
   @override
   void onInit() {
-    FlutterVision.listen(fvCallback);
+    FlutterVision3d.listen(fvCallback);
     super.onInit();
   }
 

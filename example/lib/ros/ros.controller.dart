@@ -1,6 +1,6 @@
-import 'package:flutter_vision/camera/camera.dart';
-import 'package:flutter_vision/camera/ros_camera.dart';
-import 'package:flutter_vision/flutter_vision.dart';
+import 'package:flutter_vision3d/camera/camera.dart';
+import 'package:flutter_vision3d/camera/ros_camera.dart';
+import 'package:flutter_vision3d/flutter_vision3d.dart';
 import 'package:get/get.dart';
 
 class RosControllerDevice extends GetxController {

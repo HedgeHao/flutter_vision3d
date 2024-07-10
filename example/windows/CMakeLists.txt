@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
-project(flutter_vision_example LANGUAGES CXX)
+project(flutter_vision3d_example LANGUAGES CXX)
 
-set(BINARY_NAME "flutter_vision_example")
+set(BINARY_NAME "flutter_vision3d_example")
 
 cmake_policy(SET CMP0063 NEW)
 

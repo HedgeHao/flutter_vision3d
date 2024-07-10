@@ -107,13 +107,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_vision:
+  flutter_vision3d:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "1.0.2"
+    version: "1.0.3"
   flutter_web_plugins:
     dependency: transitive
     description: flutter

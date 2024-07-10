@@ -6,9 +6,9 @@
 
 #include "generated_plugin_registrant.h"
 
-#include <flutter_vision/flutter_vision_plugin.h>
+#include <flutter_vision3d/flutter_vision3d_plugin.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
-  FlutterVisionPluginRegisterWithRegistrar(
-      registry->GetRegistrarForPlugin("FlutterVisionPlugin"));
+  FlutterVision3dPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("FlutterVision3dPlugin"));
 }

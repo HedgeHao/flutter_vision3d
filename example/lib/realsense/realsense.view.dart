@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_vision_example/realsense/realsense.controller.dart';
-import 'package:flutter_vision_example/widgets/pointcloud/pointcloud.view.dart';
+import 'package:flutter_vision3d_example/realsense/realsense.controller.dart';
+import 'package:flutter_vision3d_example/widgets/pointcloud/pointcloud.view.dart';
 import 'package:get/get.dart';
 
 class RealsenseView extends GetView<RealsenseController> {

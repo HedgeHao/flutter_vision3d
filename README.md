@@ -1,25 +1,28 @@
-# Flutter Vision
+# Flutter Vision3D
 
 A framework for 2D & 3D image processing with AI (Tensorflow Lite)
 
-* 3D camera RGB, Depth, IR frames and PointCloud
-![](doc/img/screenshot1.png)
+- 3D camera RGB, Depth, IR frames and PointCloud
+  ![](doc/img/screenshot1.png)
 
-* Capture image from camera and process with OpenCV and TensorflowLite hand recognition AI model.
-![](doc/img/screenshot2.gif)
+- Capture image from camera and process with OpenCV and TensorflowLite hand recognition AI model.
+  ![](doc/img/screenshot2.gif)
 
-* Process image by OpenCV functions
-![](doc/img/screenshot6.png)
+- Process image by OpenCV functions
+  ![](doc/img/screenshot6.png)
+
 ---
+
 ## Prerequisite
+
 ### Ubuntu 20.04 / Ubuntu 18.04
 
-* libglew-dev
-* libopencv-dev (4.0.0+)
-* libglm-dev
-* freeglut3-dev
-* Tensorflow Lite 2.7.0+
-> All the dependency package can be installed using apt-get expect TensorFlow Lite. Please follow [documentation](https://www.tensorflow.org/install/source) to build `libtensorflowlite.so` and place it to where compiler can find (e.g /usr/lib/)
+- libglew-dev
+- libopencv-dev (4.0.0+)
+- libglm-dev
+- freeglut3-dev
+- Tensorflow Lite 2.7.0+
+  > All the dependency package can be installed using apt-get expect TensorFlow Lite. Please follow [documentation](https://www.tensorflow.org/install/source) to build `libtensorflowlite.so` and place it to where compiler can find (e.g /usr/lib/)
 
 ### Windows 10
 
@@ -29,7 +32,7 @@ A framework for 2D & 3D image processing with AI (Tensorflow Lite)
 
 ![](doc/img/screenshot5.png)
 
-3. Add system environment variable `FLUTTER_VISION_DEP`
+3. Add system environment variable `FLUTTER_VISION3D_DEP`
 
 ![](doc/img/screenshot4.png)
 
@@ -49,79 +52,96 @@ class Define {
 }
 ```
 
-| Example    |          Description              |
-| ---------- | --------------------------------  |
-| [Camera] UVC Camera | Display 2D USB camera video frame |
-| [Camera] Realsense  | Display 3D camera RGB, depth, IR frames and PointCloud using Realsense SDK |
-| [Camera] OpenNI     | Display 3D camera RGB, depth, IR frames and PointCloud using OpenNI2 SDK |
-| [Pipeline] OpenCV | Load a image file. Use different pipeline functions to process this image |
-| [Pipeline] Custom Handler | Load a image file. Use pipeline native handler(written in C++) to process this image |
-| [Pipeline] Hand Detection | Load video from UVC camera. Use tensorflow lite pipeline functions to detect hand in frame. Hand detection model original from [MediaPipe](https://github.com/jiuqiant/mediapipe_multi_hands_tracking_aar_example/blob/master/app/src/main/assets/hand_landmark.tflite)|
-| [Pipeline] Object Detection | Load video from UVC camera. Use tensorflow lite pipeline functions to recognize object in frame. Object detection model from [TensorflowLite](https://tfhub.dev/tensorflow/lite-model/efficientnet/lite4/fp32/2)|
-| [Pipeline] Facial Recognition | Load video from UVC camera. Use tensorflow lite pipeline functions to detect face in frame. Facial Recognition Model from [LIPS Corp.](https://www.lips-hci.com/lipsface-3d-facial-recognition-solution)
+| Example                       | Description                                                                                                                                                                                                                                                             |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Camera] UVC Camera           | Display 2D USB camera video frame                                                                                                                                                                                                                                       |
+| [Camera] Realsense            | Display 3D camera RGB, depth, IR frames and PointCloud using Realsense SDK                                                                                                                                                                                              |
+| [Camera] OpenNI               | Display 3D camera RGB, depth, IR frames and PointCloud using OpenNI2 SDK                                                                                                                                                                                                |
+| [Pipeline] OpenCV             | Load a image file. Use different pipeline functions to process this image                                                                                                                                                                                               |
+| [Pipeline] Custom Handler     | Load a image file. Use pipeline native handler(written in C++) to process this image                                                                                                                                                                                    |
+| [Pipeline] Hand Detection     | Load video from UVC camera. Use tensorflow lite pipeline functions to detect hand in frame. Hand detection model original from [MediaPipe](https://github.com/jiuqiant/mediapipe_multi_hands_tracking_aar_example/blob/master/app/src/main/assets/hand_landmark.tflite) |
+| [Pipeline] Object Detection   | Load video from UVC camera. Use tensorflow lite pipeline functions to recognize object in frame. Object detection model from [TensorflowLite](https://tfhub.dev/tensorflow/lite-model/efficientnet/lite4/fp32/2)                                                        |
+| [Pipeline] Facial Recognition | Load video from UVC camera. Use tensorflow lite pipeline functions to detect face in frame. Facial Recognition Model from [LIPS Corp.](https://www.lips-hci.com/lipsface-3d-facial-recognition-solution)                                                                |
 
 ## Supported 3D Camera
-| Camera                | Supported | Tested | Product Link |
-| --------------------- | --------- | ------ | ------------ |
-| Intel Realsense D415  |     ✅    |   ✅   |  [Link](https://www.intelrealsense.com/depth-camera-d415/) |
-| Intel Realsense D435  |     ✅    |   ✅   |  [Link](https://www.intelrealsense.com/depth-camera-d435/) |
-| Intel Realsense D435i |     ✅    |        |  [Link](https://www.intelrealsense.com/depth-camera-d435i/) |
-| Intel Realsense D455  |     ✅    |        |  [Link](https://www.intelrealsense.com/depth-camera-d455/) |
-| Intel Realsense T265  |     ✅    |        |  [Link](https://www.intelrealsense.com/tracking-camera-t265/) |
-| Intel Realsense L515  |     ✅    |        |  [Link](https://www.intelrealsense.com/lidar-camera-l515/) |
-| LIPSedge AE400        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae400) |
-| LIPSedge AE430        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae430) |
-| LIPSedge AE450        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae450) |
-| LIPSedge AE470        |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-ae470) |
-| LIPSedge DL           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-dl-series) |
-| LIPSedge M3           |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-m3-series) |
-| LIPSedge L Series     |     ✅    |   ✅   |  [Link](https://www.lips-hci.com/lipsedge-l-series) |
 
+| Camera                | Supported | Tested | Product Link                                                 |
+| --------------------- | --------- | ------ | ------------------------------------------------------------ |
+| Intel Realsense D415  | ✅        | ✅     | [Link](https://www.intelrealsense.com/depth-camera-d415/)    |
+| Intel Realsense D435  | ✅        | ✅     | [Link](https://www.intelrealsense.com/depth-camera-d435/)    |
+| Intel Realsense D435i | ✅        |        | [Link](https://www.intelrealsense.com/depth-camera-d435i/)   |
+| Intel Realsense D455  | ✅        |        | [Link](https://www.intelrealsense.com/depth-camera-d455/)    |
+| Intel Realsense T265  | ✅        |        | [Link](https://www.intelrealsense.com/tracking-camera-t265/) |
+| Intel Realsense L515  | ✅        |        | [Link](https://www.intelrealsense.com/lidar-camera-l515/)    |
+| LIPSedge AE400        | ✅        | ✅     | [Link](https://www.lips-hci.com/lipsedge-ae400)              |
+| LIPSedge AE430        | ✅        | ✅     | [Link](https://www.lips-hci.com/lipsedge-ae430)              |
+| LIPSedge AE450        | ✅        | ✅     | [Link](https://www.lips-hci.com/lipsedge-ae450)              |
+| LIPSedge AE470        | ✅        | ✅     | [Link](https://www.lips-hci.com/lipsedge-ae470)              |
+| LIPSedge DL           | ✅        | ✅     | [Link](https://www.lips-hci.com/lipsedge-dl-series)          |
+| LIPSedge M3           | ✅        | ✅     | [Link](https://www.lips-hci.com/lipsedge-m3-series)          |
+| LIPSedge L Series     | ✅        | ✅     | [Link](https://www.lips-hci.com/lipsedge-l-series)           |
 
 ## Usage
+
 ---
+
 ## 1. Create and Connect to Camera
-* UVC Camera
+
+- UVC Camera
+
 ```dart
 UvcCamera? cam = await FvCamera.create(ctl.text, CameraType.UVC) as UvcCamera?;
 ```
 
-* OpenNI2 Camera
+- OpenNI2 Camera
+
 ```dart
 OpenniCamera? cam = await FvCamera.create(ctl.text, CameraType.OPENNI) as OpenniCamera?;
 ```
 
-* Realsense, LIPSedge AE400 and LIPSedge AE450
+- Realsense, LIPSedge AE400 and LIPSedge AE450
+
 ```dart
 RealsenseCamera? cam = await FvCamera.create(ctl.text, CameraType.REALSENSE) as RealsenseCamera?;
 ```
 
-* Virtual Camera (Load frame from file system without video stream)
+- Virtual Camera (Load frame from file system without video stream)
+
 ```dart
 DummyCamera? cam = await FvCamera.create(ctl.text, CameraType.DUMMY) as DummyCamera?;
 ```
 
 ---
+
 ## 2. Enable/Disable camera video stream
+
 ```dart
 await cam.enableStream();
 await cam.disableStream();
 ```
+
 ---
+
 ## 3. Bind texture widget
+
 ```dart
 Texture(textureId: cam.rgbTextureId);
 ```
+
 ---
+
 ## 4. Pipeline (Set how to process frames captured from camera)
-* Display UVC video stream
+
+- Display UVC video stream
+
 ```dart
 FvPipeline uvcPipeline = cam.rgbPipeline;
 await uvcPipeline.cvtColor(OpenCV.COLOR_BGR2RGBA);
 await uvcPipeline.show();
 ```
 
-* Display 3D camera depth and IR frame with color map applied
+- Display 3D camera depth and IR frame with color map applied
+
 ```dart
 FvPipeline depthPipeline = cam.depthPipeline;
 await depthPipeline.convertTo(0, 255.0 / 1024.0);
@@ -130,7 +150,8 @@ await depthPipeline.cvtColor(OpenCV.COLOR_RGB2RGBA);
 await depthPipeline.show();
 ```
 
-* Object detection with Efficient Net (Tensorflow Lite)
+- Object detection with Efficient Net (Tensorflow Lite)
+
 ```dart
 // Create Tensorflow Lite Model
 TFLiteModel model = await TFLiteModel.create('/path/to/model.tflite');
@@ -141,37 +162,50 @@ await rgbPipeline.setInputTensorData(model!.index, 0, FvPipeline.DATATYPE_UINT8)
 await rgbPipeline.inference(model!.index);
 
 // Set the callback function. Called when inference is done.
-FlutterVision.listen((MethodCall call) async {
+FlutterVision3d.listen((MethodCall call) async {
     if (call.method == 'onInference') {
         ...
     }
 });
 ```
+
 ---
+
 ## APIs
+
 ```dart
 // Enumberation
 enum CameraType { OPENNI, REALSENSE, DUMMY, UVC }
 
 
-// FlutterVision Functions
+// FlutterVision3d Functions
 class FvCamera {
     static Future<FvCamera?> create(String serial, CameraType type)
     Future<void> close()
     Future<bool> enableStream()
     Future<bool> disableStream()
+    Future<bool> pauseStream(bool pause)
     Future<void> enablePointCloud()
     Future<void> disablePointCloud()
     Future<bool> isConnected()
     Future<void> configure(int prop, double value)
     Future<bool> screenshot(int index, String path, {int? cvtCode})
+    Future<int> getOpenCVMat(int index)
+    Future<Map<String, double>> getIntrinsic(int index)
+    Future<bool> enableRegistration(bool enable)
+    Future<List<String>> getVideoModes(int index)
+    Future<bool> setVideMode(int index, int mode)
+    Future<String> getCurrentVideoMode(int index)
+    Future<String> getSerialNumber()
+    Future<void> loadPresetParameter(String path)
+    Future<List<int>> getDepthData(DepthType depthType, {int? x, int? y, int? width, int? height})
 }
 
 class OpenniCamera extends FvCamera {}
 class RealsenseCamera extends FvCamera {}
 class UvcCamera extends FvCamera {}
 
-class FlutterVision {
+class FlutterVision3d {
     static listen(Future<dynamic> Function(MethodCall) callback)
     static Future<int> niInitialize()
     static Future<List<OpenNi2Device>> enumerateDevices()
@@ -193,6 +227,9 @@ class FvPipeline {
     Future<void> crop(int xStart, int xEnd, int yStart, int yEnd, {int? at, int? interval, bool? append})
     Future<void> rotate(int rotateCode, {int? at, int? interval, bool? append})
     Future<void> cvRectangle(double x1, double y1, double x2, double y2, int r, int g, int b, {int? at, int? thickness, int? lineType, int? shift, int? alpha, int? interval, bool? append})
+    Future<void> threshold(double threshold, double max, {int? type, int? at, int? interval, bool? append, bool? runOnce})
+    Future<void> zeroDepthFilter(int threshold, int range, {int? at, int? interval, bool? append, bool? runOnce})
+    Future<void> copyTo(OpencvMat mat, {int? at, int? interval, bool? append, bool? runOnce}) async {
     Future<void> setInputTensorData(int modelIndex, int tensorIndex, int dataType, {int? at, int? interval, bool? append})
     Future<void> inference(int modelIndex, {int? at, int? interval, bool? append})
     Future<void> customHandler(int size, {int? at, int? interval, bool? append})
@@ -208,4 +245,4 @@ class TFLiteModel{
 
 ## Known Issues
 
-* Tensorflow Lite model cannot load in debug mode on Windows. If you want to use tensorflow lite functions on Windows, run flutter app with release mode.
+- Tensorflow Lite model cannot load in debug mode on Windows. If you want to use tensorflow lite functions on Windows, run flutter app with release mode.

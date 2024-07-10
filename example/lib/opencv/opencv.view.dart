@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_vision_example/opencv/opencv.controller.dart';
+import 'package:flutter_vision3d_example/opencv/opencv.controller.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart';
 
@@ -13,7 +13,6 @@ class OpencvView extends GetView<OpencvController> {
   @override
   Widget build(BuildContext context) {
     ctl.text = join(File(Platform.resolvedExecutable).parent.absolute.path, 'data', 'flutter_assets', 'assets', 'flutter_logo.png');
-    ctl.text = 'C:/Users/Acer/Desktop/barcode.jpg';
     controller.imgPath = ctl.text;
 
     Size size = MediaQuery.of(context).size;
