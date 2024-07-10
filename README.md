@@ -184,11 +184,21 @@ class FvCamera {
     Future<void> close()
     Future<bool> enableStream()
     Future<bool> disableStream()
+    Future<bool> pauseStream(bool pause)
     Future<void> enablePointCloud()
     Future<void> disablePointCloud()
     Future<bool> isConnected()
     Future<void> configure(int prop, double value)
     Future<bool> screenshot(int index, String path, {int? cvtCode})
+    Future<int> getOpenCVMat(int index)
+    Future<Map<String, double>> getIntrinsic(int index)
+    Future<bool> enableRegistration(bool enable)
+    Future<List<String>> getVideoModes(int index)
+    Future<bool> setVideMode(int index, int mode)
+    Future<String> getCurrentVideoMode(int index)
+    Future<String> getSerialNumber()
+    Future<void> loadPresetParameter(String path)
+    Future<List<int>> getDepthData(DepthType depthType, {int? x, int? y, int? width, int? height})
 }
 
 class OpenniCamera extends FvCamera {}
@@ -217,6 +227,9 @@ class FvPipeline {
     Future<void> crop(int xStart, int xEnd, int yStart, int yEnd, {int? at, int? interval, bool? append})
     Future<void> rotate(int rotateCode, {int? at, int? interval, bool? append})
     Future<void> cvRectangle(double x1, double y1, double x2, double y2, int r, int g, int b, {int? at, int? thickness, int? lineType, int? shift, int? alpha, int? interval, bool? append})
+    Future<void> threshold(double threshold, double max, {int? type, int? at, int? interval, bool? append, bool? runOnce})
+    Future<void> zeroDepthFilter(int threshold, int range, {int? at, int? interval, bool? append, bool? runOnce})
+    Future<void> copyTo(OpencvMat mat, {int? at, int? interval, bool? append, bool? runOnce}) async {
     Future<void> setInputTensorData(int modelIndex, int tensorIndex, int dataType, {int? at, int? interval, bool? append})
     Future<void> inference(int modelIndex, {int? at, int? interval, bool? append})
     Future<void> customHandler(int size, {int? at, int? interval, bool? append})
