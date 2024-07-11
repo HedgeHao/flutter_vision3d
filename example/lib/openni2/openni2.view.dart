@@ -289,11 +289,6 @@ class OpenNIView extends GetView<OpenNIController> {
                     )
                   : const SizedBox(),
             ),
-            TextButton(
-                onPressed: () {
-                  controller.test();
-                },
-                child: const Text('Test'))
           ],
         ))
       ]),

@@ -61,10 +61,7 @@ else()
 endif()
 
 # OpenNI2 SDK
-find_path(OPENNI2_INC NAMES OpenNI.h HINTS "$ENV{OPENNI2_INCLUDE}")
-find_library(OPENNI2_LIB NAMES OpenNI2 HINTS "$ENV{OPENNI2_REDIST}")
-
-if(${OPENNI2_INC} AND ${OPENNI2_LIB})
+if(NOT "$ENV{OPENNI2_INCLUDE}" STREQUAL "" AND NOT "$ENV{OPENNI2_REDIST}" STREQUAL "")
   include_directories($ENV{OPENNI2_INCLUDE})
   target_link_libraries(${PLUGIN_NAME} PRIVATE OpenNI2)
 else()
